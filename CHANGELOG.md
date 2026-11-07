@@ -13,6 +13,7 @@ TukiUHC queda solo para el UHC; la parte administrativa (rangos, chat, moderaci�
 - **Recompensas** con comandos de consola (ganar, kill, eliminado, participación).
 - **API**: eventos de preparación (cancelable), inicio, nueva parte, eliminación y final.
 - Permisos por comando (`tukiuhc.command.*`), `tukiuhc.staff` con espía de chats y `/uhcreload`.
+- Quien está en vanish (TukiCore, EssentialsX, SuperVanish…) no entra en la partida ni cuenta para el inicio automático.
 - Eliminación de jugadores desconectados después de `death.offline-elimination-minutes` (sus ítems caen donde se fueron).
 
 ### Correcciones

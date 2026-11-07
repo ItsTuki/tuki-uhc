@@ -32,7 +32,7 @@ public final class AutoStartModule implements UhcModule {
     private int readyPlayers() {
         int count = 0;
         for (Player player : Bukkit.getOnlinePlayers()) {
-            if (!player.hasPermission("tukiuhc.spectator")) {
+            if (!player.hasPermission("tukiuhc.spectator") && !cl.itstuki.uhc.util.Vanish.isVanished(player)) {
                 count++;
             }
         }

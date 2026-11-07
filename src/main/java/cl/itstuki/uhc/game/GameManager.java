@@ -134,8 +134,8 @@ public final class GameManager {
         plugin.stats().reset();
         matchId++;
         for (Player player : Bukkit.getOnlinePlayers()) {
-            // Juegan todos los conectados salvo el staff con tukiuhc.spectator.
-            if (!player.hasPermission("tukiuhc.spectator")) {
+            // Juegan todos los conectados salvo el staff con tukiuhc.spectator y quien está en vanish.
+            if (!player.hasPermission("tukiuhc.spectator") && !cl.itstuki.uhc.util.Vanish.isVanished(player)) {
                 participants.add(player.getUniqueId());
                 alive.add(player.getUniqueId());
                 plugin.stats().register(player.getUniqueId(), player.getName());

@@ -111,7 +111,7 @@ public final class ScoreboardModule implements UhcModule {
             lines.add(lang.get("scoreboard.mode", Lang.c("mode", lang.get("modes." + plugin.settings().mode().key() + ".name"))));
             lines.add(lang.get("scoreboard.teams", Lang.c("teams", lang.get("team-modes." + plugin.settings().teamMode().key() + ".name")),
                     Lang.p("size", plugin.settings().teamSize())));
-            lines.add(lang.get("scoreboard.players", Lang.p("count", Bukkit.getOnlinePlayers().size())));
+            lines.add(lang.get("scoreboard.players", Lang.p("count", Bukkit.getOnlinePlayers().stream().filter(p -> !cl.itstuki.uhc.util.Vanish.isVanished(p)).count())));
             lines.add(Component.empty());
             Party lobbyTeam = plugin.teams().team(player.getUniqueId());
             lines.add(lobbyTeam != null
