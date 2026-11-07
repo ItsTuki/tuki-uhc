@@ -55,6 +55,19 @@ features:
   super-apples: {enabled: false}
   dragon-breath: {enabled: false}
 
+lobby:
+  # Mini lobby flotante: zona de espera con el maniquí del creador y zona de resultados con tops.
+  enabled: true
+  # Mundo (vacío = mundo principal) y posición del centro del lobby.
+  world: ""
+  x: 0
+  y: 300
+  z: 0
+  # Usuario cuya skin lleva el maniquí del lobby.
+  mannequin: ItsTuki
+  # Segundos tras el final antes de llevar a todos a la zona de resultados.
+  results-delay: 8
+
 death:
   # Bloque que sostiene la pica con la cabeza del jugador muerto (material: peso).
   pike-blocks:

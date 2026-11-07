@@ -88,7 +88,7 @@ public final class ScoreboardModule implements UhcModule {
                 board.resetScores(entry);
             }
         }
-        syncTeams(board);
+        syncTeams(board, player);
         tab(player);
     }
 
@@ -104,6 +104,12 @@ public final class ScoreboardModule implements UhcModule {
             lines.add(lang.get("scoreboard.teams", Lang.c("teams", lang.get("team-modes." + plugin.settings().teamMode().key() + ".name")),
                     Lang.p("size", plugin.settings().teamSize())));
             lines.add(lang.get("scoreboard.players", Lang.p("count", Bukkit.getOnlinePlayers().size())));
+            lines.add(Component.empty());
+            Party lobbyTeam = plugin.teams().team(player.getUniqueId());
+            lines.add(lobbyTeam != null
+                    ? lang.get("scoreboard.your-team", Lang.c("team", Component.text(lobbyTeam.name(), lobbyTeam.color())))
+                    : lang.get("scoreboard.no-team"));
+            addTeamsSummary(lines, player);
             lines.add(Component.empty());
             lines.add(lang.get("scoreboard.waiting"));
             return lines;
@@ -137,6 +143,11 @@ public final class ScoreboardModule implements UhcModule {
                 lines.add(mateLine(player, mate));
             }
             lines.add(Component.empty());
+        } else if (plugin.settings().mode() != UhcMode.SOLITARIOS && plugin.game().isAlive(id)) {
+            lines.add(lang.get(plugin.settings().teamMode() == cl.itstuki.uhc.config.TeamMode.RANDOM
+                    || plugin.settings().teamMode() == cl.itstuki.uhc.config.TeamMode.PROXIMITY
+                    ? "scoreboard.team-pending" : "scoreboard.no-team"));
+            lines.add(Component.empty());
         }
 
         lines.add(lang.get("scoreboard.time", Lang.p("time", Format.time(game.totalSeconds()))));
@@ -161,7 +172,46 @@ public final class ScoreboardModule implements UhcModule {
             lines.add(lang.get("scoreboard.role", Lang.c("role", role == null ? lang.get("trolls.role-pending")
                     : lang.get("trolls.role." + role.name().toLowerCase(java.util.Locale.ROOT) + ".name"))));
         }
+        if (plugin.settings().mode() != UhcMode.SOLITARIOS && lines.size() < MAX_LINES - 2) {
+            lines.add(Component.empty());
+            addTeamsSummary(lines, player);
+        }
         return lines.size() > MAX_LINES ? lines.subList(0, MAX_LINES) : lines;
+    }
+
+    /** Hasta 4 equipos con sus jugadores vivos (en el lobby: los inscritos). */
+    private void addTeamsSummary(List<Component> lines, Player viewer) {
+        List<Party> teams = new ArrayList<>(plugin.teams().teams());
+        if (teams.isEmpty()) {
+            return;
+        }
+        boolean lobby = plugin.game().state() == GameState.LOBBY;
+        teams.sort((a, b) -> Long.compare(aliveIn(b, lobby), aliveIn(a, lobby)));
+        lines.add(plugin.lang().get("scoreboard.teams-header", Lang.p("count", teams.size())));
+        int room = Math.max(1, Math.min(4, MAX_LINES - lines.size() - (teams.size() > 1 ? 1 : 0)));
+        int shown = 0;
+        for (Party party : teams) {
+            if (shown >= room) {
+                break;
+            }
+            shown++;
+            long alive = aliveIn(party, lobby);
+            boolean mine = party.members().contains(viewer.getUniqueId());
+            lines.add(plugin.lang().get(alive == 0 ? "scoreboard.team-out" : "scoreboard.team-line",
+                    Lang.c("team", Component.text(party.name(), party.color())),
+                    Lang.p("alive", alive), Lang.p("total", party.members().size()),
+                    Lang.p("you", mine ? "★" : "")));
+        }
+        if (teams.size() > shown) {
+            lines.add(plugin.lang().get("scoreboard.teams-more", Lang.p("count", teams.size() - shown)));
+        }
+    }
+
+    private long aliveIn(Party party, boolean lobby) {
+        if (lobby) {
+            return party.members().stream().filter(id -> Bukkit.getPlayer(id) != null).count();
+        }
+        return party.members().stream().filter(plugin.game()::isAlive).count();
     }
 
     private Component mateLine(Player viewer, UUID mate) {
@@ -183,54 +233,67 @@ public final class ScoreboardModule implements UhcModule {
         return lang.get("scoreboard.mate", Lang.p("player", name), Lang.p("hearts", Format.hearts(other.getHealth())), Lang.p("where", where));
     }
 
-    // ── Equipos (colores y nombres) ──────────────────────────
+    // ── Equipos (colores, nombres y quién ve a quién) ───────
 
-    private void syncTeams(Scoreboard board) {
-        boolean hide = SkinRotationModule.hidingNames();
-        Set<String> wanted = new HashSet<>();
-        for (Party party : plugin.teams().teams()) {
-            String id = party.scoreboardId();
-            wanted.add(id);
-            Team team = board.getTeam(id);
-            if (team == null) {
-                team = board.registerNewTeam(id);
+    private record Spec(String id, NamedTextColor color, Component prefix, Team.OptionStatus nametag) {
+    }
+
+    /**
+     * Cada jugador tiene su propio scoreboard, así que los equipos se arman según quién mira:
+     * con la rotación de skins solo ve el nombre de su equipo y de los enemigos que golpeó.
+     */
+    private void syncTeams(Scoreboard board, Player viewer) {
+        boolean hide = SkinRotationModule.hidingNames() && plugin.game().isRunning();
+        boolean friendlyFire = plugin.settings().mode() == UhcMode.TROLLS_RATAS;
+        Map<String, Spec> specs = new HashMap<>();
+        Map<String, String> assignment = new HashMap<>();
+        for (Player target : Bukkit.getOnlinePlayers()) {
+            Party party = plugin.teams().team(target.getUniqueId());
+            boolean known = !hide || plugin.skinRotation().knows(viewer.getUniqueId(), target.getUniqueId());
+            Spec spec;
+            if (party != null) {
+                Team.OptionStatus tag = !hide ? Team.OptionStatus.ALWAYS
+                        : known ? Team.OptionStatus.ALWAYS : Team.OptionStatus.NEVER;
+                String id = party.scoreboardId() + (tag == Team.OptionStatus.NEVER ? "_h" : "");
+                spec = new Spec(id, party.color(), Component.text("[" + abbreviate(party.name()) + "] ", party.color()), tag);
+            } else if (hide) {
+                spec = known ? new Spec("uhct_known", NamedTextColor.WHITE, Component.empty(), Team.OptionStatus.ALWAYS)
+                        : new Spec("uhct_hidden", NamedTextColor.GRAY, Component.empty(), Team.OptionStatus.NEVER);
+            } else {
+                continue;
             }
-            team.color(party.color());
-            team.prefix(Component.text("[" + abbreviate(party.name()) + "] ", party.color()));
-            team.setAllowFriendlyFire(plugin.settings().mode() == UhcMode.TROLLS_RATAS);
+            specs.putIfAbsent(spec.id(), spec);
+            assignment.put(target.getName(), spec.id());
+        }
+        for (Spec spec : specs.values()) {
+            Team team = board.getTeam(spec.id());
+            if (team == null) {
+                team = board.registerNewTeam(spec.id());
+            }
+            team.color(spec.color());
+            team.prefix(spec.prefix());
+            team.setAllowFriendlyFire(friendlyFire);
             team.setCanSeeFriendlyInvisibles(true);
-            team.setOption(Team.Option.NAME_TAG_VISIBILITY, hide ? Team.OptionStatus.NEVER : Team.OptionStatus.ALWAYS);
-            Set<String> names = new HashSet<>();
-            for (UUID member : party.members()) {
-                names.add(plugin.stats().name(member).equals("?") ? nameOf(member) : plugin.stats().name(member));
+            team.setOption(Team.Option.NAME_TAG_VISIBILITY, spec.nametag());
+        }
+        for (Team team : Set.copyOf(board.getTeams())) {
+            if (!team.getName().startsWith("uhct_") && !team.getName().startsWith("uhc_")) {
+                continue;
+            }
+            if (!specs.containsKey(team.getName())) {
+                team.unregister();
+                continue;
             }
             for (String entry : Set.copyOf(team.getEntries())) {
-                if (!names.contains(entry)) {
+                if (!team.getName().equals(assignment.get(entry))) {
                     team.removeEntry(entry);
                 }
             }
-            for (String name : names) {
-                if (!team.hasEntry(name)) {
-                    team.addEntry(name);
-                }
-            }
         }
-        Team hidden = board.getTeam("uhc_hidden");
-        if (hide) {
-            wanted.add("uhc_hidden");
-            if (hidden == null) {
-                hidden = board.registerNewTeam("uhc_hidden");
-            }
-            hidden.setOption(Team.Option.NAME_TAG_VISIBILITY, Team.OptionStatus.NEVER);
-            for (Player online : Bukkit.getOnlinePlayers()) {
-                if (!plugin.teams().hasTeam(online.getUniqueId()) && !hidden.hasEntry(online.getName())) {
-                    hidden.addEntry(online.getName());
-                }
-            }
-        }
-        for (Team team : Set.copyOf(board.getTeams())) {
-            if ((team.getName().startsWith("uhct_") || team.getName().equals("uhc_hidden")) && !wanted.contains(team.getName())) {
-                team.unregister();
+        for (Map.Entry<String, String> entry : assignment.entrySet()) {
+            Team team = board.getTeam(entry.getValue());
+            if (team != null && !team.hasEntry(entry.getKey())) {
+                team.addEntry(entry.getKey());
             }
         }
     }
@@ -254,10 +317,18 @@ public final class ScoreboardModule implements UhcModule {
                 lang.get("tab.header", Lang.p("name", plugin.settings().matchName())),
                 lang.get("tab.footer", Lang.p("alive", plugin.game().alive().size()), Lang.p("episode", plugin.game().episode()),
                         Lang.p("time", Format.time(plugin.game().totalSeconds()))));
-        if (SkinRotationModule.hidingNames() && plugin.game().isRunning()) {
-            player.playerListName(Component.text("???", NamedTextColor.GRAY));
-        } else {
-            player.playerListName(null);
+        // Con la rotación de skins, el tab solo muestra a quien conoces (tú, tu equipo y los que golpeaste).
+        boolean hide = SkinRotationModule.hidingNames() && plugin.game().isRunning();
+        for (Player other : Bukkit.getOnlinePlayers()) {
+            if (other.equals(player)) {
+                continue;
+            }
+            boolean show = !hide || plugin.skinRotation().knows(player.getUniqueId(), other.getUniqueId());
+            if (show && !player.isListed(other)) {
+                player.listPlayer(other);
+            } else if (!show && player.isListed(other)) {
+                player.unlistPlayer(other);
+            }
         }
     }
 
@@ -265,6 +336,11 @@ public final class ScoreboardModule implements UhcModule {
     public void onReset() {
         for (Player player : Bukkit.getOnlinePlayers()) {
             player.playerListName(null);
+            for (Player other : Bukkit.getOnlinePlayers()) {
+                if (!player.isListed(other)) {
+                    player.listPlayer(other);
+                }
+            }
         }
     }
 }

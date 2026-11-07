@@ -18,6 +18,12 @@ Plugin de **UHC por episodios** para servidores **Paper 26.3** (Java 25), totalm
 4. La partida avanza por **partes** (episodios). El scoreboard muestra parte, fase (PVE/PVP/PVD), compañeros con vida y distancia, tiempo y borde.
 5. Al terminar se anuncian las estadísticas y se guarda una **imagen PNG** en `plugins/TukiUHC/stats/`.
 
+## Lobby y resultados
+
+- Al entrar al servidor todos aparecen en un **mini lobby flotante** (sobre 0 0, a altura 300) con un **maniquí de ItsTuki** con su skin. No se puede romper ni recibir daño.
+- Al terminar la partida, a los 8 segundos todos pasan a la **zona de resultados**: podio de oro, hierro y cobre con maniquíes de los 3 mejores jugadores, **top de kills y de supervivencia** de la partida, y **tops históricos** de victorias y kills (guardados en `leaderboard.yml`).
+- `/sos` devuelve a todos al lobby. Posición, mundo, usuario del maniquí y demora se cambian en `config.yml` → `lobby`.
+
 ## Mecánicas fijas
 
 - Sin regeneración natural: solo manzanas doradas, cabezas y pociones.

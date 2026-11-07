@@ -57,6 +57,10 @@ public final class StatsTracker {
         return names.getOrDefault(id, "?");
     }
 
+    public Optional<Long> deathSecond(UUID id) {
+        return Optional.ofNullable(deathSecond.get(id));
+    }
+
     public int kills(UUID id) {
         return kills.getOrDefault(id, 0);
     }

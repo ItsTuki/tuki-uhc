@@ -43,7 +43,7 @@ public final class AfkModule implements UhcModule {
         });
         player.addPassenger(label);
         afk.put(player.getUniqueId(), label);
-        plugin.lang().send(player, "afk.on");
+        plugin.lang().send(player, "afk.enabled");
         plugin.lang().broadcast("afk.broadcast", cl.itstuki.uhc.lang.Lang.p("player", player.getName()));
     }
 
@@ -55,7 +55,7 @@ public final class AfkModule implements UhcModule {
         player.setInvulnerable(false);
         player.removePotionEffect(PotionEffectType.BLINDNESS);
         if (message) {
-            plugin.lang().send(player, "afk.off");
+            plugin.lang().send(player, "afk.disabled");
         }
     }
 

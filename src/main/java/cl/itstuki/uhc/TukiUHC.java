@@ -18,6 +18,7 @@ import cl.itstuki.uhc.module.EpisodeRewardsModule;
 import cl.itstuki.uhc.module.EscortModule;
 import cl.itstuki.uhc.module.HeadStealModule;
 import cl.itstuki.uhc.module.ItemsModule;
+import cl.itstuki.uhc.module.LobbyModule;
 import cl.itstuki.uhc.module.LootModule;
 import cl.itstuki.uhc.module.ProximityTeamsModule;
 import cl.itstuki.uhc.module.RandomTeamsModule;
@@ -47,6 +48,8 @@ public final class TukiUHC extends JavaPlugin {
     private AfkModule afk;
     private ResurrectionModule resurrection;
     private Menus menus;
+    private SkinRotationModule skinRotation;
+    private LobbyModule lobby;
 
     @Override
     public void onEnable() {
@@ -81,11 +84,15 @@ public final class TukiUHC extends JavaPlugin {
         game.register(new LootModule(this));
         game.register(new HeadStealModule(this));
         game.register(new CopperAgeModule(this));
-        game.register(new SkinRotationModule(this));
+        skinRotation = new SkinRotationModule(this);
+        game.register(skinRotation);
         game.register(new DragonModule(this));
         game.register(resourceRush);
         game.register(afk);
         game.register(scoreboard);
+        lobby = new LobbyModule(this);
+        game.register(lobby);
+        getServer().getScheduler().runTask(this, lobby::setup);
         items.registerRecipes();
         game.startTicker();
         scoreboard.startTask();
@@ -142,4 +149,6 @@ public final class TukiUHC extends JavaPlugin {
     public AfkModule afk() { return afk; }
     public ResurrectionModule resurrection() { return resurrection; }
     public Menus menus() { return menus; }
+    public SkinRotationModule skinRotation() { return skinRotation; }
+    public LobbyModule lobby() { return lobby; }
 }

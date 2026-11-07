@@ -13,3 +13,7 @@ Primera versión de TukiUHC para Paper 26.3 (Java 25).
 - 20 opciones activables: brújula, escolta, resurrección, shulker, aumento de vida, localizador, tumbas, caña roba-cabezas, tridentes, botín de puestos y campamentos, ciudades antiguas, pacto de caballeros, Edad de Cobre, rotación de skins, super/hiper manzanas, aliento de dragón.
 - Menú /uhcconfig completo, scoreboard y tab propios, idiomas ES/EN.
 - Estadísticas finales en el chat e imagen PNG.
+- Mini lobby con maniquí de ItsTuki y zona de resultados con podio, tops de la partida y tops históricos.
+- Rotación de skins por jugador: ves tu nombre, el de tu equipo y el de quien golpeas (tab y sobre la cabeza).
+- Scoreboard con tu equipo, compañeros y lista de equipos; en modo Manual quien no tenga equipo se reparte al azar.
+- El reparto evita el agua y el congelamiento ya no hunde a los jugadores.

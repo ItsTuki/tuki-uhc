@@ -89,8 +89,10 @@ public final class RulesModule implements UhcModule {
                 && event.hasChangedPosition()) {
             Location from = event.getFrom();
             Location to = event.getTo();
-            if (from.getX() != to.getX() || from.getZ() != to.getZ() || to.getY() > from.getY()) {
+            // Solo se bloquea el movimiento horizontal: así nadie queda atrapado bajo el agua.
+            if (from.getX() != to.getX() || from.getZ() != to.getZ()) {
                 Location stay = from.clone();
+                stay.setY(to.getY());
                 stay.setYaw(to.getYaw());
                 stay.setPitch(to.getPitch());
                 event.setTo(stay);

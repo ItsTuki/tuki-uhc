@@ -28,6 +28,8 @@ public final class SkinRotationModule implements UhcModule {
     private final TukiUHC plugin;
     private final Map<UUID, ProfileProperty> originals = new HashMap<>();
     private final Map<String, Long> revealCooldown = new HashMap<>();
+    /** Para cada jugador, los enemigos que ya identificó golpeándolos. */
+    private final Map<UUID, java.util.Set<UUID>> revealed = new HashMap<>();
 
     public SkinRotationModule(TukiUHC plugin) {
         this.plugin = plugin;
@@ -36,6 +38,21 @@ public final class SkinRotationModule implements UhcModule {
     /** Si los nombres deben ocultarse (lo usa el scoreboard). */
     public static boolean hidingNames() {
         return active;
+    }
+
+    /**
+     * Si {@code viewer} sabe quién es {@code target}: siempre a sí mismo, a su equipo,
+     * a los enemigos que golpeó, y todo si es espectador o no participa.
+     */
+    public boolean knows(UUID viewer, UUID target) {
+        if (!active || viewer.equals(target) || plugin.teams().sameTeam(viewer, target)) {
+            return true;
+        }
+        if (!plugin.game().isAlive(viewer) || !plugin.game().isParticipant(target)) {
+            return true;
+        }
+        java.util.Set<UUID> known = revealed.get(viewer);
+        return known != null && known.contains(target);
     }
 
     @Override
@@ -76,6 +93,9 @@ public final class SkinRotationModule implements UhcModule {
             plugin.lang().broadcast("skins.not-enough");
             return;
         }
+        // Con skins nuevas hay que volver a descubrir quién es quién.
+        revealed.clear();
+        revealCooldown.clear();
         // Desplaza la lista al azar para que nadie conserve su propia skin.
         Collections.shuffle(players);
         List<ProfileProperty> ordered = new ArrayList<>();
@@ -108,7 +128,11 @@ public final class SkinRotationModule implements UhcModule {
         if (attacker == null || attacker.equals(victim) || plugin.teams().sameTeam(attacker.getUniqueId(), victim.getUniqueId())) {
             return;
         }
+        boolean firstTime = revealed.computeIfAbsent(attacker.getUniqueId(), id -> new java.util.HashSet<>()).add(victim.getUniqueId());
         String pair = attacker.getUniqueId() + ">" + victim.getUniqueId();
+        if (!firstTime) {
+            return;
+        }
         long now = System.currentTimeMillis();
         Long last = revealCooldown.get(pair);
         if (last != null && now - last < 30_000) {
@@ -128,6 +152,7 @@ public final class SkinRotationModule implements UhcModule {
         }
         originals.clear();
         revealCooldown.clear();
+        revealed.clear();
         active = false;
     }
 

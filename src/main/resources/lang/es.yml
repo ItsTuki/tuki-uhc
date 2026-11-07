@@ -62,6 +62,7 @@ border:
   final-battle-subtitle: "<gray>Todos al centro del mapa"
 
 teams:
+  auto-assigned: "<prefix><yellow><white><count></white> jugadores sin equipo fueron repartidos al azar en equipos nuevos."
   default-name: "Equipo"
   random-pending: "<prefix><gray>Los equipos aleatorios se revelarán en la parte <white><episode></white>."
   random-countdown: "<prefix><yellow>¡En <white><seconds></white> s se revelará tu compañero!"
@@ -163,8 +164,8 @@ skins:
 
 afk:
   label: "<red><bold>AFK"
-  on: "<prefix><gray>Estás AFK: eres invulnerable hasta que te muevas."
-  off: "<prefix><green>Ya no estás AFK."
+  enabled: "<prefix><gray>Estás AFK: eres invulnerable hasta que te muevas."
+  disabled: "<prefix><green>Ya no estás AFK."
   broadcast: "<prefix><gray><player> está AFK."
 
 dragon:
@@ -209,6 +210,12 @@ rush:
   win: "<gray>Completó la lista"
 
 scoreboard:
+  no-team: "<gray>Equipo: <white>sin equipo"
+  team-pending: "<gray>Equipo: <yellow>por revelar"
+  teams-header: "<gray>Equipos (<white><count></white>):"
+  team-line: "<team> <white><alive></white><dark_gray>/<total></dark_gray> <gold><you>"
+  team-out: "<dark_gray><st>■</st> </dark_gray><team> <dark_gray>eliminado"
+  teams-more: "<dark_gray>…y <count> más"
   title: "<gradient:#FF5555:#FFAA00><bold><name>"
   mode: "<gray>Modo: <white><mode>"
   teams: "<gray>Equipos: <white><teams></white> <dark_gray>(<size>)"
@@ -386,8 +393,8 @@ features:
 menu:
   back: "<gray>← Volver"
   close: "<red>Cerrar"
-  on: "<green>Activada"
-  off: "<red>Desactivada"
+  state-on: "<green>✔ Activado"
+  state-off: "<red>✘ Desactivado"
   selected: "<green>✔ Seleccionado"
   click-select: "<yellow>Clic para seleccionar"
   number-help: ["<yellow>Clic izq: +<step>  <gray>|</gray>  Clic der: -<step>", "<yellow>Shift + clic: escribir el valor"]
@@ -496,3 +503,19 @@ menu:
     tier-lore: ["<gray>Objetos: <white><count>", "<yellow>Clic para editar"]
     click-remove: "<red>Clic para quitar"
     help: "<gray>Haz clic en un ítem de tu inventario para añadirlo"
+
+lobby:
+  creator-title: "<gradient:#FF5555:#FFAA00><bold>TukiUHC</bold></gradient><newline><gray>Creado por <gradient:#55FFFF:#5555FF><bold><player></bold></gradient>"
+  creator-description: "<aqua>Creador de TukiUHC"
+  creator-click: "<prefix><gray>TukiUHC es de código abierto: <aqua><click:open_url:'<url>'><u>ver en GitHub</u></click>"
+  welcome: "<gold><bold>¡Bienvenido!</bold><newline><gray>Espera a que el organizador<newline><gray>inicie la partida.<newline><dark_gray>/uhchelp para ver la ayuda"
+  results-waiting: "<gold><bold>Resultados</bold><newline><gray>Aquí aparecerán los tops<newline><gray>al terminar la partida."
+  results-teleport: "<prefix><gold>¡Mira los resultados y los tops en el podio!"
+  results-title: "<gold><bold><match></bold><newline><yellow>★ Ganador: <white><winner></white><newline><gray>Duración: <white><time>"
+  top-kills-title: "<red><bold>⚔ Top kills de la partida"
+  top-survival-title: "<aqua><bold>⏱ Top supervivencia"
+  top-wins-title: "<gold><bold>★ Top victorias (histórico)"
+  top-alltime-kills-title: "<red><bold>⚔ Top kills (histórico)"
+  top-line: "<gray><place>. <white><player></white> <dark_gray>—</dark_gray> <yellow><value>"
+  top-empty: "<dark_gray>Sin datos todavía"
+  survived: "sobrevivió"

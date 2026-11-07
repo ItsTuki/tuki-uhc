@@ -137,6 +137,12 @@ public final class GameManager {
                     }
                 }
             }
+            // Quien quedó sin equipo se reparte al azar para que nadie juegue solo sin querer.
+            List<UUID> loose = participants.stream().filter(id -> !plugin.teams().hasTeam(id)).toList();
+            if (!loose.isEmpty() && settings().teamSize() > 1) {
+                plugin.teams().randomize(loose, settings().teamSize(), lang().raw("teams.default-name"));
+                lang().broadcast("teams.auto-assigned", Lang.p("count", loose.size()));
+            }
         }
 
         World world = mainWorld();
@@ -158,10 +164,7 @@ public final class GameManager {
         pendingScatter = groups.size();
         List<Location> used = new ArrayList<>();
         for (List<UUID> group : groups) {
-            Location spot = randomSpot(world, used);
-            used.add(spot);
-            world.getChunkAtAsync(spot.getBlockX() >> 4, spot.getBlockZ() >> 4).thenAccept(chunk -> {
-                Location safe = safeLocation(spot);
+            findDrySpot(world, used, 0, safe -> {
                 for (UUID id : group) {
                     spots.put(id, safe);
                     Player player = Bukkit.getPlayer(id);
@@ -223,6 +226,35 @@ public final class GameManager {
         return best;
     }
 
+    private static final java.util.Set<Material> WET = java.util.EnumSet.of(Material.WATER, Material.LAVA, Material.KELP,
+            Material.KELP_PLANT, Material.SEAGRASS, Material.TALL_SEAGRASS, Material.BUBBLE_COLUMN, Material.MAGMA_BLOCK,
+            Material.LILY_PAD);
+
+    /** Busca un punto en tierra firme (no océano ni lava). Tras 12 intentos usa el último y le pone una plataforma. */
+    private void findDrySpot(World world, List<Location> used, int attempt, Consumer<Location> done) {
+        Location spot = randomSpot(world, used);
+        world.getChunkAtAsync(spot.getBlockX() >> 4, spot.getBlockZ() >> 4).thenAccept(chunk -> {
+            Block top = world.getHighestBlockAt(spot.getBlockX(), spot.getBlockZ());
+            boolean wet = WET.contains(top.getType()) || top.isLiquid()
+                    || (top.getBlockData() instanceof org.bukkit.block.data.Waterlogged w && w.isWaterlogged());
+            if (wet && attempt < 12) {
+                findDrySpot(world, used, attempt + 1, done);
+                return;
+            }
+            if (wet) {
+                // Sin tierra cerca: plataforma de 3x3 sobre el agua.
+                for (int dx = -1; dx <= 1; dx++) {
+                    for (int dz = -1; dz <= 1; dz++) {
+                        top.getRelative(dx, 0, dz).setType(Material.STONE);
+                    }
+                }
+            }
+            Location safe = safeLocation(spot);
+            used.add(safe);
+            done.accept(safe);
+        });
+    }
+
     private static Location safeLocation(Location spot) {
         World world = spot.getWorld();
         Block top = world.getHighestBlockAt(spot.getBlockX(), spot.getBlockZ());
@@ -263,11 +295,12 @@ public final class GameManager {
         player.addPotionEffect(new PotionEffect(PotionEffectType.SLOWNESS, inf, 9, false, false));
         player.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, inf, 0, false, false));
         player.addPotionEffect(new PotionEffect(PotionEffectType.SATURATION, inf, 0, false, false));
+        player.addPotionEffect(new PotionEffect(PotionEffectType.WATER_BREATHING, inf, 0, false, false));
     }
 
     private void unfreeze(Player player) {
         for (PotionEffectType type : List.of(PotionEffectType.RESISTANCE, PotionEffectType.SLOWNESS,
-                PotionEffectType.BLINDNESS, PotionEffectType.SATURATION)) {
+                PotionEffectType.BLINDNESS, PotionEffectType.SATURATION, PotionEffectType.WATER_BREATHING)) {
             player.removePotionEffect(type);
         }
     }

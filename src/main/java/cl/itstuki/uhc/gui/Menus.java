@@ -65,7 +65,7 @@ public final class Menus {
     }
 
     private Component onOff(boolean value) {
-        return lang().get(value ? "menu.on" : "menu.off");
+        return lang().get(value ? "menu.state-on" : "menu.state-off");
     }
 
     // ── Principal ────────────────────────────────────────────
