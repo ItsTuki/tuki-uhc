@@ -177,9 +177,26 @@ public final class RulesModule implements UhcModule {
         if (!plugin.game().isParticipant(id)) {
             player.setGameMode(GameMode.SPECTATOR);
             plugin.lang().send(player, "game.late-join");
+            watchPoint(player).ifPresent(player::teleportAsync);
         } else if (!plugin.game().isAlive(id)) {
             player.setGameMode(GameMode.SPECTATOR);
+            Location death = plugin.game().deathLocations().get(id);
+            if (death != null) {
+                player.teleportAsync(death.clone().add(0, 2, 0));
+            }
         }
+    }
+
+    /** Un jugador vivo al azar para observar, o el centro del mapa. */
+    private java.util.Optional<Location> watchPoint(Player viewer) {
+        for (UUID alive : plugin.game().alive()) {
+            Player target = Bukkit.getPlayer(alive);
+            if (target != null && !target.equals(viewer)) {
+                return java.util.Optional.of(target.getLocation().add(0, 3, 0));
+            }
+        }
+        org.bukkit.World world = plugin.game().mainWorld();
+        return java.util.Optional.of(new Location(world, 0.5, world.getHighestBlockYAt(0, 0) + 10, 0.5));
     }
 
     private void placePike(Location where, @Nullable Player headOwner) {

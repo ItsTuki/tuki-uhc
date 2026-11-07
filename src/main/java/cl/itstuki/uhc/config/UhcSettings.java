@@ -146,7 +146,8 @@ public final class UhcSettings {
     }
     public TeamMode teamMode() { return teamMode; }
     public void teamMode(TeamMode teamMode) { this.teamMode = teamMode; }
-    public int teamSize() { return teamSize; }
+    /** Trolls y Ratas siempre juega con equipos de 3. */
+    public int teamSize() { return mode == UhcMode.TROLLS_RATAS ? 3 : teamSize; }
     public void teamSize(int size) { this.teamSize = clamp(size, 1, 50); }
     public int episodeMinutes() { return episodeMinutes; }
     public void episodeMinutes(int minutes) { this.episodeMinutes = clamp(minutes, 1, 180); }

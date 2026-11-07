@@ -96,6 +96,8 @@ public final class ResourceRushModule implements UhcModule {
         int perTier = TOTAL_ITEMS / TIERS;
         for (int tier = 1; tier <= TIERS; tier++) {
             List<Material> pool = new ArrayList<>(pool(tier));
+            // Un objeto repetido en dos niveles cuenta una sola vez: se salta para llegar a 12.
+            pool.removeAll(sequence);
             Collections.shuffle(pool);
             sequence.addAll(pool.subList(0, Math.min(perTier, pool.size())));
         }
@@ -153,6 +155,31 @@ public final class ResourceRushModule implements UhcModule {
                     plugin.lang().send(mate, "rush.next", Lang.c("item", next));
                 }
             }
+        }
+    }
+
+    private final Map<UUID, List<Long>> sneaks = new HashMap<>();
+
+    /** Agacharse 3 veces seguidas muestra los objetivos que faltan. */
+    @org.bukkit.event.EventHandler
+    public void onSneak(org.bukkit.event.player.PlayerToggleSneakEvent event) {
+        if (!active() || !event.isSneaking() || !plugin.game().isRunning() || sequence.isEmpty()) {
+            return;
+        }
+        Player player = event.getPlayer();
+        long now = System.currentTimeMillis();
+        List<Long> times = sneaks.computeIfAbsent(player.getUniqueId(), id -> new ArrayList<>());
+        times.removeIf(t -> now - t > 1200);
+        times.add(now);
+        if (times.size() < 3) {
+            return;
+        }
+        times.clear();
+        int done = progress(player.getUniqueId());
+        plugin.lang().send(player, "rush.pending-header", Lang.p("done", done), Lang.p("total", sequence.size()));
+        for (int i = done; i < sequence.size(); i++) {
+            plugin.lang().send(player, i == done ? "rush.pending-current" : "rush.pending-entry",
+                    Lang.p("number", i + 1), Lang.c("item", itemName(sequence.get(i))));
         }
     }
 

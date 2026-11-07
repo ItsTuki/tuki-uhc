@@ -45,6 +45,15 @@ public final class EpisodeRewardsModule implements UhcModule {
 
     @Override
     public void onEpisodeStart(int episode) {
+        // La Resistencia del aumento de vida termina al empezar la parte siguiente.
+        if (plugin.settings().enabled(Feature.LIFE_BOOST) && episode == plugin.settings().featureEpisode(Feature.LIFE_BOOST) + 1) {
+            for (UUID id : plugin.game().alive()) {
+                Player player = Bukkit.getPlayer(id);
+                if (player != null) {
+                    player.removePotionEffect(PotionEffectType.RESISTANCE);
+                }
+            }
+        }
         if (at(Feature.SHULKER_BOX, episode)) {
             giveAll(ItemStack.of(Material.SHULKER_BOX));
             plugin.lang().broadcast("rewards.shulker-given");
@@ -84,7 +93,8 @@ public final class EpisodeRewardsModule implements UhcModule {
                 max.addModifier(new AttributeModifier(plugin.key("life_boost"), 20, AttributeModifier.Operation.ADD_NUMBER, EquipmentSlotGroup.ANY));
                 ItemsModule.heal(player, 20);
             }
-            player.addPotionEffect(new PotionEffect(PotionEffectType.RESISTANCE, PotionEffect.INFINITE_DURATION, 1, false, true));
+            // Resistencia II solo durante esta parte (antes era infinita).
+            player.addPotionEffect(new PotionEffect(PotionEffectType.RESISTANCE, plugin.settings().episodeSeconds() * 20, 1, false, true));
             player.showTitle(Title.title(plugin.lang().get("rewards.life-boost-title"), plugin.lang().get("rewards.life-boost-subtitle"),
                     Title.Times.times(Duration.ofMillis(200), Duration.ofSeconds(3), Duration.ofSeconds(1))));
             player.playSound(player.getLocation(), Sound.ITEM_TOTEM_USE, 0.6f, 1.2f);

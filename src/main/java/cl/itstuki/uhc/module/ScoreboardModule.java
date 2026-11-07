@@ -317,21 +317,20 @@ public final class ScoreboardModule implements UhcModule {
                 lang.get("tab.header", Lang.p("name", plugin.settings().matchName())),
                 lang.get("tab.footer", Lang.p("alive", plugin.game().alive().size()), Lang.p("episode", plugin.game().episode()),
                         Lang.p("time", Format.time(plugin.game().totalSeconds()))));
-        // Con la rotación de skins, el tab solo muestra a quien conoces (tú, tu equipo y los que golpeaste).
+        // Con la rotación de skins, los no revelados salen como "???" en el tab de todos.
         boolean hide = SkinRotationModule.hidingNames() && plugin.game().isRunning();
+        boolean revealed = plugin.skinRotation().isRevealed(player.getUniqueId());
+        Component wanted = hide && !revealed && plugin.game().isParticipant(player.getUniqueId())
+                ? plugin.lang().get("skins.hidden-name") : null;
+        if (!java.util.Objects.equals(player.playerListName(), wanted == null ? Component.text(player.getName()) : wanted)) {
+            player.playerListName(wanted);
+        }
         for (Player other : Bukkit.getOnlinePlayers()) {
-            if (other.equals(player)) {
-                continue;
-            }
-            boolean show = !hide || plugin.skinRotation().knows(player.getUniqueId(), other.getUniqueId());
-            if (show && !player.isListed(other)) {
+            if (!player.isListed(other)) {
                 player.listPlayer(other);
-            } else if (!show && player.isListed(other)) {
-                player.unlistPlayer(other);
             }
         }
     }
-
     @Override
     public void onReset() {
         for (Player player : Bukkit.getOnlinePlayers()) {

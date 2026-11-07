@@ -123,6 +123,12 @@ public final class GameManager {
             lang().send(sender, "game.no-players");
             return false;
         }
+        if (settings().mode() == UhcMode.TROLLS_RATAS && participants.size() < 3) {
+            lang().send(sender, "trolls.need-three");
+            participants.clear();
+            alive.clear();
+            return false;
+        }
 
         TeamMode teamMode = settings().teamMode();
         if (teamMode == TeamMode.SOLO || teamMode == TeamMode.RANDOM || teamMode == TeamMode.PROXIMITY
@@ -390,6 +396,12 @@ public final class GameManager {
         episodeSecond++;
         int length = settings().episodeSeconds();
         int left = Math.max(0, length - episodeSecond);
+        if (!infiniteEpisodes() && (left == 30 || left == 10 || (left >= 1 && left <= 5))) {
+            lang().broadcast("game.episode-ending", Lang.p("episode", episode), Lang.p("seconds", left));
+            for (Player player : Bukkit.getOnlinePlayers()) {
+                player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_HAT, 0.8f, left <= 5 ? 1.6f : 1f);
+            }
+        }
         each(module -> module.onSecond(left));
         if (state != GameState.PLAYING) {
             return;
@@ -525,6 +537,10 @@ public final class GameManager {
         UhcMode mode = settings().mode();
         if (mode == UhcMode.DRAGON) {
             return; // Solo se gana matando a la dragona.
+        }
+        if (plugin.trolls().onlyRatsAlive()) {
+            end(List.copyOf(alive), "trolls.rats-win");
+            return;
         }
         Set<String> sides = new LinkedHashSet<>();
         for (UUID id : alive) {

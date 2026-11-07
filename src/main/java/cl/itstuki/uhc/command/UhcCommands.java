@@ -254,6 +254,12 @@ public final class UhcCommands {
                     IntegerArgumentType.getInteger(ctx, "tamaño"), plugin.lang().raw("teams.default-name"));
             plugin.lang().send(sender(ctx), "teams.shuffled", Lang.p("count", plugin.teams().teams().size()));
         }))));
+        root.then(Commands.literal("force").executes(ok(ctx -> {
+            // Junta en equipos al azar a los vivos que siguen sin equipo (útil en Amor a primera vista).
+            List<java.util.UUID> loose = plugin.game().alive().stream().filter(id -> !plugin.teams().hasTeam(id)).toList();
+            plugin.teams().randomize(loose, plugin.settings().teamSize(), plugin.lang().raw("teams.default-name"));
+            plugin.lang().broadcast("teams.forced", Lang.p("count", loose.size()));
+        })));
         root.then(Commands.literal("clear").executes(ok(ctx -> {
             plugin.teams().clear();
             plugin.lang().send(sender(ctx), "teams.cleared");

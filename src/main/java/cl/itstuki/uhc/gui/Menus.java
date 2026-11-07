@@ -166,7 +166,21 @@ public final class Menus {
                 number(14, Material.GLASS, "border", settings()::borderRadius, settings()::borderRadius, 100);
                 number(15, Material.TINTED_GLASS, "border-final", settings()::borderFinalRadius, settings()::borderFinalRadius, 25);
                 number(16, Material.HOPPER, "border-episode", settings()::borderShrinkEpisodeRaw, settings()::borderShrinkEpisode, 1);
+                preset(21, Material.REDSTONE_LAMP, "preset-live", 5, 60);
+                preset(23, Material.BOOKSHELF, "preset-episodes", 10, 25);
                 set(31, back(), (p, c) -> openMain(p));
+            }
+
+            /** Ajuste rápido de duración: Directo (5 × 60 min) o Episodios (10 × 25 min). */
+            private void preset(int slot, Material icon, String key, int count, int minutes) {
+                boolean selected = settings().episodes() == count && settings().episodeMinutes() == minutes;
+                set(slot, Items.of(icon).name(lang().item("menu.settings." + key + ".name"))
+                        .lore(lore("menu.settings." + key + ".lore")).glow(selected).build(), (p, c) -> {
+                    settings().episodes(count);
+                    settings().episodeMinutes(minutes);
+                    changed(p);
+                    refresh();
+                });
             }
 
             private void number(int slot, Material icon, String key, IntSupplier get, IntConsumer setter, int step) {

@@ -21,7 +21,9 @@ import org.bukkit.entity.Player;
 public final class EscortModule implements UhcModule {
     private static final int PENALTY_EVERY = 10;
     private final TukiUHC plugin;
+    private static final int MIN_DISTANCE = 40;
     private final Map<Integer, Integer> apartSeconds = new HashMap<>();
+    private int maxDistance = 100;
 
     public EscortModule(TukiUHC plugin) {
         this.plugin = plugin;
@@ -40,11 +42,30 @@ public final class EscortModule implements UhcModule {
     }
 
     @Override
+    public void onStart() {
+        maxDistance = plugin.settings().value(Feature.ESCORT);
+    }
+
+    /** Cada parte la distancia permitida baja 10 bloques, hasta un mínimo de 40. */
+    @Override
+    public void onEpisodeStart(int episode) {
+        if (!plugin.settings().enabled(Feature.ESCORT) || episode <= 1 || maxDistance <= MIN_DISTANCE) {
+            return;
+        }
+        maxDistance = Math.max(MIN_DISTANCE, maxDistance - 10);
+        plugin.lang().broadcast("escort.reduced", Lang.p("max", maxDistance));
+    }
+
+    public int maxDistance() {
+        return maxDistance;
+    }
+
+    @Override
     public void onSecond(int secondsToNextEpisode) {
         if (!active()) {
             return;
         }
-        int max = plugin.settings().value(Feature.ESCORT);
+        int max = maxDistance;
         for (Party team : plugin.teams().teams()) {
             boolean apart = false;
             for (UUID id : team.members()) {

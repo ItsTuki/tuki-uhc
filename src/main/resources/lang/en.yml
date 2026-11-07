@@ -1,7 +1,7 @@
 # TukiUHC — English texts (MiniMessage format: https://docs.advntr.dev/minimessage/format)
 # <prefix> inserts the prefix. Leave a text as "" to not send it.
 # No cambies este número: el plugin lo usa para actualizar el archivo.
-lang-version: 2
+lang-version: 5
 prefix: "<dark_gray>[<gradient:#FF5555:#FFAA00><bold>UHC</bold></gradient><dark_gray>]</dark_gray> <gold>»</gold> "
 
 phase:
@@ -10,6 +10,7 @@ phase:
   pvd: "<light_purple>PVD"
 
 game:
+  episode-ending: "<prefix><yellow>Part <white><episode></white> ends in <white><seconds></white> s."
   already-running: "<prefix><red>A match is already in progress. Use <white>/sos</white> to restart it."
   no-players: "<prefix><red>There are no players to start."
   preparing: "<prefix><yellow>Preparing the match and scattering players…"
@@ -64,6 +65,7 @@ border:
   final-battle-subtitle: "<gray>Everyone to the center of the map"
 
 teams:
+  forced: "<prefix><yellow><white><count></white> players without a team were grouped at random."
   auto-assigned: "<prefix><yellow><white><count></white> players without a team were placed into new random teams."
   default-name: "Team"
   random-pending: "<prefix><gray>Random teams will be revealed in part <white><episode></white>."
@@ -126,7 +128,7 @@ revive:
 rewards:
   shulker-warning: "<prefix><light_purple>In 30 seconds you will receive a Shulker Box, make room in your inventory!"
   shulker-given: "<prefix><light_purple>All players received a Shulker Box."
-  life-boost: "<prefix><red>❤ Everyone gets 10 extra hearts and Resistance II!"
+  life-boost: "<prefix><red>❤ Everyone gets 10 extra hearts and Resistance II for this part!"
   life-boost-title: "<red><bold>+10 ❤"
   life-boost-subtitle: "<gray>and Resistance II for the final battle"
   locator-on: "<prefix><aqua>The player locator bar is now enabled!"
@@ -143,6 +145,7 @@ head-steal:
   already: "<prefix><gray><white><player></white>'s head has already been stolen."
 
 escort:
+  reduced: "<prefix><yellow>Escort mode: the maximum distance is now <white><max></white> blocks."
   warning-title: "<yellow><bold>WARNING!"
   warning-subtitle: "<gray>You have strayed too far from your team (max. <max> blocks)"
   danger-title: "<red><bold>DANGER!"
@@ -162,7 +165,8 @@ skins:
   rotated: "<prefix><light_purple>The skins have rotated! Nobody knows who is who…"
   not-enough: "<prefix><gray>There are not enough skins to rotate."
   revealed: "<prefix><light_purple>You have revealed <white><player></white>!"
-  you-were-revealed: "<prefix><light_purple>You have been revealed!"
+  you-were-revealed: "<prefix><light_purple>You were hit and your skin has been revealed to everyone!"
+  hidden-name: "<gray>???"
 
 afk:
   label: "<red><bold>AFK"
@@ -177,6 +181,18 @@ dragon:
   time-up-reason: "<gray>The dragon survived"
 
 trolls:
+  need-three: "<prefix><red>Trolls and Rats needs at least 3 players."
+  rats-win: "<gray>Only Rats were left"
+  rat-team: "Rats"
+  rats-revealed: "<prefix><dark_purple><bold>The Rats reveal themselves!</bold> <white><players></white> <gray>now form a team."
+  torch:
+    name: "<gold><bold>Troll Torch"
+    lore: ["<gray>Right click: your team's Rat", "<gray>may give itself away with a noise (50%).", "<dark_gray>Recharges every 5 minutes."]
+    used: "<prefix><gold>You activated the torch's power… listen carefully."
+    no-rat: "<prefix><red>There is no Rat alive on your team."
+    cooldown: "<prefix><red>You must wait <white><seconds></white> s to use the torch."
+    actionbar: "<gold>Troll Torch: <white><seconds></white> s"
+    rat-noise: "<prefix><dark_purple>You couldn't avoid making a small noise…"
   intro: "<prefix><dark_purple>Trolls and Rats: secret roles are assigned at the start of part <white><episode></white>."
   assigned: "<prefix><dark_purple>Roles have been assigned. Use <white>/uhcrole</white> to see yours again."
   no-role: "<prefix><gray>You have no role in this match."
@@ -205,6 +221,9 @@ trolls:
       description: ["<aqua>[Normal]</aqua> <gray>You can attack your teammates if you suspect they are the Rat.", "<red>If you kill the Troll you lose half of your health and the Rat will be able to attack you."]
 
 rush:
+  pending-header: "<prefix><gold>Objectives (<white><done></white>/<total>):"
+  pending-current: "<yellow> ▶ <number>. <white><item>"
+  pending-entry: "<gray>   <number>. <item>"
   start: "<prefix><gold>Resource Rush: get <white><count></white> items in order. The first to finish wins!"
   first: "<prefix><gold>First objective: <white><item>"
   got: "<prefix><gold><white><who></white> got <white><item></white> <gray>(<done>/<total>)"
@@ -454,6 +473,12 @@ menu:
     border-episode:
       name: "<gold>Part in which the border closes"
       lore: ["<gray>Current: <white><value></white> <dark_gray>(0 = second to last)"]
+    preset-live:
+      name: "<red>Live mode"
+      lore: ["<gray>5 parts of 60 minutes.", "", "<yellow>Click to apply"]
+    preset-episodes:
+      name: "<aqua>Episodes mode"
+      lore: ["<gray>10 parts of 25 minutes.", "", "<yellow>Click to apply"]
   features:
     title: "<dark_gray>Match options"
     state: "<gray>State: <state>"
@@ -507,6 +532,9 @@ menu:
     help: "<gray>Click an item in your inventory to add it"
 
 lobby:
+  book:
+    name: "<gold><bold>Match settings"
+    lore: ["<gray>Right click to open /uhcconfig."]
   creator-title: "<gradient:#FF5555:#FFAA00><bold>TukiUHC</bold></gradient><newline><gray>Created by <gradient:#55FFFF:#5555FF><bold><player></bold></gradient>"
   creator-description: "<aqua>TukiUHC creator"
   creator-click: "<prefix><gray>TukiUHC is open source: <link>"

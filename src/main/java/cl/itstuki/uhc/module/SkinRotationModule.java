@@ -28,8 +28,8 @@ public final class SkinRotationModule implements UhcModule {
     private final TukiUHC plugin;
     private final Map<UUID, ProfileProperty> originals = new HashMap<>();
     private final Map<String, Long> revealCooldown = new HashMap<>();
-    /** Para cada jugador, los enemigos que ya identificó golpeándolos. */
-    private final Map<UUID, java.util.Set<UUID>> revealed = new HashMap<>();
+    /** Jugadores revelados a todos (recuperaron su skin al ser golpeados). */
+    private final java.util.Set<UUID> revealed = new java.util.HashSet<>();
 
     public SkinRotationModule(TukiUHC plugin) {
         this.plugin = plugin;
@@ -48,11 +48,15 @@ public final class SkinRotationModule implements UhcModule {
         if (!active || viewer.equals(target) || plugin.teams().sameTeam(viewer, target)) {
             return true;
         }
-        if (!plugin.game().isAlive(viewer) || !plugin.game().isParticipant(target)) {
+        if (!plugin.game().isAlive(viewer) || !plugin.game().isAlive(target)) {
             return true;
         }
-        java.util.Set<UUID> known = revealed.get(viewer);
-        return known != null && known.contains(target);
+        return revealed.contains(target);
+    }
+
+    /** Si el jugador ya fue revelado a todos (o no hay rotación activa). */
+    public boolean isRevealed(UUID target) {
+        return !active || revealed.contains(target) || !plugin.game().isAlive(target);
     }
 
     @Override
@@ -128,17 +132,14 @@ public final class SkinRotationModule implements UhcModule {
         if (attacker == null || attacker.equals(victim) || plugin.teams().sameTeam(attacker.getUniqueId(), victim.getUniqueId())) {
             return;
         }
-        boolean firstTime = revealed.computeIfAbsent(attacker.getUniqueId(), id -> new java.util.HashSet<>()).add(victim.getUniqueId());
-        String pair = attacker.getUniqueId() + ">" + victim.getUniqueId();
-        if (!firstTime) {
+        if (!revealed.add(victim.getUniqueId())) {
             return;
         }
-        long now = System.currentTimeMillis();
-        Long last = revealCooldown.get(pair);
-        if (last != null && now - last < 30_000) {
-            return;
+        // Como en la guía: el golpeado recupera su skin original y queda revelado a todos.
+        ProfileProperty original = originals.get(victim.getUniqueId());
+        if (original != null) {
+            apply(victim, original);
         }
-        revealCooldown.put(pair, now);
         plugin.lang().send(attacker, "skins.revealed", Lang.p("player", victim.getName()));
         plugin.lang().send(victim, "skins.you-were-revealed");
     }

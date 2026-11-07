@@ -17,3 +17,13 @@ Primera versión de TukiUHC para Paper 26.3 (Java 25).
 - Rotación de skins por jugador: ves tu nombre, el de tu equipo y el de quien golpeas (tab y sobre la cabeza).
 - Scoreboard con tu equipo, compañeros y lista de equipos; en modo Manual quien no tenga equipo se reparte al azar.
 - El reparto evita el agua y el congelamiento ya no hunde a los jugadores.
+- Rotación de skins: al ser golpeado recuperas tu skin original y quedas revelado a todos; los demás salen como ??? en el tab.
+- El lobby desaparece al empezar y vuelve con /sos; quien entra tarde aparece como espectador junto a un jugador vivo.
+- La Resistencia II del aumento de vida dura solo esa parte.
+- Aviso de fin de parte a los 30, 10 y 5…1 segundos.
+- Libro de configuración en el lobby para los organizadores.
+- Ajustes rápidos: modo Directo (5 × 60 min) y modo Episodios (10 × 25 min).
+- Modo escolta: la distancia máxima baja 10 bloques por parte hasta 40.
+- Trolls y Ratas: mínimo 3 jugadores, equipos de 3, Antorcha Troll (pista con ruido, cada 5 min), las Ratas se revelan y se agrupan en la penúltima parte y ganan si solo quedan ellas.
+- Resource Rush: sin objetivos duplicados entre niveles; agacharse 3 veces muestra la lista de objetivos.
+- /uhcteam force agrupa al azar a los jugadores vivos sin equipo.

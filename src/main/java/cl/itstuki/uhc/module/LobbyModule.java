@@ -154,9 +154,17 @@ public final class LobbyModule implements UhcModule {
         }
     }
 
+    private void demolishLobby() {
+        clearEntities(TAG);
+        demolish(center());
+    }
+
     private void demolishResults() {
         clearEntities(RESULTS_TAG);
-        Location r = resultsCenter();
+        demolish(resultsCenter());
+    }
+
+    private void demolish(Location r) {
         World world = r.getWorld();
         for (int dx = -HALF; dx <= HALF; dx++) {
             for (int dz = -HALF; dz <= HALF; dz++) {
@@ -230,6 +238,40 @@ public final class LobbyModule implements UhcModule {
         }
         player.teleportAsync(spawn());
         player.setGameMode(GameMode.ADVENTURE);
+        lobbyItems(player);
+    }
+
+    /** En el lobby el inventario queda limpio; los organizadores reciben el libro de configuración. */
+    private void lobbyItems(Player player) {
+        player.getInventory().clear();
+        if (player.hasPermission("tukiuhc.admin")) {
+            player.getInventory().setItem(4, cl.itstuki.uhc.util.Items.of(Material.WRITABLE_BOOK)
+                    .name(plugin.lang().item("lobby.book.name")).lore(plugin.lang().itemList("lobby.book.lore"))
+                    .glow(true).tag(plugin.key("lobby_book"), "1").build());
+        }
+    }
+
+    private boolean isBook(org.bukkit.inventory.@Nullable ItemStack item) {
+        return cl.itstuki.uhc.util.Items.tag(item, plugin.key("lobby_book")) != null;
+    }
+
+    @EventHandler
+    public void onBook(org.bukkit.event.player.PlayerInteractEvent event) {
+        if (!isBook(event.getItem())) {
+            return;
+        }
+        event.setCancelled(true);
+        if (event.getAction().isRightClick() && event.getHand() == org.bukkit.inventory.EquipmentSlot.HAND
+                && event.getPlayer().hasPermission("tukiuhc.admin")) {
+            plugin.menus().openMain(event.getPlayer());
+        }
+    }
+
+    @EventHandler(ignoreCancelled = true)
+    public void onDropBook(org.bukkit.event.player.PlayerDropItemEvent event) {
+        if (isBook(event.getItemDrop().getItemStack())) {
+            event.setCancelled(true);
+        }
     }
 
     public void toResults(Player player) {
@@ -352,18 +394,26 @@ public final class LobbyModule implements UhcModule {
         }, 20L * plugin.getConfig().getInt("lobby.results-delay", 8));
     }
 
+    /** Al empezar la partida el lobby desaparece; se vuelve a construir con /sos. */
+    @Override
+    public void onStart() {
+        if (ready) {
+            demolishLobby();
+        }
+    }
+
     @Override
     public void onReset() {
-        if (!ready) {
-            return;
+        if (!ready || !plugin.isEnabled()) {
+            return; // Al apagar el servidor no hay que reconstruir nada.
         }
         Bukkit.getScheduler().runTask(plugin, () -> {
+            setup();
             for (Player player : Bukkit.getOnlinePlayers()) {
                 if (player.getGameMode() != GameMode.CREATIVE) {
                     toLobby(player);
                 }
             }
-            demolishResults();
         });
     }
 

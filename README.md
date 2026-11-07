@@ -40,8 +40,8 @@ Plugin de **UHC por episodios** para servidores **Paper 26.3** (Java 25), totalm
 | PvP por equipos | Gana el último equipo con vida. |
 | Solitarios | Todos contra todos. |
 | Dragón (PvD) | Portal al End en 0 0 con 9 de 12 ojos. Gana quien remate a la dragona antes de que acabe el tiempo. Sirve para un jugador. |
-| Trolls y Ratas | Equipos de 3 con roles secretos: **Troll** (no puede dañar a su equipo), **Rata** (elimina a su equipo solo de forma indirecta, chat privado con `#`) y **Normal** (puede ejecutar sospechosos; si mata al Troll pierde la mitad de la vida). |
-| Resource Rush | Conseguir 12 objetos en orden de dificultad. Lista editable en el juego o en `resource-rush.yml`. |
+| Trolls y Ratas | Mínimo 3 jugadores, equipos de 3 con roles secretos: **Troll** (no puede dañar a su equipo; tiene una **Antorcha Troll** que cada 5 min puede hacer que la Rata se delate con un ruido), **Rata** (elimina a su equipo solo de forma indirecta, chat privado con `#`; en la penúltima parte las Ratas se revelan y forman equipo, y ganan si solo quedan ellas) y **Normal** (puede ejecutar sospechosos; si mata al Troll pierde la mitad de la vida). |
+| Resource Rush | Conseguir 12 objetos en orden de dificultad. Agáchate 3 veces seguidas para ver la lista. Editable en el juego o en `resource-rush.yml`. |
 
 ## Equipos
 
