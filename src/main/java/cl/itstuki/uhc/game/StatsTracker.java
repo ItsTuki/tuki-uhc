@@ -17,6 +17,7 @@ public final class StatsTracker {
     private final Map<UUID, Double> damageTaken = new HashMap<>();
     private final Map<UUID, Long> deathSecond = new HashMap<>();
     private final Map<String, Integer> teamKills = new HashMap<>();
+    private final Map<String, String> teamNames = new HashMap<>();
     private final List<TeamResult> teamEliminations = new ArrayList<>();
 
     public void reset() {
@@ -25,6 +26,7 @@ public final class StatsTracker {
         damageTaken.clear();
         deathSecond.clear();
         teamKills.clear();
+        teamNames.clear();
         teamEliminations.clear();
     }
 
@@ -34,11 +36,11 @@ public final class StatsTracker {
         damageTaken.putIfAbsent(id, 0.0);
     }
 
-    public void addKill(UUID killer, String teamName) {
+    /** {@code sideKey} identifica al equipo aunque otro tenga el mismo nombre o lo renombren. */
+    public void addKill(UUID killer, String sideKey, String teamName) {
         kills.merge(killer, 1, Integer::sum);
-        if (teamName != null) {
-            teamKills.merge(teamName, 1, Integer::sum);
-        }
+        teamKills.merge(sideKey, 1, Integer::sum);
+        teamNames.put(sideKey, teamName);
     }
 
     public void addDamage(UUID player, double amount) {
@@ -78,7 +80,8 @@ public final class StatsTracker {
     }
 
     public Optional<Map.Entry<String, Integer>> topTeam() {
-        return teamKills.entrySet().stream().max(Map.Entry.comparingByValue());
+        return teamKills.entrySet().stream().max(Map.Entry.comparingByValue())
+                .map(e -> Map.entry(teamNames.getOrDefault(e.getKey(), e.getKey()), e.getValue()));
     }
 
     /** Jugador que menos daño recibió entre los que sobrevivieron. */

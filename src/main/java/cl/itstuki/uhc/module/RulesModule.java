@@ -29,6 +29,7 @@ import org.bukkit.event.entity.FoodLevelChangeEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerItemConsumeEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.inventory.ItemStack;
@@ -185,12 +186,23 @@ public final class RulesModule implements UhcModule {
             plugin.lang().send(player, "game.late-join");
             watchPoint(player).ifPresent(player::teleportAsync);
         } else if (!plugin.game().isAlive(id)) {
+            if (plugin.game().consumeOfflineElimination(id)) {
+                player.getInventory().clear(); // Sus cosas ya se soltaron donde se desconectó.
+                plugin.lang().send(player, "game.you-were-offline-eliminated");
+            }
             player.setGameMode(GameMode.SPECTATOR);
             Location death = plugin.game().deathLocations().get(id);
             if (death != null) {
                 player.teleportAsync(death.clone().add(0, 2, 0));
             }
+        } else {
+            plugin.game().handleRejoin(player);
         }
+    }
+
+    @EventHandler
+    public void onQuit(PlayerQuitEvent event) {
+        plugin.game().handleQuit(event.getPlayer());
     }
 
     /** Un jugador vivo al azar para observar, o el centro del mapa. */
@@ -202,7 +214,7 @@ public final class RulesModule implements UhcModule {
             }
         }
         org.bukkit.World world = plugin.game().mainWorld();
-        return java.util.Optional.of(new Location(world, 0.5, world.getHighestBlockYAt(0, 0) + 10, 0.5));
+        return java.util.Optional.of(new Location(world, 0.5, plugin.game().groundY(world, 0, 0) + 10, 0.5));
     }
 
     private void placePike(Location where, @Nullable Player headOwner) {

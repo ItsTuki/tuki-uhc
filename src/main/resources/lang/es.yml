@@ -1,7 +1,7 @@
 # TukiUHC — textos en español (formato MiniMessage: https://docs.advntr.dev/minimessage/format)
 # <prefix> inserta el prefijo. Deja un texto en "" para no enviarlo.
 # No cambies este número: el plugin lo usa para actualizar el archivo.
-lang-version: 5
+lang-version: 6
 prefix: "<dark_gray>[<gradient:#FF5555:#FFAA00><bold>UHC</bold></gradient><dark_gray>]</dark_gray> <gold>»</gold> "
 
 phase:
@@ -10,6 +10,7 @@ phase:
   pvd: "<light_purple>PVD"
 
 game:
+  prepare-cancelled: "<prefix><red>Otro plugin canceló la preparación de la partida."
   episode-ending: "<prefix><yellow>La parte <white><episode></white> termina en <white><seconds></white> s."
   already-running: "<prefix><red>Ya hay una partida en curso. Usa <white>/sos</white> para reiniciarla."
   no-players: "<prefix><red>No hay jugadores para empezar."
@@ -36,6 +37,8 @@ game:
   pvp-disabled-hit: "<red>El PvP todavía no está activado."
   death-prefix: "<dark_red>☠ </dark_red>"
   you-died: "<prefix><gray>Has sido eliminado. Ahora eres espectador."
+  offline-eliminated: "<prefix><red><player></red> <gray>fue eliminado por estar desconectado más de <minutes> min."
+  you-were-offline-eliminated: "<prefix><gray>Te eliminaron por estar desconectado demasiado tiempo. Ahora eres espectador."
   late-join: "<prefix><gray>La partida ya empezó: entras como espectador."
   team-eliminated: "<prefix><red>El equipo <white><team></white> ha sido eliminado."
   end-title: "<gold><bold>¡FIN DE LA PARTIDA!"
@@ -89,11 +92,11 @@ teams:
   renamed: "<prefix><green><white><player></white> renombró el equipo a <white><team></white>."
 
 chat:
-  global: "<dark_gray>[<red>GLOBAL</red>]</dark_gray> <white><player></white> <gold>»</gold> <white><message>"
-  team: "<dark_gray>[<green>EQUIPO</green>]</dark_gray> <team> <white><player></white> <gold>»</gold> <gray><message>"
-  group: "<dark_gray>[<aqua>GRUPO</aqua>]</dark_gray> <group> <white><player></white> <gold>»</gold> <aqua><message>"
+  global: "<dark_gray>[<red>GLOBAL</red>]</dark_gray> <rank><white><player></white> <gold>»</gold> <white><message>"
+  team: "<dark_gray>[<green>EQUIPO</green>]</dark_gray> <team> <rank><white><player></white> <gold>»</gold> <gray><message>"
+  group: "<dark_gray>[<aqua>GRUPO</aqua>]</dark_gray> <group> <rank><white><player></white> <gold>»</gold> <aqua><message>"
   rats: "<dark_gray>[<dark_purple>RATAS</dark_purple>]</dark_gray> <white><player></white> <gold>»</gold> <light_purple><message>"
-  dead: "<dark_gray>[<gray>MUERTO</gray>]</dark_gray> <gray><player> » <message>"
+  dead: "<dark_gray>[<gray>MUERTO</gray>]</dark_gray> <rank><gray><player> » <message>"
 
 items:
   golden-head:
@@ -258,6 +261,10 @@ scoreboard:
   rush-target: "<gray>Objetivo: <white><item></white> <dark_gray>(<done>/<total>)"
   rush-done: "<green>¡Lista completa!"
   role: "<gray>Rol: <role>"
+  # Líneas fijas al final del scoreboard. Admiten <rank> y <papi:nombre> (PlaceholderAPI). Ej.:
+  #   - ""
+  #   - "<yellow>play.tuserver.cl"
+  footer: []
 
 tab:
   header: "<newline><gradient:#FF5555:#FFAA00><bold><name></bold></gradient><newline>"
@@ -281,6 +288,8 @@ commands:
   reset-done: "<prefix><yellow>Partida reiniciada."
   healed: "<prefix><green>Un organizador te curó."
   heal-done: "<prefix><green>Curado."
+  reloaded: "<prefix><green>Configuración e idioma recargados."
+  afk-running: "<prefix><red>No puedes usar /afk mientras juegas una partida."
 
 help:
   player:
@@ -289,6 +298,7 @@ help:
     - "<yellow>/afk</yellow> <gray>— modo AFK (invulnerable hasta moverte)"
     - "<yellow>/renameteam <nombre></yellow> <gray>— cambia el nombre de tu equipo"
     - "<yellow>/uhcrole [revelar]</yellow> <gray>— tu rol en Trolls y Ratas"
+    - "<yellow>/uhchub</yellow> <gray>— vuelve al lobby de la network"
     - "<gray>Chat: normal = equipo, <white>!</white> = todos, <white>@</white> = grupo, <white>#</white> = ratas"
   admin:
     - "<gold>Organizador:"
@@ -302,6 +312,7 @@ help:
     - "<yellow>/heal <jugador></yellow> <gray>— curar a un jugador"
     - "<yellow>/uhcrevive <jugador></yellow> <gray>— revivir a un jugador"
     - "<yellow>/uhcgive <ítem></yellow> <gray>— ítems especiales de prueba"
+    - "<yellow>/uhcreload</yellow> <gray>— recarga config.yml e idiomas"
 
 modes:
   pvp:
@@ -549,3 +560,31 @@ lobby:
   top-line: "<gray><place>. <white><player></white> <dark_gray>—</dark_gray> <yellow><value>"
   top-empty: "<dark_gray>Sin datos todavía"
   survived: "sobrevivió"
+
+states:
+  lobby: "<green>En espera"
+  scattering: "<yellow>Repartiendo"
+  prepared: "<yellow>Preparada"
+  starting: "<gold>Empezando"
+  playing: "<red>En juego"
+  ended: "<gray>Terminada"
+
+motd:
+  lobby: "<gradient:#FF5555:#FFAA00><bold><name></bold></gradient> <dark_gray>| <gray><mode><newline><green>● Esperando jugadores <dark_gray>(<white><online></white>)"
+  scattering: "<gradient:#FF5555:#FFAA00><bold><name></bold></gradient> <dark_gray>| <gray><mode><newline><yellow>● Repartiendo jugadores…"
+  prepared: "<gradient:#FF5555:#FFAA00><bold><name></bold></gradient> <dark_gray>| <gray><mode><newline><yellow>● A punto de empezar"
+  starting: "<gradient:#FF5555:#FFAA00><bold><name></bold></gradient> <dark_gray>| <gray><mode><newline><gold>● Empezando"
+  playing: "<gradient:#FF5555:#FFAA00><bold><name></bold></gradient> <dark_gray>| <gray><mode><newline><red>● En juego <dark_gray>— <white><alive></white> vivos, parte <white><episode>"
+  ended: "<gradient:#FF5555:#FFAA00><bold><name></bold></gradient> <dark_gray>| <gray><mode><newline><gray>● Partida terminada"
+
+proxy:
+  disabled: "<prefix><red>El modo network (proxy.enabled) está desactivado en este servidor."
+  sending: "<prefix><gray>Enviándote a <white><server></white>…"
+  end-sending: "<prefix><yellow>Volviendo al lobby de la network (<white><server></white>)…"
+  match-running: "<prefix><gray>La partida ya empezó: entras como espectador."
+  match-running-kick: "<red>La partida ya empezó.<newline><gray>Vuelve a intentarlo cuando termine."
+
+autostart:
+  countdown: "<prefix><yellow>La partida empieza en <white><seconds></white> s."
+  cancelled: "<prefix><red>Inicio cancelado: faltan jugadores (<white><ready></white>/<min>)."
+  actionbar: "<yellow>Empieza en <white><seconds></white> s <dark_gray>| <gray>Jugadores: <white><ready>"

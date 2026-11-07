@@ -65,7 +65,7 @@ public final class UhcCommands {
     public void register(Commands registrar) {
         registrar.register(Commands.literal("uhchelp").executes(ok(this::help)).build(), "Ayuda de TukiUHC", List.of("uhc"));
 
-        registrar.register(Commands.literal("uhcconfig").requires(perm(ADMIN)).executes(ok(ctx -> {
+        registrar.register(Commands.literal("uhcconfig").requires(perm("tukiuhc.command.config")).executes(ok(ctx -> {
             Player p = player(ctx);
             if (p == null) {
                 plugin.lang().send(sender(ctx), "commands.player-only");
@@ -74,17 +74,17 @@ public final class UhcCommands {
             plugin.menus().openMain(p);
         })).build(), "Abre el menú de configuración", List.of());
 
-        registrar.register(Commands.literal("uhcprepare").requires(perm(ADMIN))
+        registrar.register(Commands.literal("uhcprepare").requires(perm("tukiuhc.command.prepare"))
                 .executes(ok(ctx -> plugin.game().prepare(sender(ctx)))).build(), "Reparte a los jugadores", List.of());
-        registrar.register(Commands.literal("uhcstart").requires(perm(ADMIN))
+        registrar.register(Commands.literal("uhcstart").requires(perm("tukiuhc.command.start"))
                 .executes(ok(ctx -> plugin.game().start(sender(ctx), false))).build(), "Inicia la partida", List.of());
-        registrar.register(Commands.literal("uhcforcestart").requires(perm(ADMIN))
+        registrar.register(Commands.literal("uhcforcestart").requires(perm("tukiuhc.command.start"))
                 .executes(ok(ctx -> plugin.game().start(sender(ctx), true))).build(), "Inicia sin esperar a nadie", List.of());
-        registrar.register(Commands.literal("uhcstop").requires(perm(ADMIN)).executes(ok(ctx -> {
+        registrar.register(Commands.literal("uhcstop").requires(perm("tukiuhc.command.stop")).executes(ok(ctx -> {
             plugin.game().end(List.of(), "game.stopped");
             plugin.lang().send(sender(ctx), "commands.stopped");
         })).build(), "Termina la partida sin ganador", List.of());
-        registrar.register(Commands.literal("sos").requires(perm(ADMIN)).executes(ok(ctx -> {
+        registrar.register(Commands.literal("sos").requires(perm("tukiuhc.command.reset")).executes(ok(ctx -> {
             plugin.game().reset();
             plugin.reloadAll();
             plugin.lang().broadcast("commands.sos");
@@ -118,7 +118,7 @@ public final class UhcCommands {
                     }
                 }))).build(), "Cambia el nombre de tu equipo", List.of());
 
-        registrar.register(Commands.literal("heal").requires(perm(ADMIN))
+        registrar.register(Commands.literal("heal").requires(perm("tukiuhc.command.heal"))
                 .then(Commands.argument("jugadores", ArgumentTypes.players()).executes(ok(ctx -> {
                     for (Player target : players(ctx, "jugadores")) {
                         ItemsModule.heal(target, 1000);
@@ -128,7 +128,7 @@ public final class UhcCommands {
                     plugin.lang().send(sender(ctx), "commands.heal-done");
                 }))).build(), "Cura a un jugador", List.of("uhcheal"));
 
-        registrar.register(Commands.literal("uhcrevive").requires(perm(ADMIN))
+        registrar.register(Commands.literal("uhcrevive").requires(perm("tukiuhc.command.revive"))
                 .then(Commands.argument("jugador", ArgumentTypes.player()).executes(ok(ctx -> {
                     Player target = players(ctx, "jugador").getFirst();
                     Location where = sender(ctx) instanceof Player p ? p.getLocation() : plugin.game().mainWorld().getSpawnLocation();
@@ -159,7 +159,7 @@ public final class UhcCommands {
                     }
                 }))).build(), "Muestra o revela tu rol (Trolls y Ratas)", List.of("rol"));
 
-        registrar.register(Commands.literal("uhcgive").requires(perm(ADMIN))
+        registrar.register(Commands.literal("uhcgive").requires(perm("tukiuhc.command.give"))
                 .then(Commands.argument("item", StringArgumentType.word()).suggests((c, b) -> {
                     List.of("golden_head", "golden_skull", "super_apple", "hyper_apple", "revive_crystal").forEach(b::suggest);
                     return b.buildFuture();
@@ -183,6 +183,22 @@ public final class UhcCommands {
                 }))).build(), "Da un ítem especial de UHC", List.of());
 
         registrar.register(teamCommand().build(), "Gestiona equipos y grupos", List.of());
+
+        registrar.register(Commands.literal("uhcreload").requires(perm("tukiuhc.command.reload")).executes(ok(ctx -> {
+            plugin.reloadAll();
+            plugin.lang().send(sender(ctx), "commands.reloaded");
+        })).build(), "Recarga config.yml y los idiomas", List.of());
+
+        boolean proxyAliases = plugin.getConfig().getBoolean("proxy.enabled", false)
+                && plugin.getConfig().getBoolean("proxy.hub-aliases", true);
+        registrar.register(Commands.literal("uhchub").requires(perm("tukiuhc.hub")).executes(ok(ctx -> {
+            Player p = player(ctx);
+            if (p == null) {
+                plugin.lang().send(sender(ctx), "commands.player-only");
+                return;
+            }
+            plugin.proxy().sendToHub(p);
+        })).build(), "Vuelve al lobby de la network", proxyAliases ? List.of("hub", "lobby") : List.of());
     }
 
     private List<Player> players(CommandContext<CommandSourceStack> ctx, String arg) throws CommandSyntaxException {
@@ -192,7 +208,7 @@ public final class UhcCommands {
     private void help(CommandContext<CommandSourceStack> ctx) {
         CommandSender s = sender(ctx);
         plugin.lang().sendList(s, "help.player", Lang.p("version", plugin.getPluginMeta().getVersion()));
-        if (s.hasPermission(ADMIN)) {
+        if (s.hasPermission(ADMIN) || s.hasPermission("tukiuhc.command.start")) {
             plugin.lang().sendList(s, "help.admin");
         }
         s.sendMessage(Credits.helpLine());
@@ -211,7 +227,7 @@ public final class UhcCommands {
     }
 
     private LiteralArgumentBuilder<CommandSourceStack> teamCommand() {
-        LiteralArgumentBuilder<CommandSourceStack> root = Commands.literal("uhcteam").requires(perm(ADMIN)).executes(ok(this::listTeams));
+        LiteralArgumentBuilder<CommandSourceStack> root = Commands.literal("uhcteam").requires(perm("tukiuhc.command.team")).executes(ok(this::listTeams));
         root.then(Commands.literal("list").executes(ok(this::listTeams)));
         for (Party.Kind kind : Party.Kind.values()) {
             String prefix = kind == Party.Kind.TEAM ? "" : "group";

@@ -144,7 +144,8 @@ public final class UhcSettings {
             }
         }
     }
-    public TeamMode teamMode() { return teamMode; }
+    /** Trolls y Ratas necesita equipos: en solitario se juega con equipos al azar. */
+    public TeamMode teamMode() { return mode == UhcMode.TROLLS_RATAS && teamMode == TeamMode.SOLO ? TeamMode.RANDOM : teamMode; }
     public void teamMode(TeamMode teamMode) { this.teamMode = teamMode; }
     /** Trolls y Ratas siempre juega con equipos de 3. */
     public int teamSize() { return mode == UhcMode.TROLLS_RATAS ? 3 : teamSize; }

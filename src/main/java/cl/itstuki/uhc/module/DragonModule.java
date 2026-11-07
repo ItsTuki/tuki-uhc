@@ -54,7 +54,7 @@ public final class DragonModule implements UhcModule {
     }
 
     private void buildPortal(World world) {
-        int y = world.getHighestBlockYAt(0, 0) + 1;
+        int y = plugin.game().groundY(world, 0, 0) + 1;
         for (int x = -3; x <= 3; x++) {
             for (int z = -3; z <= 3; z++) {
                 world.getBlockAt(x, y - 1, z).setType(Material.STONE_BRICKS);

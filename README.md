@@ -82,15 +82,41 @@ Clic izquierdo activa/desactiva, clic derecho cambia el valor (episodio, %, segu
 | Comando | Permiso | |
 |---|---|---|
 | `/uhchelp` | — | Ayuda |
-| `/uhcconfig` | `tukiuhc.admin` | Menú de configuración |
-| `/uhcprepare` · `/uhcstart` · `/uhcforcestart` | `tukiuhc.admin` | Preparar e iniciar |
-| `/uhcstop` · `/sos` | `tukiuhc.admin` | Terminar / reiniciar y recargar |
-| `/uhcteam create\|delete\|add\|remove\|random\|clear\|list` (y `groupcreate`, `groupadd`…) | `tukiuhc.admin` | Equipos y grupos |
-| `/heal <jugador>` · `/uhcrevive <jugador>` · `/uhcgive <ítem>` | `tukiuhc.admin` | Utilidades |
-| `/afk` | `tukiuhc.afk` | Invulnerable hasta moverte |
-| — | `tukiuhc.spectator` | No participa en las partidas (staff que solo mira) |
+| `/uhcconfig` | `tukiuhc.command.config` | Menú de configuración |
+| `/uhcprepare` | `tukiuhc.command.prepare` | Repartir a los jugadores |
+| `/uhcstart` · `/uhcforcestart` | `tukiuhc.command.start` | Iniciar |
+| `/uhcstop` | `tukiuhc.command.stop` | Terminar sin ganador |
+| `/sos` (`/uhcreset`) | `tukiuhc.command.reset` | Reiniciar la partida y recargar |
+| `/uhcreload` | `tukiuhc.command.reload` | Recargar config.yml e idiomas |
+| `/uhcteam create\|delete\|add\|remove\|random\|force\|clear\|list` (y `groupcreate`, `groupadd`…) | `tukiuhc.command.team` | Equipos y grupos |
+| `/heal` · `/uhcrevive` · `/uhcgive` | `tukiuhc.command.heal` · `.revive` · `.give` | Utilidades |
+| `/uhchub` (y `/hub`, `/lobby` con proxy) | `tukiuhc.hub` | Volver al lobby de la network |
+| `/afk` | `tukiuhc.afk` | Invulnerable hasta moverte (en partida, solo en el descanso) |
 | `/renameteam <nombre>` | `tukiuhc.renameteam` | Renombrar tu equipo |
 | `/uhcrole [revelar]` | — | Tu rol en Trolls y Ratas |
+
+### Permisos agrupados
+
+| Permiso | Incluye |
+|---|---|
+| `tukiuhc.admin` (OP) | Todos los `tukiuhc.command.*` y `tukiuhc.staff` |
+| `tukiuhc.staff` | `tukiuhc.chat.spy` (ver chats de equipo como espectador) y `tukiuhc.join.spectate` |
+| `tukiuhc.spectator` | No participa en las partidas: mira como espectador |
+| `tukiuhc.join.spectate` | Entrar a mirar con la partida en curso cuando `proxy.block-late-joins` está activo |
+
+## Network y compatibilidades
+
+Todo es opcional: TukiUHC funciona solo.
+
+- **[TukiCore](https://github.com/ItsTuki/tuki-core)** (recomendado): rangos, prefijos, chat y moderación. Si está instalado, TukiUHC usa sus prefijos en el chat de la partida (`<rank>`), y en el lobby el chat y el tab los maneja TukiCore. Los silencios y el anti-spam de TukiCore también valen en partida.
+- **LuckPerms**: sin TukiCore, TukiUHC muestra el prefijo de LuckPerms en el chat y en el tab del lobby (`luckperms.tab-prefix`).
+- **PlaceholderAPI**: registra `%tukiuhc_<x>%` y permite `<papi:nombre>` en cualquier texto de `lang/*.yml` (por ejemplo en `scoreboard.footer`).
+  - Globales: `state`, `mode`, `team_mode`, `team_size`, `match_name`, `episode`, `episodes`, `phase`, `pvp`, `time`, `time_left`, `alive`, `alive_teams`, `participants`, `border`.
+  - Por jugador: `kills`, `is_alive`, `is_playing`, `team`, `team_color`, `team_alive`, `role`, `hearts`, `wins`, `total_kills`, `games`.
+- **BungeeCord / Velocity** (`proxy.enabled`): `/uhchub` y `/hub` mandan al servidor `proxy.lobby-server`. Al terminar, todos vuelven al lobby y el servidor se reinicia solo (`end-action: RESET`) o se apaga (`SHUTDOWN`). Con `block-late-joins` quien entra a una partida empezada vuelve al lobby. El MOTD muestra el estado de la partida (`motd.<estado>` en lang).
+- **Inicio automático** (`autostart`): con `min-players` conectados empieza una cuenta atrás, reparte e inicia sola.
+- **Recompensas** (`rewards`): comandos de consola al ganar, matar, ser eliminado o participar (`{player}`, `{killer}`, `{kills}`…), por ejemplo `economy give {player} gold-coin 5`.
+- **API para otros plugins**: eventos `UhcPrepareEvent` (cancelable), `UhcStartEvent`, `UhcEpisodeStartEvent`, `UhcPlayerEliminatedEvent` y `UhcGameEndEvent` en `cl.itstuki.uhc.api.event`.
 
 ## Idiomas
 

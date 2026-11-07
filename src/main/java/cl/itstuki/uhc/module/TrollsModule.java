@@ -84,7 +84,8 @@ public final class TrollsModule implements UhcModule {
         if (episode == penultimate && !ratsGrouped && !roles.isEmpty()) {
             groupRats();
         }
-        if (episode != ROLES_EPISODE) {
+        // Desde la parte 2, en cuanto existan equipos (con equipos al azar pueden revelarse más tarde).
+        if (episode < ROLES_EPISODE || !roles.isEmpty() || plugin.teams().teams().isEmpty()) {
             return;
         }
         for (Party team : plugin.teams().teams()) {

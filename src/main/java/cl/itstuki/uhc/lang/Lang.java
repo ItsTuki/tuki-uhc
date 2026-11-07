@@ -24,6 +24,10 @@ public final class Lang {
     private final Plugin plugin;
     private YamlConfiguration messages = new YamlConfiguration();
     private TagResolver base = TagResolver.empty();
+    /** Etiquetas que dependen de un jugador (rango de LuckPerms, PlaceholderAPI). */
+    private java.util.function.Function<org.bukkit.entity.@org.jspecify.annotations.Nullable Player, TagResolver> playerTags =
+            p -> TagResolver.empty();
+    private final ThreadLocal<org.bukkit.entity.Player> viewer = new ThreadLocal<>();
     private String code = "es";
 
     public Lang(Plugin plugin) {
@@ -84,8 +88,27 @@ public final class Lang {
         return messages.getString(key, key);
     }
 
+    public void playerTags(java.util.function.Function<org.bukkit.entity.@org.jspecify.annotations.Nullable Player, TagResolver> tags) {
+        this.playerTags = tags;
+    }
+
+    /** Ejecuta {@code action} con {@code player} como contexto para <rank> y <papi:...>. */
+    public void asViewer(org.bukkit.entity.Player player, Runnable action) {
+        viewer.set(player);
+        try {
+            action.run();
+        } finally {
+            viewer.remove();
+        }
+    }
+
+    private TagResolver all(TagResolver... resolvers) {
+        // Los últimos mandan: las etiquetas propias del mensaje pisan a <prefix>, <rank>, <papi:...>.
+        return TagResolver.resolver(base, playerTags.apply(viewer.get()), TagResolver.resolver(resolvers));
+    }
+
     public Component get(String key, TagResolver... resolvers) {
-        return MM.deserialize(raw(key), TagResolver.resolver(base, TagResolver.resolver(resolvers)));
+        return MM.deserialize(raw(key), all(resolvers));
     }
 
     /** Igual que {@link #get} pero sin cursiva, para nombres y lore de ítems. */
@@ -95,7 +118,7 @@ public final class Lang {
 
     public List<Component> itemList(String key, TagResolver... resolvers) {
         List<Component> lines = new ArrayList<>();
-        TagResolver all = TagResolver.resolver(base, TagResolver.resolver(resolvers));
+        TagResolver all = all(resolvers);
         for (String line : messages.getStringList(key)) {
             lines.add(MM.deserialize(line, all).decorationIfAbsent(TextDecoration.ITALIC, TextDecoration.State.FALSE));
         }
@@ -104,13 +127,19 @@ public final class Lang {
 
     public void send(Audience audience, String key, TagResolver... resolvers) {
         String raw = raw(key);
-        if (!raw.isEmpty()) {
+        if (raw.isEmpty()) {
+            return;
+        }
+        if (audience instanceof org.bukkit.entity.Player player) {
+            audience.sendMessage(MM.deserialize(raw, TagResolver.resolver(base, playerTags.apply(player), TagResolver.resolver(resolvers))));
+        } else {
             audience.sendMessage(get(key, resolvers));
         }
     }
 
     public void sendList(Audience audience, String key, TagResolver... resolvers) {
-        TagResolver all = TagResolver.resolver(base, TagResolver.resolver(resolvers));
+        TagResolver all = audience instanceof org.bukkit.entity.Player player
+                ? TagResolver.resolver(base, playerTags.apply(player), TagResolver.resolver(resolvers)) : all(resolvers);
         for (String line : messages.getStringList(key)) {
             audience.sendMessage(MM.deserialize(line, all));
         }
@@ -118,6 +147,16 @@ public final class Lang {
 
     public void broadcast(String key, TagResolver... resolvers) {
         send(Bukkit.getServer(), key, resolvers);
+    }
+
+    /** Lista de textos (vacía si la clave no existe). */
+    public List<String> rawList(String key) {
+        return messages.getStringList(key);
+    }
+
+    /** Deserializa un texto suelto con las etiquetas de un jugador. */
+    public Component format(String text, org.bukkit.entity.@org.jspecify.annotations.Nullable Player player, TagResolver... resolvers) {
+        return MM.deserialize(text, TagResolver.resolver(base, playerTags.apply(player), TagResolver.resolver(resolvers)));
     }
 
     public static Component mm(String text, TagResolver... resolvers) {

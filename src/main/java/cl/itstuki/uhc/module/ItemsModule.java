@@ -159,6 +159,23 @@ public final class ItemsModule implements UhcModule {
         }
     }
 
+    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+    public void onCrafter(org.bukkit.event.block.CrafterCraftEvent event) {
+        Recipe recipe = event.getRecipe();
+        if (!(recipe instanceof Keyed keyed) || !keyed.getKey().getNamespace().equals(plugin.namespace())) {
+            return;
+        }
+        Feature required = switch (keyed.getKey().getKey()) {
+            case "super_apple", "hyper_apple" -> Feature.SUPER_APPLES;
+            case "dragon_breath" -> Feature.DRAGON_BREATH;
+            case "revive_crystal" -> Feature.RESURRECTION;
+            default -> null;
+        };
+        if (required != null && !plugin.settings().enabled(required)) {
+            event.setCancelled(true);
+        }
+    }
+
     // ── Consumo ──────────────────────────────────────────────
 
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)

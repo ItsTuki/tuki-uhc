@@ -23,8 +23,8 @@ public final class TeamManager {
 
     private final Map<Integer, Party> teams = new LinkedHashMap<>();
     private final Map<Integer, Party> groups = new LinkedHashMap<>();
-    private final Map<UUID, Party> teamOf = new HashMap<>();
-    private final Map<UUID, Party> groupOf = new HashMap<>();
+    private final Map<UUID, Party> teamOf = new java.util.concurrent.ConcurrentHashMap<>();
+    private final Map<UUID, Party> groupOf = new java.util.concurrent.ConcurrentHashMap<>();
     private int nextId = 1;
     private int version;
 

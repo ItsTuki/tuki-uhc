@@ -4,18 +4,22 @@ plugins {
 }
 
 group = "cl.itstuki.uhc"
-version = "1.0.1"
+version = "1.1.0"
 description = "UHC por episodios totalmente configurable para Paper 26.3."
 
 val minecraftVersion: String by project
 
 repositories {
     maven("https://repo.papermc.io/repository/maven-public/")
+    maven("https://repo.extendedclip.com/releases/")
     mavenCentral()
 }
 
 dependencies {
     compileOnly(libs.paper.api)
+    // Integraciones opcionales: solo se usan si el servidor tiene esos plugins.
+    compileOnly(libs.placeholderapi)
+    compileOnly(libs.luckperms.api)
 }
 
 java {

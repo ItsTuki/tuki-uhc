@@ -5,12 +5,44 @@ description: UHC por episodios totalmente configurable.
 api-version: "26.1"
 authors: [ItsTuki]
 website: https://github.com/ItsTuki/tuki-uhc
+softdepend: [TukiCore, LuckPerms, PlaceholderAPI]
 
 # Los comandos se registran con Brigadier desde el código.
 permissions:
   tukiuhc.admin:
-    description: Organizar partidas (/uhcconfig, /uhcprepare, /uhcstart, /sos, /uhcteam…).
+    description: Todo TukiUHC (incluye cada tukiuhc.command.* y tukiuhc.staff).
     default: op
+    children:
+      tukiuhc.staff: true
+      tukiuhc.command.config: true
+      tukiuhc.command.prepare: true
+      tukiuhc.command.start: true
+      tukiuhc.command.stop: true
+      tukiuhc.command.reset: true
+      tukiuhc.command.reload: true
+      tukiuhc.command.heal: true
+      tukiuhc.command.revive: true
+      tukiuhc.command.give: true
+      tukiuhc.command.team: true
+  tukiuhc.staff:
+    description: "Staff: espía los chats privados y puede entrar a mirar partidas en curso."
+    default: false
+    children:
+      tukiuhc.chat.spy: true
+      tukiuhc.join.spectate: true
+  tukiuhc.command.config: {description: /uhcconfig, default: false}
+  tukiuhc.command.prepare: {description: /uhcprepare, default: false}
+  tukiuhc.command.start: {description: /uhcstart y /uhcforcestart, default: false}
+  tukiuhc.command.stop: {description: /uhcstop, default: false}
+  tukiuhc.command.reset: {description: /sos (/uhcreset), default: false}
+  tukiuhc.command.reload: {description: /uhcreload, default: false}
+  tukiuhc.command.heal: {description: /heal, default: false}
+  tukiuhc.command.revive: {description: /uhcrevive, default: false}
+  tukiuhc.command.give: {description: /uhcgive, default: false}
+  tukiuhc.command.team: {description: /uhcteam, default: false}
+  tukiuhc.chat.spy: {description: Ver los chats de equipo/grupo siendo espectador, default: false}
+  tukiuhc.join.spectate: {description: Entrar como espectador con la partida en curso, default: true}
+  tukiuhc.hub: {description: /uhchub (y /hub /lobby con proxy), default: true}
   tukiuhc.spectator:
     description: No participar en las partidas (queda como espectador).
     default: false

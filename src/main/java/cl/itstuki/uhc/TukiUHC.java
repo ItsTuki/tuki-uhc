@@ -8,7 +8,11 @@ import cl.itstuki.uhc.gui.ChatPrompt;
 import cl.itstuki.uhc.gui.MenuListener;
 import cl.itstuki.uhc.gui.Menus;
 import cl.itstuki.uhc.lang.Lang;
+import cl.itstuki.uhc.hook.Hooks;
 import cl.itstuki.uhc.module.AfkModule;
+import cl.itstuki.uhc.module.AutoStartModule;
+import cl.itstuki.uhc.module.ProxyModule;
+import cl.itstuki.uhc.module.RewardsModule;
 import cl.itstuki.uhc.module.BorderModule;
 import cl.itstuki.uhc.module.ChatModule;
 import cl.itstuki.uhc.module.CompassModule;
@@ -48,6 +52,8 @@ public final class TukiUHC extends JavaPlugin {
     private AfkModule afk;
     private ResurrectionModule resurrection;
     private Menus menus;
+    private Hooks hooks;
+    private ProxyModule proxy;
     private SkinRotationModule skinRotation;
     private LobbyModule lobby;
 
@@ -57,6 +63,8 @@ public final class TukiUHC extends JavaPlugin {
         settings.load(getConfig());
         lang = new Lang(this);
         lang.load(settings.language());
+        hooks = new Hooks(this);
+        lang.playerTags(hooks::tags);
         game = new GameManager(this);
         prompts = new ChatPrompt(this);
         menus = new Menus(this);
@@ -92,6 +100,14 @@ public final class TukiUHC extends JavaPlugin {
         game.register(scoreboard);
         lobby = new LobbyModule(this);
         game.register(lobby);
+        proxy = new ProxyModule(this);
+        game.register(proxy);
+        proxy.registerChannel();
+        game.register(new RewardsModule(this));
+        AutoStartModule autoStart = new AutoStartModule(this);
+        game.register(autoStart);
+        autoStart.startTask();
+        hooks.enable();
         getServer().getScheduler().runTask(this, lobby::setup);
         items.registerRecipes();
         game.startTicker();
@@ -111,6 +127,12 @@ public final class TukiUHC extends JavaPlugin {
         }
         if (items != null) {
             items.unregisterRecipes();
+        }
+        if (hooks != null) {
+            hooks.disable();
+        }
+        if (proxy != null) {
+            proxy.unregisterChannel();
         }
         saveSettings();
         Credits.disableBanner(this);
@@ -149,6 +171,8 @@ public final class TukiUHC extends JavaPlugin {
     public AfkModule afk() { return afk; }
     public ResurrectionModule resurrection() { return resurrection; }
     public Menus menus() { return menus; }
+    public Hooks hooks() { return hooks; }
+    public ProxyModule proxy() { return proxy; }
     public SkinRotationModule skinRotation() { return skinRotation; }
     public LobbyModule lobby() { return lobby; }
 }

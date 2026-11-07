@@ -152,6 +152,10 @@ public final class CopperAgeModule implements UhcModule {
                 continue;
             }
             zone.secondsLeft--;
+            if (zone.secondsLeft <= 0) {
+                it.remove();
+                continue;
+            }
             zone.center.getWorld().spawnParticle(Particle.WAX_ON, zone.center.clone().add(0.5, 1, 0.5), 6, RADIUS / 2.0, 1, RADIUS / 2.0, 0);
             for (Player player : zone.center.getWorld().getPlayers()) {
                 if (!plugin.game().isAlive(player.getUniqueId())

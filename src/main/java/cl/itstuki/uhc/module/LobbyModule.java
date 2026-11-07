@@ -244,7 +244,7 @@ public final class LobbyModule implements UhcModule {
     /** En el lobby el inventario queda limpio; los organizadores reciben el libro de configuración. */
     private void lobbyItems(Player player) {
         player.getInventory().clear();
-        if (player.hasPermission("tukiuhc.admin")) {
+        if (player.hasPermission("tukiuhc.command.config")) {
             player.getInventory().setItem(4, cl.itstuki.uhc.util.Items.of(Material.WRITABLE_BOOK)
                     .name(plugin.lang().item("lobby.book.name")).lore(plugin.lang().itemList("lobby.book.lore"))
                     .glow(true).tag(plugin.key("lobby_book"), "1").build());
@@ -262,7 +262,7 @@ public final class LobbyModule implements UhcModule {
         }
         event.setCancelled(true);
         if (event.getAction().isRightClick() && event.getHand() == org.bukkit.inventory.EquipmentSlot.HAND
-                && event.getPlayer().hasPermission("tukiuhc.admin")) {
+                && event.getPlayer().hasPermission("tukiuhc.command.config")) {
             plugin.menus().openMain(event.getPlayer());
         }
     }
@@ -319,6 +319,34 @@ public final class LobbyModule implements UhcModule {
                 && event.getPlayer().getGameMode() != GameMode.SPECTATOR) {
             event.setTo(state == GameState.LOBBY ? spawn() : resultsSpawn());
         }
+    }
+
+    /** Bloque más alto en (x, z) sin contar el lobby ni la zona de resultados flotantes. */
+    public int groundY(World world, int x, int z) {
+        int y = world.getHighestBlockYAt(x, z);
+        if (!world.equals(world())) {
+            return y;
+        }
+        Location c = center();
+        int below = c.getBlockY() - 3;
+        if (y < below) {
+            return y;
+        }
+        boolean underLobby = false;
+        for (Location zone : List.of(c, resultsCenter())) {
+            if (Math.abs(x + 0.5 - zone.getX()) <= HALF + 2 && Math.abs(z + 0.5 - zone.getZ()) <= HALF + 2) {
+                underLobby = true;
+            }
+        }
+        if (!underLobby) {
+            return y;
+        }
+        for (int yy = below; yy > world.getMinHeight(); yy--) {
+            if (!world.getBlockAt(x, yy, z).getType().isAir()) {
+                return yy;
+            }
+        }
+        return world.getMinHeight();
     }
 
     private boolean inLobby(Location location) {
@@ -426,10 +454,11 @@ public final class LobbyModule implements UhcModule {
     private List<Ranked> ranking() {
         List<Ranked> list = new ArrayList<>();
         long total = plugin.game().totalSeconds();
+        java.util.Set<UUID> winners = java.util.Set.copyOf(plugin.game().lastWinners());
         for (UUID id : plugin.game().participants()) {
             boolean alive = plugin.game().isAlive(id);
             long survived = alive ? total + 1 : plugin.stats().deathSecond(id).orElse(0L);
-            list.add(new Ranked(id, plugin.stats().name(id), alive, survived, plugin.stats().kills(id), plugin.stats().damage(id)));
+            list.add(new Ranked(id, plugin.stats().name(id), winners.contains(id), survived, plugin.stats().kills(id), plugin.stats().damage(id)));
         }
         list.sort(Comparator.comparing(Ranked::winner).reversed()
                 .thenComparing(Comparator.comparingLong(Ranked::survived).reversed())
@@ -533,6 +562,11 @@ public final class LobbyModule implements UhcModule {
         } catch (IOException ex) {
             plugin.getLogger().warning("No se pudo guardar leaderboard.yml: " + ex.getMessage());
         }
+    }
+
+    /** Estadística histórica de un jugador (wins, kills o games) guardada en leaderboard.yml. */
+    public int stat(UUID id, String field) {
+        return board.getInt("players." + id + "." + field, 0);
     }
 
     public @Nullable Location lobbySpawnIfReady() {

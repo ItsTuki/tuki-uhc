@@ -1,6 +1,11 @@
 package cl.itstuki.uhc.game;
 
 import cl.itstuki.uhc.TukiUHC;
+import cl.itstuki.uhc.api.event.UhcEpisodeStartEvent;
+import cl.itstuki.uhc.api.event.UhcGameEndEvent;
+import cl.itstuki.uhc.api.event.UhcPlayerEliminatedEvent;
+import cl.itstuki.uhc.api.event.UhcPrepareEvent;
+import cl.itstuki.uhc.api.event.UhcStartEvent;
 import cl.itstuki.uhc.config.Feature;
 import cl.itstuki.uhc.config.TeamMode;
 import cl.itstuki.uhc.config.UhcMode;
@@ -44,11 +49,22 @@ import org.jspecify.annotations.Nullable;
 public final class GameManager {
     private final TukiUHC plugin;
     private final List<UhcModule> modules = new ArrayList<>();
-    private final Set<UUID> participants = new LinkedHashSet<>();
-    private final Set<UUID> alive = new LinkedHashSet<>();
+    // Concurrentes: el chat (asíncrono) los lee mientras el hilo principal los cambia.
+    private final Set<UUID> participants = java.util.concurrent.ConcurrentHashMap.newKeySet();
+    private final Set<UUID> alive = java.util.concurrent.ConcurrentHashMap.newKeySet();
     private final Map<UUID, Location> spots = new HashMap<>();
     private final Map<UUID, Location> deathLocations = new HashMap<>();
     private final Set<String> eliminatedTeams = new LinkedHashSet<>();
+    private List<UUID> lastWinners = List.of();
+    /** Jugadores ya llevados a su punto de inicio y los que siguen congelados. */
+    private final Set<UUID> scattered = new java.util.HashSet<>();
+    private final Set<UUID> frozen = new java.util.HashSet<>();
+    /** Desconectados en partida: dónde y con qué se fueron (para soltarlo si no vuelven). */
+    private final Map<UUID, Location> offlineAt = new HashMap<>();
+    private final Map<UUID, ItemStack[]> offlineItems = new HashMap<>();
+    private final Set<UUID> offlineEliminated = new java.util.HashSet<>();
+    /** Sube con cada partida: las tareas pendientes de una partida anterior se descartan. */
+    private int matchId;
 
     private GameState state = GameState.LOBBY;
     private int episode;
@@ -108,9 +124,15 @@ public final class GameManager {
         participants.clear();
         alive.clear();
         spots.clear();
+        scattered.clear();
+        frozen.clear();
+        offlineAt.clear();
+        offlineItems.clear();
+        offlineEliminated.clear();
         deathLocations.clear();
         eliminatedTeams.clear();
         plugin.stats().reset();
+        matchId++;
         for (Player player : Bukkit.getOnlinePlayers()) {
             // Juegan todos los conectados salvo el staff con tukiuhc.spectator.
             if (!player.hasPermission("tukiuhc.spectator")) {
@@ -125,6 +147,13 @@ public final class GameManager {
         }
         if (settings().mode() == UhcMode.TROLLS_RATAS && participants.size() < 3) {
             lang().send(sender, "trolls.need-three");
+            participants.clear();
+            alive.clear();
+            return false;
+        }
+        UhcPrepareEvent prepareEvent = new UhcPrepareEvent(java.util.Collections.unmodifiableSet(participants));
+        if (!prepareEvent.callEvent()) {
+            lang().send(sender, "game.prepare-cancelled");
             participants.clear();
             alive.clear();
             return false;
@@ -169,16 +198,14 @@ public final class GameManager {
         List<List<UUID>> groups = scatterGroups();
         pendingScatter = groups.size();
         List<Location> used = new ArrayList<>();
+        int generation = matchId;
         for (List<UUID> group : groups) {
-            findDrySpot(world, used, 0, safe -> {
+            findDrySpot(world, used, 0, generation, safe -> {
                 for (UUID id : group) {
                     spots.put(id, safe);
                     Player player = Bukkit.getPlayer(id);
                     if (player != null) {
-                        resetPlayer(player);
-                        player.teleportAsync(safe);
-                        freeze(player);
-                        player.getInventory().addItem(ItemStack.of(Material.OAK_BOAT));
+                        sendToSpot(player, safe, true);
                     }
                 }
                 pendingScatter--;
@@ -189,6 +216,89 @@ public final class GameManager {
             });
         }
         return true;
+    }
+
+    /** Limpia al jugador, lo lleva a su punto de inicio y (antes de empezar) lo congela. */
+    private void sendToSpot(Player player, Location spot, boolean freeze) {
+        resetPlayer(player);
+        player.teleportAsync(spot);
+        scattered.add(player.getUniqueId());
+        if (freeze) {
+            freeze(player);
+            frozen.add(player.getUniqueId());
+        }
+        player.getInventory().addItem(ItemStack.of(Material.OAK_BOAT));
+    }
+
+    /**
+     * Un participante vivo volvió a entrar: si no alcanzó a ser repartido se le lleva a su punto;
+     * si la partida ya empezó y seguía congelado, se le descongela.
+     */
+    public void handleRejoin(Player player) {
+        UUID id = player.getUniqueId();
+        if (!alive.contains(id) || state == GameState.LOBBY || state == GameState.ENDED) {
+            return;
+        }
+        offlineAt.remove(id);
+        offlineItems.remove(id);
+        Location spot = spots.get(id);
+        if (!scattered.contains(id) && spot != null) {
+            sendToSpot(player, spot, state != GameState.PLAYING);
+            if (state == GameState.PLAYING) {
+                player.setHealth(player.getAttribute(Attribute.MAX_HEALTH).getValue());
+            }
+        } else if (state == GameState.PLAYING && frozen.remove(id)) {
+            unfreeze(player);
+        }
+    }
+
+    /** Un eliminado mientras estaba desconectado vuelve: sus cosas ya se soltaron. */
+    public boolean consumeOfflineElimination(UUID id) {
+        return offlineEliminated.remove(id);
+    }
+
+    /** Un participante vivo se desconectó con la partida en curso. */
+    public void handleQuit(Player player) {
+        UUID id = player.getUniqueId();
+        if (state != GameState.PLAYING || !alive.contains(id)) {
+            return;
+        }
+        offlineAt.put(id, player.getLocation().clone());
+        offlineItems.put(id, player.getInventory().getContents().clone());
+        scheduleOfflineElimination(id);
+    }
+
+    private void scheduleOfflineElimination(UUID id) {
+        int minutes = plugin.getConfig().getInt("death.offline-elimination-minutes", 10);
+        if (minutes <= 0) {
+            return;
+        }
+        int generation = matchId;
+        Bukkit.getScheduler().runTaskLater(plugin, () -> {
+            if (generation != matchId || state != GameState.PLAYING || !alive.contains(id) || Bukkit.getPlayer(id) != null) {
+                return;
+            }
+            Location where = offlineAt.remove(id);
+            if (where == null) {
+                where = spots.getOrDefault(id, mainWorld().getSpawnLocation());
+            }
+            ItemStack[] items = offlineItems.remove(id);
+            if (items != null) {
+                for (ItemStack item : items) {
+                    if (item != null && !item.getType().isAir()) {
+                        where.getWorld().dropItemNaturally(where, item);
+                    }
+                }
+            }
+            offlineEliminated.add(id);
+            lang().broadcast("game.offline-eliminated", Lang.p("player", plugin.stats().name(id)), Lang.p("minutes", minutes));
+            eliminate(id, plugin.stats().name(id), null, where);
+        }, 20L * 60 * minutes);
+    }
+
+    /** Altura del suelo en (x, z) sin contar el lobby flotante. */
+    public int groundY(World world, int x, int z) {
+        return plugin.lobby().groundY(world, x, z);
     }
 
     private List<List<UUID>> scatterGroups() {
@@ -237,14 +347,20 @@ public final class GameManager {
             Material.LILY_PAD);
 
     /** Busca un punto en tierra firme (no océano ni lava). Tras 12 intentos usa el último y le pone una plataforma. */
-    private void findDrySpot(World world, List<Location> used, int attempt, Consumer<Location> done) {
+    private void findDrySpot(World world, List<Location> used, int attempt, int generation, Consumer<Location> done) {
         Location spot = randomSpot(world, used);
+        // Se reserva ya: todos los grupos piden su punto en el mismo tick, antes de que carguen los chunks.
+        used.add(spot);
         world.getChunkAtAsync(spot.getBlockX() >> 4, spot.getBlockZ() >> 4).thenAccept(chunk -> {
-            Block top = world.getHighestBlockAt(spot.getBlockX(), spot.getBlockZ());
+            if (generation != matchId || state != GameState.SCATTERING) {
+                return; // La partida se detuvo (/uhcstop, /sos) mientras se cargaba el chunk.
+            }
+            Block top = world.getBlockAt(spot.getBlockX(), groundY(world, spot.getBlockX(), spot.getBlockZ()), spot.getBlockZ());
             boolean wet = WET.contains(top.getType()) || top.isLiquid()
                     || (top.getBlockData() instanceof org.bukkit.block.data.Waterlogged w && w.isWaterlogged());
             if (wet && attempt < 12) {
-                findDrySpot(world, used, attempt + 1, done);
+                used.remove(spot);
+                findDrySpot(world, used, attempt + 1, generation, done);
                 return;
             }
             if (wet) {
@@ -255,15 +371,13 @@ public final class GameManager {
                     }
                 }
             }
-            Location safe = safeLocation(spot);
-            used.add(safe);
-            done.accept(safe);
+            done.accept(safeLocation(spot));
         });
     }
 
-    private static Location safeLocation(Location spot) {
+    private Location safeLocation(Location spot) {
         World world = spot.getWorld();
-        Block top = world.getHighestBlockAt(spot.getBlockX(), spot.getBlockZ());
+        Block top = world.getBlockAt(spot.getBlockX(), groundY(world, spot.getBlockX(), spot.getBlockZ()), spot.getBlockZ());
         if (top.getType() == Material.LAVA || top.getType() == Material.MAGMA_BLOCK) {
             top.setType(Material.STONE);
         }
@@ -347,14 +461,27 @@ public final class GameManager {
             Player player = Bukkit.getPlayer(id);
             if (player != null) {
                 unfreeze(player);
+                frozen.remove(id);
                 player.setHealth(player.getAttribute(Attribute.MAX_HEALTH).getValue());
                 player.playSound(player.getLocation(), Sound.ENTITY_ENDER_DRAGON_GROWL, 0.7f, 1.2f);
+            } else if (alive.contains(id)) {
+                scheduleOfflineElimination(id); // Se fue antes de empezar.
+            }
+        }
+        // El lobby desaparece al empezar: el staff que no juega pasa a espectador sobre el mapa.
+        Location watch = spots.values().stream().findFirst()
+                .orElseGet(() -> new Location(mainWorld(), 0.5, groundY(mainWorld(), 0, 0) + 1, 0.5));
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            if (!participants.contains(player.getUniqueId()) && player.getGameMode() != GameMode.CREATIVE) {
+                player.setGameMode(GameMode.SPECTATOR);
+                player.teleportAsync(watch.clone().add(0, 10, 0));
             }
         }
         Bukkit.getServer().showTitle(Title.title(lang().get("game.started-title"), lang().get("game.started-subtitle"),
                 Title.Times.times(Duration.ofMillis(200), Duration.ofSeconds(3), Duration.ofSeconds(1))));
         lang().broadcast("game.started");
         each(UhcModule::onStart);
+        new UhcStartEvent(java.util.Collections.unmodifiableSet(participants)).callEvent();
         startEpisode(1);
     }
 
@@ -458,6 +585,7 @@ public final class GameManager {
             lang().broadcast("game.pvp-enabled");
         }
         each(module -> module.onEpisodeStart(number));
+        new UhcEpisodeStartEvent(number, pvpAllowed()).callEvent();
     }
 
     // ── Reglas ───────────────────────────────────────────────
@@ -484,21 +612,31 @@ public final class GameManager {
     // ── Eliminaciones ────────────────────────────────────────
 
     public void eliminate(Player player, @Nullable Player killer, Location where) {
-        UUID id = player.getUniqueId();
+        eliminate(player.getUniqueId(), player.getName(), killer, where);
+    }
+
+    /** Clave única de un lado (equipo o jugador suelto): los nombres de equipo se pueden repetir. */
+    private String sideKey(UUID id) {
+        Party team = plugin.teams().team(id);
+        return team != null ? "t" + team.id() : "p" + id;
+    }
+
+    public void eliminate(UUID id, String playerName, @Nullable Player killer, Location where) {
         if (!alive.remove(id)) {
             return;
         }
         deathLocations.put(id, where.clone());
         plugin.stats().death(id, totalSeconds);
-        if (killer != null && !killer.equals(player)) {
+        if (killer != null && !killer.getUniqueId().equals(id)) {
             Party killerTeam = plugin.teams().team(killer.getUniqueId());
-            plugin.stats().addKill(killer.getUniqueId(), killerTeam != null ? killerTeam.name() : killer.getName());
+            plugin.stats().addKill(killer.getUniqueId(), sideKey(killer.getUniqueId()),
+                    killerTeam != null ? killerTeam.name() : killer.getName());
         }
         Party team = plugin.teams().team(id);
         boolean teamWiped = team == null || team.members().stream().noneMatch(alive::contains);
         if (teamWiped) {
-            String name = team != null ? team.name() : player.getName();
-            if (eliminatedTeams.add(name)) {
+            String name = team != null ? team.name() : playerName;
+            if (eliminatedTeams.add(sideKey(id))) {
                 plugin.stats().teamEliminated(name, totalSeconds);
                 if (team != null) {
                     lang().broadcast("game.team-eliminated", Lang.p("team", name));
@@ -506,6 +644,7 @@ public final class GameManager {
             }
         }
         each(module -> module.onEliminate(id, killer));
+        new UhcPlayerEliminatedEvent(id, killer, alive.size()).callEvent();
         Bukkit.getScheduler().runTask(plugin, this::checkWin);
     }
 
@@ -516,8 +655,7 @@ public final class GameManager {
             return false;
         }
         alive.add(id);
-        Party team = plugin.teams().team(id);
-        eliminatedTeams.remove(team != null ? team.name() : player.getName());
+        eliminatedTeams.remove(sideKey(id));
         player.setGameMode(GameMode.SURVIVAL);
         player.teleport(where);
         AttributeInstance max = player.getAttribute(Attribute.MAX_HEALTH);
@@ -566,6 +704,7 @@ public final class GameManager {
         state = GameState.ENDED;
         restLeft = 0;
         List<UUID> winnerList = List.copyOf(winners);
+        lastWinners = winnerList;
         String winnerNames = winnerList.isEmpty() ? lang().raw("game.nobody")
                 : String.join(", ", winnerList.stream().map(plugin.stats()::name).toList());
         Party winnerTeam = winnerList.isEmpty() ? null : plugin.teams().team(winnerList.getFirst());
@@ -590,6 +729,7 @@ public final class GameManager {
             }
         }
         each(UhcModule::onEnd);
+        new UhcGameEndEvent(winnerList, totalSeconds).callEvent();
     }
 
     /** Deja todo como en el lobby. */
@@ -601,14 +741,18 @@ public final class GameManager {
         episodeSecond = 0;
         totalSeconds = 0;
         each(UhcModule::onReset);
+        matchId++;
         for (World world : Bukkit.getWorlds()) {
             world.setGameRule(GameRules.NATURAL_HEALTH_REGENERATION, true);
             world.setGameRule(GameRules.LOCATOR_BAR, true);
         }
+        mainWorld().setGameRule(GameRules.IMMEDIATE_RESPAWN, false);
         if (previous != GameState.LOBBY) {
             for (Player player : Bukkit.getOnlinePlayers()) {
-                if (participants.contains(player.getUniqueId())) {
-                    unfreeze(player);
+                if (participants.contains(player.getUniqueId()) && player.getGameMode() != GameMode.CREATIVE) {
+                    // Vuelven sin restos de la partida (vida extra, efectos, ítems).
+                    resetPlayer(player);
+                } else if (player.getGameMode() == GameMode.SPECTATOR) {
                     player.setGameMode(GameMode.SURVIVAL);
                 }
             }
@@ -616,9 +760,18 @@ public final class GameManager {
         participants.clear();
         alive.clear();
         spots.clear();
+        scattered.clear();
+        frozen.clear();
+        offlineAt.clear();
+        offlineItems.clear();
     }
 
     // ── Consultas ────────────────────────────────────────────
+
+    /** Ganadores de la última partida terminada (vacío si no hubo). */
+    public List<UUID> lastWinners() {
+        return lastWinners;
+    }
 
     public GameState state() {
         return state;

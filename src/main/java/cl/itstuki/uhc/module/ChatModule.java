@@ -33,6 +33,9 @@ public final class ChatModule implements UhcModule {
         Player sender = event.getPlayer();
         String plain = PlainTextComponentSerializer.plainText().serialize(event.message());
         Channel channel = channel(sender, plain);
+        if (channel == Channel.GLOBAL && !plugin.game().inGame() && plugin.hooks().tukiCore()) {
+            return; // En el lobby el chat lo formatea TukiCore.
+        }
         Component message = event.message();
         if (channel == Channel.GLOBAL && plain.startsWith("!") || channel == Channel.GROUP || channel == Channel.RATS) {
             message = strip(message);
@@ -47,15 +50,20 @@ public final class ChatModule implements UhcModule {
             case RATS -> p -> plugin.trolls().isRat(p.getUniqueId());
             case DEAD -> p -> !plugin.game().isAlive(p.getUniqueId());
         };
-        event.viewers().removeIf(audience -> audience instanceof Player player && !canSee.test(player));
+        // El staff que no está jugando (espectadores con tukiuhc.chat.spy) ve todos los canales privados.
+        Predicate<Player> spy = p -> channel != Channel.GLOBAL && p.hasPermission("tukiuhc.chat.spy")
+                && !plugin.game().isAlive(p.getUniqueId());
+        event.viewers().removeIf(audience -> audience instanceof Player player && !canSee.test(player) && !spy.test(player));
 
         String formatKey = "chat." + channel.name().toLowerCase(java.util.Locale.ROOT);
         Component teamTag = team != null ? Component.text(team.name(), team.color()) : Component.empty();
         Component groupTag = group != null ? Component.text(group.name(), group.color()) : Component.empty();
         Component finalMessage = message;
         event.message(finalMessage);
+        net.kyori.adventure.text.minimessage.tag.resolver.TagResolver senderTags = plugin.hooks().tags(sender);
         event.renderer(ChatRenderer.viewerUnaware((source, displayName, msg) -> plugin.lang().get(formatKey,
-                Lang.c("player", displayName), Lang.c("message", msg), Lang.c("team", teamTag), Lang.c("group", groupTag))));
+                Lang.c("player", displayName), Lang.c("message", msg), Lang.c("team", teamTag), Lang.c("group", groupTag),
+                senderTags)));
     }
 
     private Channel channel(Player sender, String plain) {

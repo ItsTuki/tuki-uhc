@@ -32,6 +32,7 @@ import org.bukkit.scoreboard.Team;
 
 /** Scoreboard lateral, vida en el tabulador, colores de equipo y cabecera/pie del tab. Sin dependencias. */
 public final class ScoreboardModule implements UhcModule {
+    private final java.util.Set<java.util.UUID> tabManaged = new java.util.HashSet<>();
     private static final int MAX_LINES = 15;
     private final TukiUHC plugin;
     private final Map<UUID, Scoreboard> boards = new HashMap<>();
@@ -52,7 +53,7 @@ public final class ScoreboardModule implements UhcModule {
     private void updateAll() {
         for (Player player : Bukkit.getOnlinePlayers()) {
             try {
-                update(player);
+                plugin.lang().asViewer(player, () -> update(player));
             } catch (RuntimeException ex) {
                 plugin.getLogger().warning("Scoreboard: " + ex.getMessage());
             }
@@ -70,7 +71,10 @@ public final class ScoreboardModule implements UhcModule {
             sidebar.setDisplaySlot(DisplaySlot.SIDEBAR);
             sidebar.numberFormat(NumberFormat.blank());
         }
-        sidebar.displayName(plugin.lang().get("scoreboard.title", Lang.p("name", plugin.settings().matchName())));
+        Component title = plugin.lang().get("scoreboard.title", Lang.p("name", plugin.settings().matchName()));
+        if (!title.equals(sidebar.displayName())) {
+            sidebar.displayName(title);
+        }
         Objective health = board.getObjective("hp");
         if (health == null) {
             health = board.registerNewObjective("hp", Criteria.HEALTH, Component.text("❤", NamedTextColor.RED), RenderType.HEARTS);
@@ -82,8 +86,12 @@ public final class ScoreboardModule implements UhcModule {
             String entry = "l" + (i < 10 ? "0" : "") + i;
             if (i < lines.size()) {
                 var score = sidebar.getScore(entry);
-                score.setScore(MAX_LINES - i);
-                score.customName(lines.get(i));
+                if (!score.isScoreSet() || score.getScore() != MAX_LINES - i) {
+                    score.setScore(MAX_LINES - i);
+                }
+                if (!lines.get(i).equals(score.customName())) {
+                    score.customName(lines.get(i));
+                }
             } else {
                 board.resetScores(entry);
             }
@@ -112,6 +120,7 @@ public final class ScoreboardModule implements UhcModule {
             addTeamsSummary(lines, player);
             lines.add(Component.empty());
             lines.add(lang.get("scoreboard.waiting"));
+            addFooter(lines, player);
             return lines;
         }
         if (state == GameState.SCATTERING || state == GameState.PREPARED || state == GameState.STARTING) {
@@ -173,11 +182,24 @@ public final class ScoreboardModule implements UhcModule {
             lines.add(lang.get("scoreboard.role", Lang.c("role", role == null ? lang.get("trolls.role-pending")
                     : lang.get("trolls.role." + role.name().toLowerCase(java.util.Locale.ROOT) + ".name"))));
         }
-        if (plugin.settings().mode() != UhcMode.SOLITARIOS && lines.size() < MAX_LINES - 2) {
+        List<String> footer = lang.rawList("scoreboard.footer");
+        if (plugin.settings().mode() != UhcMode.SOLITARIOS && lines.size() < MAX_LINES - 2 - footer.size()) {
             lines.add(Component.empty());
             addTeamsSummary(lines, player);
         }
+        addFooter(lines, player);
         return lines.size() > MAX_LINES ? lines.subList(0, MAX_LINES) : lines;
+    }
+
+    /** Líneas fijas al final del scoreboard (scoreboard.footer en lang/*.yml), con <rank> y <papi:...>. */
+    private void addFooter(List<Component> lines, Player player) {
+        List<String> footer = plugin.lang().rawList("scoreboard.footer");
+        if (footer.isEmpty() || lines.size() + footer.size() > MAX_LINES) {
+            return;
+        }
+        for (String line : footer) {
+            lines.add(plugin.lang().format(line, player));
+        }
     }
 
     /** Hasta 4 equipos con sus jugadores vivos (en el lobby: los inscritos). */
@@ -271,11 +293,24 @@ public final class ScoreboardModule implements UhcModule {
             if (team == null) {
                 team = board.registerNewTeam(spec.id());
             }
-            team.color(spec.color());
-            team.prefix(spec.prefix());
-            team.setAllowFriendlyFire(friendlyFire);
-            team.setCanSeeFriendlyInvisibles(true);
-            team.setOption(Team.Option.NAME_TAG_VISIBILITY, spec.nametag());
+            // uhct_known/uhct_hidden agrupan a jugadores sin equipo solo para el nombre: entre ellos sí hay PvP.
+            boolean ff = friendlyFire || spec.id().startsWith("uhct_");
+            // Cada setter manda un paquete: solo se cambia lo que cambió.
+            if (!team.hasColor() || team.color() != spec.color()) {
+                team.color(spec.color());
+            }
+            if (!spec.prefix().equals(team.prefix())) {
+                team.prefix(spec.prefix());
+            }
+            if (team.allowFriendlyFire() != ff) {
+                team.setAllowFriendlyFire(ff);
+            }
+            if (!team.canSeeFriendlyInvisibles()) {
+                team.setCanSeeFriendlyInvisibles(true);
+            }
+            if (team.getOption(Team.Option.NAME_TAG_VISIBILITY) != spec.nametag()) {
+                team.setOption(Team.Option.NAME_TAG_VISIBILITY, spec.nametag());
+            }
         }
         for (Team team : Set.copyOf(board.getTeams())) {
             if (!team.getName().startsWith("uhct_") && !team.getName().startsWith("uhc_")) {
@@ -319,8 +354,14 @@ public final class ScoreboardModule implements UhcModule {
                 lang.get("tab.footer", Lang.p("alive", plugin.game().alive().size()), Lang.p("episode", plugin.game().episode()),
                         Lang.p("time", Format.time(plugin.game().totalSeconds()))));
         Component wanted = tabName(player);
-        if (!java.util.Objects.equals(player.playerListName(), wanted == null ? Component.text(player.getName()) : wanted)) {
-            player.playerListName(wanted);
+        if (wanted != null) {
+            tabManaged.add(player.getUniqueId());
+            if (!wanted.equals(player.playerListName())) {
+                player.playerListName(wanted);
+            }
+        } else if (tabManaged.remove(player.getUniqueId())) {
+            // Solo se limpia lo que puso TukiUHC: así no se pisa el nombre que ponga otro plugin (TukiCore).
+            player.playerListName(null);
         }
         for (Player other : Bukkit.getOnlinePlayers()) {
             if (!player.isListed(other)) {
@@ -332,8 +373,18 @@ public final class ScoreboardModule implements UhcModule {
     private @org.jspecify.annotations.Nullable Component tabName(Player player) {
         boolean hide = SkinRotationModule.hidingNames() && plugin.game().isRunning();
         boolean revealed = plugin.skinRotation().isRevealed(player.getUniqueId());
-        return hide && !revealed && plugin.game().isParticipant(player.getUniqueId())
-                ? plugin.lang().get("skins.hidden-name") : null;
+        if (hide && !revealed && plugin.game().isParticipant(player.getUniqueId())) {
+            return plugin.lang().get("skins.hidden-name");
+        }
+        // Fuera de la partida, el tab muestra el rango de LuckPerms (en partida mandan los colores de equipo).
+        // Con TukiCore el tab del lobby es suyo.
+        if (!plugin.hooks().tukiCore() && plugin.hooks().hasRanks() && !plugin.game().isRunning()
+                && plugin.getConfig().getBoolean("luckperms.tab-prefix", true)) {
+            return cl.itstuki.uhc.hook.Hooks.legacy(plugin.hooks().ranks().prefix(player))
+                    .append(Component.text(player.getName(), NamedTextColor.WHITE))
+                    .append(cl.itstuki.uhc.hook.Hooks.legacy(plugin.hooks().ranks().suffix(player)));
+        }
+        return null;
     }
 
     /**
@@ -343,9 +394,12 @@ public final class ScoreboardModule implements UhcModule {
     public void forceTabRefresh() {
         for (Player player : Bukkit.getOnlinePlayers()) {
             Component wanted = tabName(player);
+            Component previous = player.playerListName();
             player.playerListName(null);
-            if (wanted != null) {
-                player.playerListName(wanted);
+            // Se vuelve a mandar lo que había (el de TukiUHC o el de otro plugin, como el rango de TukiCore).
+            Component restore = wanted != null ? wanted : previous;
+            if (!restore.equals(Component.text(player.getName()))) {
+                player.playerListName(restore);
             }
         }
         for (Player viewer : Bukkit.getOnlinePlayers()) {

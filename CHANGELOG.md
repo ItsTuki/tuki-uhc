@@ -1,5 +1,35 @@
 # Changelog
 
+## 1.1.0 — 2026-11-07
+
+TukiUHC queda solo para el UHC; la parte administrativa (rangos, chat, moderación) pasa a **TukiCore**, que es compatible.
+
+### Nuevo
+- Compatibilidad con **TukiCore**: prefijos de rango en el chat de la partida; en el lobby el chat y el tab son de TukiCore.
+- **PlaceholderAPI**: `%tukiuhc_...%` y `<papi:nombre>` en los textos. Pie del scoreboard configurable (`scoreboard.footer`).
+- **LuckPerms** (sin TukiCore): prefijos en chat y tab del lobby.
+- **BungeeCord/Velocity**: `/uhchub` (`/hub`, `/lobby`), envío al lobby al terminar con reinicio o apagado automático, bloqueo de entradas tardías y MOTD con el estado.
+- **Inicio automático** con mínimo de jugadores y cuenta atrás.
+- **Recompensas** con comandos de consola (ganar, kill, eliminado, participación).
+- **API**: eventos de preparación (cancelable), inicio, nueva parte, eliminación y final.
+- Permisos por comando (`tukiuhc.command.*`), `tukiuhc.staff` con espía de chats y `/uhcreload`.
+- Eliminación de jugadores desconectados después de `death.offline-elimination-minutes` (sus ítems caen donde se fueron).
+
+### Correcciones
+- Quien se reconectaba durante la cuenta atrás quedaba congelado e inmortal para siempre; quien no estaba al repartir ahora va a su punto al volver.
+- `/afk` daba inmunidad permanente en partida; ahora solo funciona en el descanso y se quita al pegar o al empezar la parte.
+- Con rotación de skins, los jugadores sin equipo ya revelados no se podían golpear entre sí.
+- El staff con `tukiuhc.spectator` caía del lobby y moría en bucle; ahora pasa a espectador sobre el mapa.
+- Detener la partida mientras se repartía dejaba tareas pendientes que teletransportaban y congelaban a los jugadores.
+- Las victorias se contaban para todos los vivos (dragón, Resource Rush, /uhcstop); ahora solo para los ganadores.
+- Los equipos podían aparecer juntos: la distancia mínima entre puntos de inicio no se respetaba.
+- Equipos con el mismo nombre se mezclaban en eliminaciones y estadísticas.
+- El portal del modo Dragón (y los puntos de espera) se construían sobre el techo del lobby.
+- La zona de la Era del Cobre nunca se acababa; el Crafter ignoraba las recetas desactivadas; Trolls y Ratas sin equipos no repartía roles.
+- Al reiniciar se restauran la regla de reaparición inmediata y la vida/efectos de la partida anterior.
+- El scoreboard ya no reenvía cada segundo datos que no cambiaron (menos paquetes con muchos equipos).
+- Lectura segura de equipos y vivos desde el chat (asíncrono).
+
 ## 1.0.1 — 2026-11-07
 
 Parche con las correcciones y mejoras tras las primeras pruebas.

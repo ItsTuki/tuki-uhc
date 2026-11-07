@@ -33,6 +33,11 @@ public final class AfkModule implements UhcModule {
             clear(player, true);
             return;
         }
+        // Jugando solo se puede en el descanso entre partes (se quita al empezar la siguiente).
+        if (plugin.game().inGame() && plugin.game().isAlive(player.getUniqueId()) && plugin.game().restLeft() <= 0) {
+            plugin.lang().send(player, "commands.afk-running");
+            return;
+        }
         player.setInvulnerable(true);
         player.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, PotionEffect.INFINITE_DURATION, 0, false, false));
         TextDisplay label = player.getWorld().spawn(player.getLocation().add(0, 2.3, 0), TextDisplay.class, display -> {
@@ -70,6 +75,25 @@ public final class AfkModule implements UhcModule {
     public void onQuit(PlayerQuitEvent event) {
         if (afk.containsKey(event.getPlayer().getUniqueId())) {
             clear(event.getPlayer(), false);
+        }
+    }
+
+    @Override
+    public void onEpisodeStart(int episode) {
+        for (UUID id : Map.copyOf(afk).keySet()) {
+            Player player = Bukkit.getPlayer(id);
+            if (player != null && plugin.game().isAlive(id)) {
+                clear(player, true);
+            }
+        }
+    }
+
+    @EventHandler(ignoreCancelled = true)
+    public void onHit(org.bukkit.event.entity.EntityDamageByEntityEvent event) {
+        Player attacker = event.getDamager() instanceof Player p ? p
+                : event.getDamager() instanceof org.bukkit.entity.Projectile proj && proj.getShooter() instanceof Player p ? p : null;
+        if (attacker != null && afk.containsKey(attacker.getUniqueId())) {
+            clear(attacker, true);
         }
     }
 

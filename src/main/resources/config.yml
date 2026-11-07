@@ -69,6 +69,9 @@ lobby:
   results-delay: 8
 
 death:
+  # Minutos que un jugador vivo puede estar desconectado antes de quedar eliminado (0 = nunca).
+  # Sus ítems caen donde se desconectó.
+  offline-elimination-minutes: 10
   # Bloque que sostiene la pica con la cabeza del jugador muerto (material: peso).
   pike-blocks:
     CRAFTING_TABLE: 20
@@ -81,3 +84,53 @@ death:
     ENCHANTING_TABLE: 4
     TNT: 6
     DIAMOND_BLOCK: 1
+
+# ───────────────────────── Network / core ─────────────────────────
+
+proxy:
+  # Actívalo si el servidor está detrás de BungeeCord o Velocity (canal "BungeeCord").
+  enabled: false
+  # Servidor del proxy al que se manda a los jugadores (/uhchub y al terminar).
+  lobby-server: lobby
+  # Registrar /hub y /lobby como alias de /uhchub (requiere reiniciar).
+  hub-aliases: true
+  # Al terminar la partida, enviar a todos al lobby de la network.
+  send-to-lobby-on-end: true
+  # Segundos extra (después de results-delay) antes de enviarlos.
+  end-delay: 30
+  # Qué hace el servidor después de vaciarse: RESET (nueva partida), SHUTDOWN (apagar, para servidores
+  # que se reinician solos) o NONE.
+  end-action: RESET
+  # Con la partida en curso, mandar al lobby a quien entra (salvo tukiuhc.join.spectate, que entra a mirar).
+  block-late-joins: false
+
+# MOTD de la lista de servidores según el estado (textos en lang/*.yml, sección motd).
+motd:
+  enabled: true
+
+# Inicio automático cuando hay suficientes jugadores (ideal para servidores de la network).
+autostart:
+  enabled: false
+  min-players: 4
+  # Segundos de cuenta atrás (se cancela si bajan los jugadores).
+  countdown: 60
+
+# Comandos de consola como recompensa (economía, puntos, etc.).
+# Variables: {player} {killer} {victim} {kills} {team} {match}
+rewards:
+  enabled: true
+  # Partidas más cortas que esto no dan premios (evita farmear).
+  min-match-seconds: 60
+  win: []
+  #  - "economy give {player} gold-coin 5"
+  kill: []
+  #  - "economy give {killer} gold-coin 1"
+  eliminated: []
+  participation: []
+  #  - "economy give {player} gold-coin 1"
+
+# Rangos: con TukiCore (recomendado) o LuckPerms instalados, sus prefijos salen en el chat y en lang/*.yml
+# como <rank>. Los rangos se crean y editan desde TukiCore (/rank) o LuckPerms.
+luckperms:
+  # Sin TukiCore: mostrar el prefijo de LuckPerms en el tab fuera de la partida.
+  tab-prefix: true
