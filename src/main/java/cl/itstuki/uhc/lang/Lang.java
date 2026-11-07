@@ -34,6 +34,21 @@ public final class Lang {
         this.code = LANGUAGES.contains(language) ? language : "es";
         for (String lang : LANGUAGES) {
             File file = new File(plugin.getDataFolder(), "lang/" + lang + ".yml");
+            if (file.exists()) {
+                // Si el archivo es de una versión anterior se respalda y se reemplaza por el nuevo.
+                YamlConfiguration current = YamlConfiguration.loadConfiguration(file);
+                YamlConfiguration bundled = resource(lang);
+                int bundledVersion = bundled == null ? 0 : bundled.getInt("lang-version", 0);
+                if (current.getInt("lang-version", 0) < bundledVersion) {
+                    File backup = new File(file.getParentFile(), lang + ".yml.old");
+                    if (backup.exists()) {
+                        backup.delete();
+                    }
+                    if (file.renameTo(backup)) {
+                        plugin.getLogger().info("lang/" + lang + ".yml actualizado (copia anterior en " + backup.getName() + ")");
+                    }
+                }
+            }
             if (!file.exists()) {
                 plugin.saveResource("lang/" + lang + ".yml", false);
             }

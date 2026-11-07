@@ -1,5 +1,7 @@
 # TukiUHC — textos en español (formato MiniMessage: https://docs.advntr.dev/minimessage/format)
 # <prefix> inserta el prefijo. Deja un texto en "" para no enviarlo.
+# No cambies este número: el plugin lo usa para actualizar el archivo.
+lang-version: 2
 prefix: "<dark_gray>[<gradient:#FF5555:#FFAA00><bold>UHC</bold></gradient><dark_gray>]</dark_gray> <gold>»</gold> "
 
 phase:
@@ -507,9 +509,9 @@ menu:
 lobby:
   creator-title: "<gradient:#FF5555:#FFAA00><bold>TukiUHC</bold></gradient><newline><gray>Creado por <gradient:#55FFFF:#5555FF><bold><player></bold></gradient>"
   creator-description: "<aqua>Creador de TukiUHC"
-  creator-click: "<prefix><gray>TukiUHC es de código abierto: <aqua><click:open_url:'<url>'><u>ver en GitHub</u></click>"
+  creator-click: "<prefix><gray>TukiUHC es de código abierto: <link>"
+  creator-link: "<aqua><u>ver en GitHub</u>"
   welcome: "<gold><bold>¡Bienvenido!</bold><newline><gray>Espera a que el organizador<newline><gray>inicie la partida.<newline><dark_gray>/uhchelp para ver la ayuda"
-  results-waiting: "<gold><bold>Resultados</bold><newline><gray>Aquí aparecerán los tops<newline><gray>al terminar la partida."
   results-teleport: "<prefix><gold>¡Mira los resultados y los tops en el podio!"
   results-title: "<gold><bold><match></bold><newline><yellow>★ Ganador: <white><winner></white><newline><gray>Duración: <white><time>"
   top-kills-title: "<red><bold>⚔ Top kills de la partida"

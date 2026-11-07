@@ -21,8 +21,8 @@ Plugin de **UHC por episodios** para servidores **Paper 26.3** (Java 25), totalm
 ## Lobby y resultados
 
 - Al entrar al servidor todos aparecen en un **mini lobby flotante** (sobre 0 0, a altura 300) con un **maniquí de ItsTuki** con su skin. No se puede romper ni recibir daño.
-- Al terminar la partida, a los 8 segundos todos pasan a la **zona de resultados**: podio de oro, hierro y cobre con maniquíes de los 3 mejores jugadores, **top de kills y de supervivencia** de la partida, y **tops históricos** de victorias y kills (guardados en `leaderboard.yml`).
-- `/sos` devuelve a todos al lobby. Posición, mundo, usuario del maniquí y demora se cambian en `config.yml` → `lobby`.
+- Al terminar la partida, a los 8 segundos se construye la **zona de resultados** (no existe antes, así que no se ve desde el lobby) y todos pasan a ella: podio de oro, hierro y cobre con maniquíes de los 3 mejores jugadores, **top de kills y de supervivencia** de la partida, y **tops históricos** de victorias y kills (guardados en `leaderboard.yml`).
+- `/sos` devuelve a todos al lobby y desmonta la zona de resultados. Posición, mundo, usuario del maniquí y demora se cambian en `config.yml` → `lobby`.
 
 ## Mecánicas fijas
 

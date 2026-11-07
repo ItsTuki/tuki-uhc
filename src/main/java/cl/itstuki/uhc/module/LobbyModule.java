@@ -109,10 +109,9 @@ public final class LobbyModule implements UhcModule {
             }
         }
         buildPlatform(c, Material.POLISHED_BLACKSTONE_BRICKS, Material.GOLD_BLOCK);
-        buildPlatform(r, Material.QUARTZ_BRICKS, Material.DIAMOND_BLOCK);
-        buildPodium(r);
         clearEntities(TAG);
-        clearEntities(RESULTS_TAG);
+        // La zona de resultados solo existe al terminar una partida.
+        demolishResults();
 
         String creator = plugin.getConfig().getString("lobby.mannequin", "ItsTuki");
         Location statue = c.clone().add(0, 1, HALF - 4);
@@ -120,7 +119,6 @@ public final class LobbyModule implements UhcModule {
         mannequin(statue, creator, plugin.lang().get("lobby.creator-description"), TAG);
         hologram(statue.clone().add(0, 2.9, 0), plugin.lang().get("lobby.creator-title", Lang.p("player", creator)), TAG, 1.6f);
         hologram(c.clone().add(0, 3.2, -HALF + 6), plugin.lang().get("lobby.welcome"), TAG, 1.2f);
-        hologram(resultsCenter().add(0, 4.5, -HALF + 6), plugin.lang().get("lobby.results-waiting"), RESULTS_TAG, 1.2f);
         world().setSpawnLocation(spawn());
         ready = true;
         for (Player player : Bukkit.getOnlinePlayers()) {
@@ -152,6 +150,22 @@ public final class LobbyModule implements UhcModule {
                     }
                 }
                 world.getBlockAt(x0 + dx, y0 + 7, z0 + dz).setType(Material.BARRIER, false);
+            }
+        }
+    }
+
+    private void demolishResults() {
+        clearEntities(RESULTS_TAG);
+        Location r = resultsCenter();
+        World world = r.getWorld();
+        for (int dx = -HALF; dx <= HALF; dx++) {
+            for (int dz = -HALF; dz <= HALF; dz++) {
+                for (int dy = -1; dy <= 7; dy++) {
+                    Block block = world.getBlockAt(r.getBlockX() + dx, r.getBlockY() + dy, r.getBlockZ() + dz);
+                    if (!block.getType().isAir()) {
+                        block.setType(Material.AIR, false);
+                    }
+                }
             }
         }
     }
@@ -307,9 +321,14 @@ public final class LobbyModule implements UhcModule {
 
     @EventHandler
     public void onInteract(PlayerInteractEntityEvent event) {
-        if (event.getRightClicked().getScoreboardTags().contains(TAG)) {
-            plugin.lang().send(event.getPlayer(), "lobby.creator-click", Lang.p("url", cl.itstuki.uhc.util.Credits.REPOSITORY));
+        if (event.getHand() != org.bukkit.inventory.EquipmentSlot.HAND
+                || !event.getRightClicked().getScoreboardTags().contains(TAG)) {
+            return;
         }
+        Component link = plugin.lang().get("lobby.creator-link")
+                .clickEvent(net.kyori.adventure.text.event.ClickEvent.openUrl(cl.itstuki.uhc.util.Credits.REPOSITORY))
+                .hoverEvent(net.kyori.adventure.text.event.HoverEvent.showText(Component.text(cl.itstuki.uhc.util.Credits.REPOSITORY)));
+        plugin.lang().send(event.getPlayer(), "lobby.creator-click", Lang.c("link", link));
     }
 
     // ── Momentos de la partida ───────────────────────────────
@@ -344,6 +363,7 @@ public final class LobbyModule implements UhcModule {
                     toLobby(player);
                 }
             }
+            demolishResults();
         });
     }
 
@@ -370,6 +390,8 @@ public final class LobbyModule implements UhcModule {
     private void showResults(List<Ranked> ranking) {
         clearEntities(RESULTS_TAG);
         Location r = resultsCenter();
+        buildPlatform(r, Material.QUARTZ_BRICKS, Material.DIAMOND_BLOCK);
+        buildPodium(r);
         int podiumZ = HALF - 5;
         double[][] spots = {{0, 4, podiumZ}, {-2, 3, podiumZ}, {2, 2, podiumZ}};
         String[] medals = {"<gold><bold>1°", "<gray><bold>2°", "<#C87533><bold>3°"};
