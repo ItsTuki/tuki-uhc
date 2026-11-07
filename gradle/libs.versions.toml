@@ -1,0 +1,9 @@
+[versions]
+paper-api = "26.3.build.244-stable"
+run-paper = "3.1.0"
+
+[libraries]
+paper-api = { module = "io.papermc.paper:paper-api", version.ref = "paper-api" }
+
+[plugins]
+run-paper = { id = "xyz.jpenilla.run-paper", version.ref = "run-paper" }

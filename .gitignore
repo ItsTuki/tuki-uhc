@@ -1,0 +1,14 @@
+# Gradle
+.gradle/
+build/
+!gradle/wrapper/gradle-wrapper.jar
+
+# Servidor de pruebas (./gradlew runServer)
+run/
+
+# IDE y sistema
+.idea/
+*.iml
+.vscode/
+.DS_Store
+__MACOSX/

@@ -1,0 +1,33 @@
+# Objetos de Resource Rush por nivel de dificultad (1 = fácil, 4 = difícil).
+# Se eligen 3 de cada nivel. También se editan en el juego: /uhcconfig > Modos > Resource Rush.
+pools:
+  '1':
+    - GILDED_BLACKSTONE
+    - WIND_CHARGE
+    - RECOVERY_COMPASS
+    - OMINOUS_BOTTLE
+    - TRIAL_KEY
+    - BREEZE_ROD
+    - CAKE
+    - RABBIT_FOOT
+  '2':
+    - ENCHANTING_TABLE
+    - NETHERITE_INGOT
+    - DIAMOND_CHESTPLATE
+    - SPLASH_POTION
+    - SADDLE
+    - NAME_TAG
+  '3':
+    - BEE_NEST
+    - TURTLE_EGG
+    - GRASS_BLOCK
+    - BLUE_ICE
+    - SPONGE
+    - TOTEM_OF_UNDYING
+  '4':
+    - DRAGON_HEAD
+    - HEART_OF_THE_SEA
+    - ECHO_SHARD
+    - NETHER_STAR
+    - SHULKER_SHELL
+    - ENCHANTED_GOLDEN_APPLE
