@@ -40,6 +40,7 @@ import org.jspecify.annotations.Nullable;
 /** Reglas fijas: PvP por episodios, muerte con cabeza en pica, lobby protegido y mecánicas UHC. */
 public final class RulesModule implements UhcModule {
     private final TukiUHC plugin;
+    private final java.util.Map<UUID, Long> pvpWarned = new java.util.HashMap<>();
 
     public RulesModule(TukiUHC plugin) {
         this.plugin = plugin;
@@ -113,7 +114,12 @@ public final class RulesModule implements UhcModule {
         }
         if (!plugin.game().pvpAllowed()) {
             event.setCancelled(true);
-            plugin.lang().send(attacker, "game.pvp-disabled-hit");
+            long now = System.currentTimeMillis();
+            Long last = pvpWarned.get(attacker.getUniqueId());
+            if (last == null || now - last > 3000) {
+                pvpWarned.put(attacker.getUniqueId(), now);
+                attacker.sendActionBar(plugin.lang().get("game.pvp-disabled-hit"));
+            }
             return;
         }
         boolean teammates = plugin.teams().sameTeam(attacker.getUniqueId(), victim.getUniqueId());

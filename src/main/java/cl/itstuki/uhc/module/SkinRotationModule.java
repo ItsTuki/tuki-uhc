@@ -110,6 +110,12 @@ public final class SkinRotationModule implements UhcModule {
             apply(players.get(i), ordered.get((i + 1) % ordered.size()));
         }
         plugin.lang().broadcast("skins.rotated");
+        refreshTabLater();
+    }
+
+    /** Tras el cambio de skin el cliente pierde los nombres del tab: se reenvían medio segundo después. */
+    private void refreshTabLater() {
+        org.bukkit.Bukkit.getScheduler().runTaskLater(plugin, () -> plugin.scoreboard().forceTabRefresh(), 10L);
     }
 
     private void apply(Player player, ProfileProperty skin) {
@@ -139,6 +145,7 @@ public final class SkinRotationModule implements UhcModule {
         ProfileProperty original = originals.get(victim.getUniqueId());
         if (original != null) {
             apply(victim, original);
+            refreshTabLater();
         }
         plugin.lang().send(attacker, "skins.revealed", Lang.p("player", victim.getName()));
         plugin.lang().send(victim, "skins.you-were-revealed");
@@ -155,6 +162,9 @@ public final class SkinRotationModule implements UhcModule {
         revealCooldown.clear();
         revealed.clear();
         active = false;
+        if (plugin.isEnabled()) {
+            refreshTabLater();
+        }
     }
 
     @Override

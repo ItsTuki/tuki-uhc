@@ -143,7 +143,8 @@ public final class ScoreboardModule implements UhcModule {
                 lines.add(mateLine(player, mate));
             }
             lines.add(Component.empty());
-        } else if (plugin.settings().mode() != UhcMode.SOLITARIOS && plugin.game().isAlive(id)) {
+        } else if (plugin.settings().mode() != UhcMode.SOLITARIOS && plugin.game().isAlive(id)
+                && plugin.settings().teamMode() != cl.itstuki.uhc.config.TeamMode.SOLO) {
             lines.add(lang.get(plugin.settings().teamMode() == cl.itstuki.uhc.config.TeamMode.RANDOM
                     || plugin.settings().teamMode() == cl.itstuki.uhc.config.TeamMode.PROXIMITY
                     ? "scoreboard.team-pending" : "scoreboard.no-team"));
@@ -317,11 +318,7 @@ public final class ScoreboardModule implements UhcModule {
                 lang.get("tab.header", Lang.p("name", plugin.settings().matchName())),
                 lang.get("tab.footer", Lang.p("alive", plugin.game().alive().size()), Lang.p("episode", plugin.game().episode()),
                         Lang.p("time", Format.time(plugin.game().totalSeconds()))));
-        // Con la rotación de skins, los no revelados salen como "???" en el tab de todos.
-        boolean hide = SkinRotationModule.hidingNames() && plugin.game().isRunning();
-        boolean revealed = plugin.skinRotation().isRevealed(player.getUniqueId());
-        Component wanted = hide && !revealed && plugin.game().isParticipant(player.getUniqueId())
-                ? plugin.lang().get("skins.hidden-name") : null;
+        Component wanted = tabName(player);
         if (!java.util.Objects.equals(player.playerListName(), wanted == null ? Component.text(player.getName()) : wanted)) {
             player.playerListName(wanted);
         }
@@ -331,6 +328,36 @@ public final class ScoreboardModule implements UhcModule {
             }
         }
     }
+    /** Con la rotación de skins, los no revelados salen como "???" en el tab de todos. */
+    private @org.jspecify.annotations.Nullable Component tabName(Player player) {
+        boolean hide = SkinRotationModule.hidingNames() && plugin.game().isRunning();
+        boolean revealed = plugin.skinRotation().isRevealed(player.getUniqueId());
+        return hide && !revealed && plugin.game().isParticipant(player.getUniqueId())
+                ? plugin.lang().get("skins.hidden-name") : null;
+    }
+
+    /**
+     * Cambiar la skin hace que Paper vuelva a enviar al jugador a todos los clientes, y eso borra
+     * en el cliente el nombre del tab y quién está listado. Aquí se reenvía todo a la fuerza.
+     */
+    public void forceTabRefresh() {
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            Component wanted = tabName(player);
+            player.playerListName(null);
+            if (wanted != null) {
+                player.playerListName(wanted);
+            }
+        }
+        for (Player viewer : Bukkit.getOnlinePlayers()) {
+            for (Player other : Bukkit.getOnlinePlayers()) {
+                if (!viewer.equals(other) && viewer.canSee(other)) {
+                    viewer.unlistPlayer(other);
+                    viewer.listPlayer(other);
+                }
+            }
+        }
+    }
+
     @Override
     public void onReset() {
         for (Player player : Bukkit.getOnlinePlayers()) {
