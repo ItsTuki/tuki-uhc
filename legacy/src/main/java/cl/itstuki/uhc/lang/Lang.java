@@ -168,6 +168,16 @@ public final class Lang {
         plugin.adventure().all().sendMessage(MM.deserialize(raw, all(null, resolvers)));
     }
 
+    /** A la consola y a los jugadores con el permiso. */
+    public void broadcastPermission(String permission, String key, TagResolver... resolvers) {
+        send(org.bukkit.Bukkit.getConsoleSender(), key, resolvers);
+        for (org.bukkit.entity.Player player : org.bukkit.Bukkit.getOnlinePlayers()) {
+            if (player.hasPermission(permission)) {
+                send(player, key, resolvers);
+            }
+        }
+    }
+
     public static Component mm(String text, TagResolver... resolvers) {
         return MM.deserialize(text, resolvers);
     }

@@ -43,9 +43,68 @@ public final class BorderModule implements UhcModule {
         }
     }
 
+    /** Cierra el borde del mundo normal (y del Nether a escala) hasta {@code radius} en {@code seconds}. */
+    private void shrinkTo(int radius, long seconds) {
+        for (World world : Bukkit.getWorlds()) {
+            if (world.getEnvironment() == World.Environment.NORMAL) {
+                world.getWorldBorder().setSize(radius * 2.0, Math.max(1, seconds));
+            } else if (world.getEnvironment() == World.Environment.NETHER) {
+                world.getWorldBorder().setSize(Math.max(16, radius * 2.0 / 8), Math.max(1, seconds));
+            }
+        }
+    }
+
+    // ── Por tiempo: cierre continuo ──────────────────────────
+
+    /** Por tiempo: si el cierre continuo ya empezó (aunque el reloj salte con /uhcdev). */
+    private boolean timedShrinkStarted;
+
+    private void startTimedShrink() {
+        timedShrinkStarted = true;
+        int finalRadius = plugin.settings().borderFinalRadius();
+        long seconds = plugin.settings().timedSeconds() - plugin.game().totalSeconds();
+        shrinkTo(finalRadius, seconds);
+        plugin.lang().broadcast("border.timed-shrinking", Lang.p("radius", finalRadius),
+                Lang.p("time", cl.itstuki.uhc.util.Format.time(seconds)));
+    }
+
+    @Override
+    public void onStart() {
+        timedShrinkStarted = false;
+        if (plugin.game().timed() && shrinks() && plugin.settings().borderStartSecond() <= 0) {
+            startTimedShrink();
+        }
+    }
+
+    @Override
+    public void onSecond(int secondsToNextEpisode) {
+        if (!timedShrinkStarted && plugin.game().timed() && shrinks() && !plugin.game().suddenDeath()
+                && plugin.game().totalSeconds() >= plugin.settings().borderStartSecond()
+                && plugin.settings().borderStartSecond() < plugin.settings().timedSeconds()) {
+            startTimedShrink();
+        }
+    }
+
+    /** Muerte súbita: el borde sigue cerrándose hasta un círculo pequeño y todos brillan (1.9+). */
+    @Override
+    public void onSuddenDeath() {
+        int radius = Math.max(5, Math.min(plugin.settings().borderFinalRadius(),
+                plugin.getConfig().getInt("timed.sudden-death-radius", 10)));
+        long seconds = Math.max(30, plugin.getConfig().getInt("timed.sudden-death-seconds", 180));
+        if (shrinks()) {
+            shrinkTo(radius, seconds);
+        }
+        for (java.util.UUID id : plugin.game().alive()) {
+            org.bukkit.entity.Player player = Bukkit.getPlayer(id);
+            if (player != null && com.cryptomorin.xseries.XPotion.GLOWING.isSupported()) {
+                cl.itstuki.uhc.compat.Compat.effect(player, com.cryptomorin.xseries.XPotion.GLOWING, Integer.MAX_VALUE, 0, false);
+            }
+        }
+    }
+
     @Override
     public void onEpisodeStart(int episode) {
-        if (!shrinks()) {
+        if (!shrinks() || plugin.game().timed()) {
             return;
         }
         int shrink = plugin.settings().shrinkEpisode();
@@ -53,13 +112,7 @@ public final class BorderModule implements UhcModule {
         if (episode == shrink) {
             long seconds = plugin.settings().episodeSeconds();
             int finalRadius = plugin.settings().borderFinalRadius();
-            for (World world : Bukkit.getWorlds()) {
-                if (world.getEnvironment() == World.Environment.NORMAL) {
-                    world.getWorldBorder().setSize(finalRadius * 2.0, seconds);
-                } else if (world.getEnvironment() == World.Environment.NETHER) {
-                    world.getWorldBorder().setSize(Math.max(16, finalRadius * 2.0 / 8), seconds);
-                }
-            }
+            shrinkTo(finalRadius, seconds);
             plugin.lang().broadcast("border.shrinking", Lang.p("radius", finalRadius), Lang.p("episode", episode));
             plugin.lang().broadcast("border.final-warning");
         }
@@ -72,6 +125,7 @@ public final class BorderModule implements UhcModule {
 
     @Override
     public void onReset() {
+        timedShrinkStarted = false;
         for (World world : Bukkit.getWorlds()) {
             world.getWorldBorder().reset();
         }

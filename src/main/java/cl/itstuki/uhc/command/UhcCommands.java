@@ -191,6 +191,13 @@ public final class UhcCommands {
 
         registrar.register(devCommand().build(), "Herramientas de desarrollo (modo dev)", List.of());
 
+        registrar.register(Commands.literal("uhcpregen").requires(perm("tukiuhc.command.pregen"))
+                .executes(ok(ctx -> plugin.map().status(sender(ctx))))
+                .then(Commands.literal("start").executes(ok(ctx -> plugin.map().start(sender(ctx)))))
+                .then(Commands.literal("stop").executes(ok(ctx -> plugin.map().stop(sender(ctx)))))
+                .then(Commands.literal("status").executes(ok(ctx -> plugin.map().status(sender(ctx))))).build(),
+                "Pregenera el mapa dentro del borde", List.of("pregen"));
+
         boolean proxyAliases = plugin.getConfig().getBoolean("proxy.enabled", false)
                 && plugin.getConfig().getBoolean("proxy.hub-aliases", true);
         registrar.register(Commands.literal("uhchub").requires(perm("tukiuhc.hub")).executes(ok(ctx -> {

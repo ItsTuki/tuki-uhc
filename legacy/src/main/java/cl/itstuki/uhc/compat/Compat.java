@@ -245,6 +245,34 @@ public final class Compat {
         return 0;
     }
 
+    /** TPS del último minuto (Paper/Spigot los exponen distinto según la versión). */
+    public static double tps() {
+        Object server = Bukkit.getServer();
+        try {
+            Object result = server.getClass().getMethod("getTPS").invoke(server);
+            if (result instanceof double[]) {
+                return ((double[]) result)[0];
+            }
+        } catch (ReflectiveOperationException | RuntimeException ignored) {
+            // Se prueba con el servidor interno.
+        }
+        try {
+            Object nms = server.getClass().getMethod("getServer").invoke(server);
+            for (Class<?> c = nms.getClass(); c != null; c = c.getSuperclass()) {
+                try {
+                    java.lang.reflect.Field field = c.getDeclaredField("recentTps");
+                    field.setAccessible(true);
+                    return ((double[]) field.get(nms))[0];
+                } catch (NoSuchFieldException ignored) {
+                    // Sigue con la clase padre.
+                }
+            }
+        } catch (ReflectiveOperationException | RuntimeException ignored) {
+            // Sin datos.
+        }
+        return 20;
+    }
+
     /** Altura del bloque sólido más alto (en 1.8 getHighestBlockYAt devuelve el aire de encima). */
     public static int highestSolidY(World world, int x, int z) {
         int y = Math.min(world.getMaxHeight() - 1, world.getHighestBlockYAt(x, z));

@@ -151,6 +151,16 @@ public final class Lang {
         send(Bukkit.getServer(), key, resolvers);
     }
 
+    /** A la consola y a los jugadores con el permiso. */
+    public void broadcastPermission(String permission, String key, TagResolver... resolvers) {
+        send(Bukkit.getConsoleSender(), key, resolvers);
+        for (org.bukkit.entity.Player player : Bukkit.getOnlinePlayers()) {
+            if (player.hasPermission(permission)) {
+                send(player, key, resolvers);
+            }
+        }
+    }
+
     /** Lista de textos (vacía si la clave no existe). */
     public List<String> rawList(String key) {
         return messages.getStringList(key);

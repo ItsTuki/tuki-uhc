@@ -26,9 +26,11 @@ public enum Feature {
     COPPER_AGE(Material.COPPER_GOLEM_STATUE, ValueType.NONE, false, 0),
     GRAVES(Material.SKELETON_SKULL, ValueType.EPISODE, false, 4),
     SUPER_APPLES(Material.GOLDEN_APPLE, ValueType.NONE, false, 0),
-    DRAGON_BREATH(Material.DRAGON_BREATH, ValueType.NONE, false, 0);
+    DRAGON_BREATH(Material.DRAGON_BREATH, ValueType.NONE, false, 0),
+    ORE_BOOST(Material.DIAMOND_ORE, ValueType.BOOST, false, 100),
+    BIG_CAVES(Material.POINTED_DRIPSTONE, ValueType.NONE, false, 0);
 
-    public enum ValueType { NONE, EPISODE, PERCENT, SECONDS, BLOCKS }
+    public enum ValueType { NONE, EPISODE, PERCENT, SECONDS, BLOCKS, BOOST }
 
     private final Material icon;
     private final ValueType valueType;
@@ -70,6 +72,7 @@ public enum Feature {
             case PERCENT -> Math.max(0, Math.min(100, value));
             case SECONDS -> Math.max(1, Math.min(600, value));
             case BLOCKS -> Math.max(5, Math.min(5000, value));
+            case BOOST -> Math.max(0, Math.min(400, value));
         };
     }
 }

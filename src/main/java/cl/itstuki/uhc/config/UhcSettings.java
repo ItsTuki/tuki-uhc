@@ -1,6 +1,8 @@
 package cl.itstuki.uhc.config;
 
 import java.util.EnumMap;
+import java.util.EnumSet;
+import java.util.Set;
 import java.util.Locale;
 import java.util.Map;
 import org.bukkit.configuration.ConfigurationSection;
@@ -21,6 +23,10 @@ public final class UhcSettings {
     private int pvpEpisode = 2;
     private int randomRevealEpisode = 2;
     private int proximityRadius = 100;
+    private MatchFormat format = MatchFormat.EPISODES;
+    private int timedMinutes = 120;
+    private int borderStartMinutes = 30;
+    private final Set<Scenario> scenarios = EnumSet.noneOf(Scenario.class);
     private final Map<Feature, FeatureState> features = new EnumMap<>(Feature.class);
 
     public static final class FeatureState {
@@ -53,6 +59,15 @@ public final class UhcSettings {
         borderRadius = clamp(config.getInt("border.radius", borderRadius), 50, 30_000);
         borderFinalRadius = clamp(config.getInt("border.final-radius", borderFinalRadius), 5, borderRadius);
         borderShrinkEpisode = clamp(config.getInt("border.shrink-episode", borderShrinkEpisode), 0, 99);
+        format = parseEnum(MatchFormat.class, config.getString("match.format"), format);
+        timedMinutes = clamp(config.getInt("timed.minutes", timedMinutes), 10, 600);
+        borderStartMinutes = clamp(config.getInt("timed.border-start-minutes", borderStartMinutes), 0, 600);
+        scenarios.clear();
+        for (Scenario scenario : Scenario.values()) {
+            if (config.getBoolean("scenarios." + scenario.key(), false)) {
+                scenarios.add(scenario);
+            }
+        }
         ConfigurationSection section = config.getConfigurationSection("features");
         for (Feature feature : Feature.values()) {
             FeatureState state = features.get(feature);
@@ -77,6 +92,12 @@ public final class UhcSettings {
         config.set("border.radius", borderRadius);
         config.set("border.final-radius", borderFinalRadius);
         config.set("border.shrink-episode", borderShrinkEpisode);
+        config.set("match.format", format.name());
+        config.set("timed.minutes", timedMinutes);
+        config.set("timed.border-start-minutes", borderStartMinutes);
+        for (Scenario scenario : Scenario.values()) {
+            config.set("scenarios." + scenario.key(), scenarios.contains(scenario));
+        }
         for (Feature feature : Feature.values()) {
             FeatureState state = features.get(feature);
             config.set("features." + feature.key() + ".enabled", state.enabled);
@@ -88,9 +109,29 @@ public final class UhcSettings {
 
     // ── Episodios ────────────────────────────────────────────
 
-    /** Episodios totales, incluido el episodio extra si está activo. */
+    /**
+     * Episodios totales, incluido el episodio extra si está activo. Por tiempo, las partes son tramos
+     * internos de {@link #episodeMinutes()} (sin títulos ni descansos) que cubren la duración total.
+     */
     public int finalEpisode() {
+        if (timed()) {
+            return Math.max(1, (timedMinutes + episodeMinutes - 1) / episodeMinutes);
+        }
         return episodes + (enabled(Feature.EXTRA_EPISODE) ? 1 : 0);
+    }
+
+    public boolean timed() {
+        return format == MatchFormat.TIMED;
+    }
+
+    /** Duración total de la partida por tiempo, en segundos. */
+    public int timedSeconds() {
+        return timedMinutes * 60;
+    }
+
+    /** Segundo en que empieza a cerrarse el borde (por tiempo). */
+    public int borderStartSecond() {
+        return Math.min(borderStartMinutes, timedMinutes) * 60;
     }
 
     /** Convierte un valor de episodio (0 = último) en un número de episodio real. */
@@ -111,6 +152,28 @@ public final class UhcSettings {
     }
 
     // ── Opciones ─────────────────────────────────────────────
+
+    public boolean scenario(Scenario scenario) {
+        return scenarios.contains(scenario);
+    }
+
+    public void scenario(Scenario scenario, boolean active) {
+        if (active) {
+            scenarios.add(scenario);
+            // Doble y triple se excluyen.
+            if (scenario == Scenario.DOUBLE_ORES) {
+                scenarios.remove(Scenario.TRIPLE_ORES);
+            } else if (scenario == Scenario.TRIPLE_ORES) {
+                scenarios.remove(Scenario.DOUBLE_ORES);
+            }
+        } else {
+            scenarios.remove(scenario);
+        }
+    }
+
+    public Set<Scenario> scenarios() {
+        return java.util.Collections.unmodifiableSet(scenarios);
+    }
 
     public boolean enabled(Feature feature) {
         return features.get(feature).enabled;
@@ -168,6 +231,12 @@ public final class UhcSettings {
     public int randomRevealEpisode() { return randomRevealEpisode; }
     public void randomRevealEpisode(int episode) { this.randomRevealEpisode = clamp(episode, 1, 99); }
     public int proximityRadius() { return proximityRadius; }
+    public MatchFormat format() { return format; }
+    public void format(MatchFormat format) { this.format = format; }
+    public int timedMinutes() { return timedMinutes; }
+    public void timedMinutes(int minutes) { this.timedMinutes = clamp(minutes, 10, 600); }
+    public int borderStartMinutes() { return borderStartMinutes; }
+    public void borderStartMinutes(int minutes) { this.borderStartMinutes = clamp(minutes, 0, 600); }
 
     private static int clamp(int value, int min, int max) {
         return Math.max(min, Math.min(max, value));

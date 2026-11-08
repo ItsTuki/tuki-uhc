@@ -22,6 +22,10 @@ public interface UhcModule extends Listener {
     default void onSecond(int secondsToNextEpisode) {
     }
 
+    /** Partida por tiempo: se acabó el tiempo y empieza la muerte súbita. */
+    default void onSuddenDeath() {
+    }
+
     /** Un jugador quedó eliminado. */
     default void onEliminate(UUID player, Player killer) {
     }

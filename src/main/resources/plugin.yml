@@ -24,6 +24,7 @@ permissions:
       tukiuhc.command.revive: true
       tukiuhc.command.give: true
       tukiuhc.command.team: true
+      tukiuhc.command.pregen: true
   tukiuhc.staff:
     description: "Staff: espía los chats privados y puede entrar a mirar partidas en curso."
     default: false
@@ -40,6 +41,7 @@ permissions:
   tukiuhc.command.revive: {description: /uhcrevive, default: false}
   tukiuhc.command.give: {description: /uhcgive, default: false}
   tukiuhc.command.team: {description: /uhcteam, default: false}
+  tukiuhc.command.pregen: {description: "/uhcpregen: pregenerar el mapa", default: false}
   tukiuhc.chat.spy: {description: Ver los chats de equipo/grupo siendo espectador, default: false}
   tukiuhc.join.spectate: {description: Entrar como espectador con la partida en curso, default: true}
   tukiuhc.hub: {description: /uhchub (y /hub /lobby con proxy), default: true}

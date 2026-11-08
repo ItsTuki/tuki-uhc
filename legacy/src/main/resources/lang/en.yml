@@ -1,8 +1,82 @@
 # TukiUHC — English texts (MiniMessage format: https://docs.advntr.dev/minimessage/format)
 # <prefix> inserts the prefix. Leave a text as "" to not send it.
 # No cambies este número: el plugin lo usa para actualizar el archivo.
-lang-version: 6
+lang-version: 7
 prefix: "<dark_gray>[<gradient:#FF5555:#FFAA00><bold>UHC</bold></gradient><dark_gray>]</dark_gray> <gold>»</gold> "
+
+formats:
+  episodes:
+    name: "<aqua>Episodes"
+    description: "<gray>Parts with titles and optional rest."
+  timed:
+    name: "<gold>Timed"
+    description: "<gray>Fixed length and a border that closes nonstop."
+
+map:
+  status-idle: "stopped"
+  status-running: "running (<percent>%)"
+  already-running: "<prefix><yellow>Pregeneration is already at <white><percent>%</white>."
+  only-lobby: "<prefix><red>You can only pregenerate in the lobby, before preparing the match."
+  started: "<prefix><green>Pregenerating <white><world></white> up to a radius of <white><radius></white> blocks (<white><chunks></white> chunks)…"
+  stopped: "<prefix><yellow>Pregeneration stopped at <white><percent>%</white>. When resumed, finished chunks go fast."
+  stopped-by-prepare: "<prefix><yellow>Pregeneration was stopped to prepare the match."
+  not-running: "<prefix><gray>No pregeneration is running."
+  status: "<prefix><gray>Pregeneration: <white><status></white> · radius <white><radius></white> · improved chunks: <white><shaped>"
+  progress: "<prefix><gray>Pregenerating: <white><percent>%</white> (<done>/<total>) · <white><eta></white> left · TPS <white><tps>"
+  actionbar: "<gold>Pregenerating map <white><percent>%</white> <dark_gray>|</dark_gray> <gray><done>/<total> <dark_gray>|</dark_gray> <white><eta></white> <gray>left <dark_gray>|</dark_gray> <gray>TPS <white><tps>"
+  finished: "<prefix><green>Map pregenerated! <white><chunks></white> chunks in <white><time></white> (improved: <white><shaped></white>)."
+
+scenarios:
+  active: "<prefix><light_purple>Active scenarios: <white><list>"
+  blocked: "<prefix><red>Not allowed: scenario <scenario><red>."
+  no-clean-start: "<prefix><green>NoClean: you are invulnerable to other players for <white><seconds></white> s (lost if you attack)."
+  no-clean-lost: "<prefix><yellow>You attacked: NoClean protection lost."
+  no-clean-protected: "<prefix><red><white><player></white> is protected by NoClean (<white><seconds></white> s)."
+  cut-clean:
+    name: "<gold>CutClean"
+    lore: ["<gray>Ores drop smelted, gravel drops", "<gray>flint and food drops cooked."]
+  timber:
+    name: "<gold>Timber"
+    lore: ["<gray>Breaking a log fells the whole tree.", "<gray>Sneak to break just one."]
+  hastey-boys:
+    name: "<gold>HasteyBoys"
+    lore: ["<gray>Pickaxes, axes and shovels come with", "<gray>Efficiency III and Unbreaking III."]
+  double-ores:
+    name: "<gold>Double ores"
+    lore: ["<gray>Ores drop twice as much."]
+  triple-ores:
+    name: "<gold>Triple ores"
+    lore: ["<gray>Ores drop three times as much."]
+  lucky-leaves:
+    name: "<gold>LuckyLeaves"
+    lore: ["<gray>Leaves can drop a", "<gray>golden apple."]
+  fireless:
+    name: "<gold>Fireless"
+    lore: ["<gray>No fire or lava damage."]
+  no-fall:
+    name: "<gold>NoFall"
+    lore: ["<gray>No fall damage."]
+  no-clean:
+    name: "<gold>NoClean"
+    lore: ["<gray>After a kill you are invulnerable to", "<gray>players for 20 s (lost if you attack)."]
+  blood-diamonds:
+    name: "<gold>BloodDiamonds"
+    lore: ["<gray>Mining diamond costs half a heart."]
+  diamondless:
+    name: "<gold>Diamondless"
+    lore: ["<gray>Diamond ore drops nothing."]
+  goldless:
+    name: "<gold>Goldless"
+    lore: ["<gray>Gold ore drops nothing; every", "<gray>eliminated player drops 8 ingots."]
+  bowless:
+    name: "<gold>Bowless"
+    lore: ["<gray>Bows can't be crafted or used."]
+  rodless:
+    name: "<gold>Rodless"
+    lore: ["<gray>Fishing rods can't be crafted or used."]
+  horseless:
+    name: "<gold>Horseless"
+    lore: ["<gray>Horses can't be ridden."]
 
 phase:
   pve: "<green>PVE"
@@ -10,6 +84,12 @@ phase:
   pvd: "<light_purple>PVD"
 
 game:
+  timed-start: "<prefix><gold>The match begins! Length: <white><time></white>. The border will close little by little."
+  timed-ending: "<prefix><yellow><white><time></white> left in the match."
+  pvp-title: "<red><bold>PvP enabled"
+  sudden-death: "<prefix><dark_red><bold>Time's up!</bold> <red>Sudden death: the border closes to the center and everyone glows until there is a winner."
+  sudden-death-title: "<dark_red><bold>Sudden death"
+  sudden-death-subtitle: "<gray>Everyone to the center · no hiding"
   prepare-cancelled: "<prefix><red>Another plugin cancelled the match preparation."
   episode-ending: "<prefix><yellow>Part <white><episode></white> ends in <white><seconds></white> s."
   already-running: "<prefix><red>A match is already in progress. Use <white>/sos</white> to restart it."
@@ -61,6 +141,7 @@ stats:
   podium-entry: "<gray>  <place>. <white><team></white> <dark_gray>(<time>)"
 
 border:
+  timed-shrinking: "<prefix><red>The border starts closing: it will reach a radius of <white><radius></white> blocks in <white><time></white>."
   shrinking: "<prefix><red>The border is closing in to a radius of <white><radius></white> blocks during part <white><episode></white>."
   final-warning: "<prefix><yellow>Remember that by the end of this part you must be at <white>0 0</white>!"
   final-battle: "<prefix><red><bold>The final battle begins!"
@@ -235,6 +316,8 @@ rush:
   win: "<gray>Completed the list"
 
 scoreboard:
+  timed: "<gold>⏱ Timed <phase>"
+  sudden-death: "<dark_red><bold>☠ Sudden death</bold> <phase>"
   no-team: "<gray>Team: <white>none"
   team-pending: "<gray>Team: <yellow>to be revealed"
   teams-header: "<gray>Teams (<white><count></white>):"
@@ -317,6 +400,7 @@ help:
     - "<yellow>/uhcrevive <jugador></yellow> <gray>— revive a player"
     - "<yellow>/uhcgive <ítem></yellow> <gray>— special test items"
     - "<yellow>/uhcreload</yellow> <gray>— reloads config.yml and languages"
+    - "<yellow>/uhcpregen [start|stop]</yellow> <gray>— pregenerates the map inside the border"
 
 modes:
   pvp:
@@ -350,6 +434,9 @@ team-modes:
     lore: ["<gray>Teams are formed by coming together", "<gray>during the match."]
 
 value-types:
+  boost:
+    format: "+<value>%"
+    hint: "extra percentage 0-400 (100 = double)"
   episode:
     format: "part <value>"
     last: "last part (<value>)"
@@ -365,6 +452,12 @@ value-types:
     hint: "blocks"
 
 features:
+  ore-boost:
+    name: "<aqua>More ores"
+    lore: ["<gray>Extra veins of diamond, gold, iron,", "<gray>lapis and redstone across the map.", "<gray>Value: extra percentage (100 = double).", "<dark_gray>Applied when generating or pregenerating."]
+  big-caves:
+    name: "<aqua>Bigger caves"
+    lore: ["<gray>Wide caverns and long tunnels", "<gray>underground for faster mining.", "<dark_gray>Applied when generating or pregenerating."]
   teammate-compass:
     name: "<aqua>Teammate compass"
     lore: ["<gray>From the given part, everyone receives", "<gray>a compass pointing to their teammate."]
@@ -427,6 +520,19 @@ features:
     lore: ["<gray>Splash potion + 6 gold nuggets", "<gray>+ 2 blaze powder."]
 
 menu:
+  scenarios:
+    title: "<dark_gray>Scenarios"
+    help: "<yellow>Click: enable / disable"
+  map:
+    title: "<dark_gray>Map"
+    start:
+      name: "<green><bold>Pregenerate map"
+      lore: ["<gray>Generates chunks up to a radius of", "<white><radius></white> <gray>blocks (border + margin).", "<gray>Status: <white><status>", "", "<yellow>Click to start / stop"]
+    stop:
+      name: "<red><bold>Stop pregeneration"
+    info:
+      name: "<aqua>How does it work?"
+      lore: ["<gray>Enable <white>More ores</white> and/or <white>Bigger", "<white>caves</white>, then pregenerate.", "<gray>Each chunk is improved only once.", "<gray>Best on a fresh world."]
   back: "<gray>← Back"
   close: "<red>Close"
   state-on: "<green>✔ On"
@@ -435,6 +541,12 @@ menu:
   click-select: "<yellow>Click to select"
   number-help: ["<yellow>Left click: +<step>  <gray>|</gray>  Right click: -<step>", "<yellow>Shift + click: type the value"]
   main:
+    map:
+      name: "<gold>Map"
+      lore: ["<gray>Pregenerate, more ores and", "<gray>bigger caves.", "<gray>Pregeneration: <white><status>", "", "<yellow>Click to open"]
+    scenarios:
+      name: "<gold>Scenarios"
+      lore: ["<gray>CutClean, Timber, HasteyBoys and more.", "<gray>Active: <white><count>", "", "<yellow>Click to open"]
     title: "<dark_gray>TukiUHC · Configuration"
     mode:
       name: "<gold>Game mode"
@@ -467,6 +579,15 @@ menu:
       lore: ["<gray>Choose the items for each tier."]
   settings:
     title: "<dark_gray>General settings"
+    format:
+      name: "<gold>Match format"
+      lore: ["<gray>Current: <value>", "<description>", "", "<yellow>Click to change"]
+    timed-minutes:
+      name: "<gold>Total length"
+      lore: ["<gray>Current: <white><value> minutes"]
+    border-start:
+      name: "<gold>Border closing start"
+      lore: ["<gray>Minute: <white><value>", "<gray>From then on it closes nonstop", "<gray>until the end of the match."]
     name:
       name: "<gold>Match name"
       lore: ["<gray>Current: <white><value>", "", "<yellow>Click to change"]

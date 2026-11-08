@@ -79,7 +79,11 @@ final class UhcExpansion extends PlaceholderExpansion {
             case "time_seconds":
                 return String.valueOf(game.totalSeconds());
             case "time_left":
-                return Format.time(game.secondsLeftInEpisode());
+                return Format.time(game.timed() ? game.timeLeft() : game.secondsLeftInEpisode());
+            case "format":
+                return plugin.settings().format().name();
+            case "sudden_death":
+                return String.valueOf(game.suddenDeath());
             case "alive":
                 return String.valueOf(game.alive().size());
             case "alive_teams":

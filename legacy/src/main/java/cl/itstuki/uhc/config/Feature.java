@@ -30,9 +30,11 @@ public enum Feature {
     COPPER_AGE(XMaterial.COPPER_BLOCK, null, ValueType.NONE, false, 0, 99),
     GRAVES(XMaterial.SKELETON_SKULL, null, ValueType.EPISODE, false, 4, 8),
     SUPER_APPLES(XMaterial.GOLDEN_APPLE, null, ValueType.NONE, false, 0, 8),
-    DRAGON_BREATH(XMaterial.DRAGON_BREATH, null, ValueType.NONE, false, 0, 9);
+    DRAGON_BREATH(XMaterial.DRAGON_BREATH, null, ValueType.NONE, false, 0, 9),
+    ORE_BOOST(XMaterial.DIAMOND_ORE, null, ValueType.BOOST, false, 100, 8),
+    BIG_CAVES(XMaterial.POINTED_DRIPSTONE, XMaterial.COBBLESTONE, ValueType.NONE, false, 0, 8);
 
-    public enum ValueType { NONE, EPISODE, PERCENT, SECONDS, BLOCKS }
+    public enum ValueType { NONE, EPISODE, PERCENT, SECONDS, BLOCKS, BOOST }
 
     private final XMaterial icon;
     private final XMaterial fallback;
@@ -86,6 +88,8 @@ public enum Feature {
                 return Math.max(0, Math.min(100, value));
             case SECONDS:
                 return Math.max(1, Math.min(600, value));
+            case BOOST:
+                return Math.max(0, Math.min(400, value));
             default:
                 return Math.max(5, Math.min(5000, value));
         }

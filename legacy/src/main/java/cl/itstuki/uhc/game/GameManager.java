@@ -13,6 +13,7 @@ import cl.itstuki.uhc.config.UhcSettings;
 import cl.itstuki.uhc.lang.Lang;
 import cl.itstuki.uhc.team.Party;
 import cl.itstuki.uhc.compat.Compat;
+import cl.itstuki.uhc.util.Format;
 import cl.itstuki.uhc.util.Show;
 import com.cryptomorin.xseries.XMaterial;
 import com.cryptomorin.xseries.XPotion;
@@ -454,6 +455,7 @@ public final class GameManager {
     private void begin() {
         state = GameState.PLAYING;
         totalSeconds = 0;
+        suddenDeath = false;
         pvpAnnounced = false;
         for (UUID id : participants) {
             Player player = Bukkit.getPlayer(id);
@@ -506,6 +508,10 @@ public final class GameManager {
     }
 
     private void tickPlaying() {
+        if (timed()) {
+            tickTimed();
+            return;
+        }
         if (restLeft > 0) {
             restLeft--;
             Show.actionBarAll(lang().get("game.rest-actionbar", Lang.p("seconds", restLeft)));
@@ -537,6 +543,72 @@ public final class GameManager {
         }
     }
 
+    /** Partida por tiempo (Resource Rush siempre va por partes sin final). */
+    public boolean timed() {
+        return settings().timed() && !infiniteEpisodes();
+    }
+
+    private boolean suddenDeath;
+
+    /** Por tiempo: un reloj total; las partes avanzan en silencio y al acabar el tiempo viene la muerte súbita. */
+    private void tickTimed() {
+        totalSeconds++;
+        episodeSecond++;
+        long limit = settings().timedSeconds();
+        long left = limit - totalSeconds;
+        if (left > 0 && (left == 1800 || left == 600 || left == 300 || left == 60 || left == 30 || left == 10 || left <= 5)) {
+            lang().broadcast("game.timed-ending", Lang.p("time", Format.time(left)));
+            for (Player player : Bukkit.getOnlinePlayers()) {
+                Compat.sound(player, XSound.BLOCK_NOTE_BLOCK_HAT, 0.8f, left <= 5 ? 1.6f : 1f);
+            }
+        }
+        final int length = settings().episodeSeconds();
+        each(module -> module.onSecond(Math.max(0, length - episodeSecond)));
+        if (state != GameState.PLAYING) {
+            return;
+        }
+        if (left == 0) {
+            timeUp();
+        } else if (episodeSecond >= length && episode < settings().finalEpisode()) {
+            episode++;
+            episodeSecond = 0;
+            if (!pvpAnnounced && pvpAllowed()) {
+                pvpAnnounced = true;
+                lang().broadcast("game.pvp-enabled");
+                Show.titleAll(Show.title(lang().get("game.pvp-title"), net.kyori.adventure.text.Component.empty(), 300, 2000, 700));
+            }
+            final int number = episode;
+            each(module -> module.onEpisodeStart(number));
+            Bukkit.getPluginManager().callEvent(new UhcEpisodeStartEvent(number, pvpAllowed()));
+        }
+    }
+
+    /** Se acabó el tiempo: en Dragón gana la dragona; si no, muerte súbita hasta que quede un lado. */
+    private void timeUp() {
+        if (settings().mode() == UhcMode.DRAGON) {
+            lang().broadcast("dragon.time-up");
+            end(Collections.emptyList(), "dragon.time-up-reason");
+            return;
+        }
+        suddenDeath = true;
+        Show.titleAll(Show.title(lang().get("game.sudden-death-title"), lang().get("game.sudden-death-subtitle"), 300, 3000, 1000));
+        lang().broadcast("game.sudden-death");
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            Compat.sound(player, XSound.ENTITY_WITHER_SPAWN, 0.6f, 1f);
+        }
+        each(UhcModule::onSuddenDeath);
+    }
+
+    /** Muerte súbita: se acabó el tiempo y siguen dos o más lados vivos. */
+    public boolean suddenDeath() {
+        return suddenDeath;
+    }
+
+    /** Segundos que quedan de la partida por tiempo (0 en muerte súbita). */
+    public long timeLeft() {
+        return Math.max(0, settings().timedSeconds() - totalSeconds);
+    }
+
     /** En Resource Rush el reloj no tiene final. */
     public boolean infiniteEpisodes() {
         return settings().mode() == UhcMode.RESOURCE_RUSH;
@@ -563,8 +635,13 @@ public final class GameManager {
         episode = number;
         episodeSecond = 0;
         boolean overtime = number > settings().finalEpisode() && !infiniteEpisodes();
-        lang().broadcast(overtime ? "game.overtime" : "game.episode-start", Lang.p("episode", number));
-        if (!overtime) {
+        if (timed()) {
+            // Por tiempo no hay títulos de parte: solo el aviso de inicio con la duración.
+            lang().broadcast("game.timed-start", Lang.p("time", Format.time(settings().timedSeconds())));
+        } else {
+            lang().broadcast(overtime ? "game.overtime" : "game.episode-start", Lang.p("episode", number));
+        }
+        if (!overtime && !timed()) {
             Show.titleAll(Show.title(lang().get("game.episode-title", Lang.p("episode", number)),
                     lang().get("game.episode-subtitle", Lang.c("phase", phaseLabel())), 300, 2000, 700));
         }
@@ -593,7 +670,7 @@ public final class GameManager {
     }
 
     public boolean pvpAllowed() {
-        return state == GameState.PLAYING && (devPvp || episode >= pvpEpisode());
+        return state == GameState.PLAYING && (devPvp || suddenDeath || episode >= pvpEpisode());
     }
 
     // ── Herramientas de desarrollo (/uhcdev, permiso tukiuhc.dev) ──
@@ -605,6 +682,12 @@ public final class GameManager {
         }
         if (restLeft > 0) {
             restLeft = 1;
+        } else if (timed()) {
+            // Salta al final del tramo actual (o al final de la partida en el último).
+            long target = Math.min(settings().timedSeconds() - 1L, (long) episode * settings().episodeSeconds() - 1L);
+            long jump = Math.max(0, target - totalSeconds);
+            totalSeconds += jump;
+            episodeSecond += (int) jump;
         } else {
             episodeSecond = Math.max(episodeSecond, settings().episodeSeconds() - 1);
         }
@@ -616,7 +699,11 @@ public final class GameManager {
         if (state != GameState.PLAYING || restLeft > 0) {
             return false;
         }
-        episodeSecond = Math.max(0, Math.min(second, settings().episodeSeconds() - 1));
+        int clamped = Math.max(0, Math.min(second, settings().episodeSeconds() - 1));
+        if (timed()) {
+            totalSeconds += clamped - episodeSecond;
+        }
+        episodeSecond = clamped;
         return true;
     }
 
@@ -765,6 +852,7 @@ public final class GameManager {
         episode = 0;
         episodeSecond = 0;
         totalSeconds = 0;
+        suddenDeath = false;
         each(UhcModule::onReset);
         matchId++;
         devPvp = false;

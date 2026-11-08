@@ -10,6 +10,8 @@ match:
   language: es
   # PVP, SOLITARIOS, DRAGON, TROLLS_RATAS, RESOURCE_RUSH
   mode: PVP
+  # EPISODES (partes con título y descanso) o TIMED (duración fija, borde que se cierra sin parar)
+  format: EPISODES
 
 teams:
   # SOLO, MANUAL, RANDOM (aleatorios), PROXIMITY (amor a primera vista)
@@ -31,6 +33,59 @@ border:
   final-radius: 50
   # Parte en la que se cierra el borde (0 = penúltima)
   shrink-episode: 0
+
+timed:
+  # Formato TIMED: duración total de la partida en minutos
+  minutes: 120
+  # Minuto en que empieza a cerrarse el borde; se cierra sin parar hasta el radio final al terminar el tiempo
+  border-start-minutes: 30
+  # Al acabar el tiempo con más de un equipo vivo: muerte súbita (el borde baja a este radio en estos segundos)
+  sudden-death-radius: 10
+  sudden-death-seconds: 180
+
+# Escenarios de UHC (también en /uhcconfig → Escenarios)
+scenarios:
+  cut-clean: false
+  timber: false
+  hastey-boys: false
+  double-ores: false
+  triple-ores: false
+  lucky-leaves: false
+  fireless: false
+  no-fall: false
+  no-clean: false
+  blood-diamonds: false
+  diamondless: false
+  goldless: false
+  bowless: false
+  rodless: false
+  horseless: false
+
+scenarios-settings:
+  timber-max-logs: 256
+  # Probabilidad (%) de que una hoja suelte una manzana dorada
+  lucky-leaves-percent: 0.5
+  goldless-gold-on-death: 8
+  no-clean-seconds: 20
+
+map:
+  # /uhcpregen: genera los chunks hasta el radio del borde + este margen
+  pregen-margin: 64
+  # Chunks que se generan a la vez (más = más rápido y más carga)
+  pregen-parallel: 16
+  # Si los TPS bajan de aquí, la pregeneración va más lenta
+  pregen-min-tps: 17
+  # Cuevas más grandes (opción big-caves): fuerza 1.0 = normal; profundidad mínima bajo la superficie
+  caves:
+    strength: 1.0
+    min-depth: 10
+  # Más minerales (opción ore-boost). "veins" × "size" ≈ lo que trae un chunk normal, así un +100% es el doble.
+  ores:
+    diamond: {veins: 4.0, size: 5, min-y: -60, max-y: 16}
+    gold: {veins: 3.4, size: 7, min-y: -60, max-y: 32}
+    iron: {veins: 7.0, size: 8, min-y: -24, max-y: 72}
+    lapis: {veins: 3.2, size: 6, min-y: -32, max-y: 32}
+    redstone: {veins: 4.0, size: 7, min-y: -60, max-y: 16}
 
 # Opciones activables. "value" es el episodio (0 = último), porcentaje, segundos o bloques según la opción.
 features:
@@ -54,6 +109,8 @@ features:
   graves: {enabled: false, value: 4}
   super-apples: {enabled: false}
   dragon-breath: {enabled: false}
+  ore-boost: {enabled: false, value: 100}
+  big-caves: {enabled: false}
 
 lobby:
   # Mini lobby flotante: zona de espera con el maniquí del creador y zona de resultados con tops.

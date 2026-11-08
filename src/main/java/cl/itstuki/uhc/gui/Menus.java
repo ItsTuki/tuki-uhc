@@ -2,6 +2,8 @@ package cl.itstuki.uhc.gui;
 
 import cl.itstuki.uhc.TukiUHC;
 import cl.itstuki.uhc.config.Feature;
+import cl.itstuki.uhc.config.MatchFormat;
+import cl.itstuki.uhc.config.Scenario;
 import cl.itstuki.uhc.config.TeamMode;
 import cl.itstuki.uhc.config.UhcMode;
 import cl.itstuki.uhc.config.UhcSettings;
@@ -85,6 +87,12 @@ public final class Menus {
                         .lore(lore("menu.main.settings.lore")).build(), (p, c) -> { click(p); openSettings(p); });
                 set(16, Items.of(Material.KNOWLEDGE_BOOK).name(lang().item("menu.main.features.name"))
                         .lore(lore("menu.main.features.lore")).build(), (p, c) -> { click(p); openFeatures(p, 0); });
+                set(20, Items.of(Material.FILLED_MAP).name(lang().item("menu.main.map.name"))
+                        .lore(lore("menu.main.map.lore", Lang.p("status", plugin.map().statusLine()))).build(),
+                        (p, c) -> { click(p); openMap(p); });
+                set(24, Items.of(Material.BREWING_STAND).name(lang().item("menu.main.scenarios.name"))
+                        .lore(lore("menu.main.scenarios.lore", Lang.p("count", settings().scenarios().size()))).build(),
+                        (p, c) -> { click(p); openScenarios(p); });
                 set(28, Items.of(Material.PAPER).name(lang().item("menu.main.language.name"))
                         .lore(lore("menu.main.language.lore", Lang.p("value", lang().code().toUpperCase()))).build(), (p, c) -> {
                     settings().language(lang().code().equals("es") ? "en" : "es");
@@ -166,16 +174,30 @@ public final class Menus {
                 number(14, Material.GLASS, "border", settings()::borderRadius, settings()::borderRadius, 100);
                 number(15, Material.TINTED_GLASS, "border-final", settings()::borderFinalRadius, settings()::borderFinalRadius, 25);
                 number(16, Material.HOPPER, "border-episode", settings()::borderShrinkEpisodeRaw, settings()::borderShrinkEpisode, 1);
-                preset(21, Material.REDSTONE_LAMP, "preset-live", 5, 60);
-                preset(23, Material.BOOKSHELF, "preset-episodes", 10, 25);
+                boolean timed = settings().timed();
+                set(19, Items.of(settings().format().icon()).name(lang().item("menu.settings.format.name"))
+                        .lore(lore("menu.settings.format.lore", Lang.c("value", lang().get("formats." + settings().format().key() + ".name")),
+                                Lang.c("description", lang().get("formats." + settings().format().key() + ".description"))))
+                        .glow(timed).build(), (p, c) -> {
+                    settings().format(timed ? MatchFormat.EPISODES : MatchFormat.TIMED);
+                    changed(p);
+                    refresh();
+                });
+                if (timed) {
+                    number(20, Material.CLOCK, "timed-minutes", settings()::timedMinutes, settings()::timedMinutes, 10);
+                    number(21, Material.HOPPER, "border-start", settings()::borderStartMinutes, settings()::borderStartMinutes, 5);
+                }
+                preset(23, Material.REDSTONE_LAMP, "preset-live", 5, 60);
+                preset(24, Material.BOOKSHELF, "preset-episodes", 10, 25);
                 set(31, back(), (p, c) -> openMain(p));
             }
 
             /** Ajuste rápido de duración: Directo (5 × 60 min) o Episodios (10 × 25 min). */
             private void preset(int slot, Material icon, String key, int count, int minutes) {
-                boolean selected = settings().episodes() == count && settings().episodeMinutes() == minutes;
+                boolean selected = !settings().timed() && settings().episodes() == count && settings().episodeMinutes() == minutes;
                 set(slot, Items.of(icon).name(lang().item("menu.settings." + key + ".name"))
                         .lore(lore("menu.settings." + key + ".lore")).glow(selected).build(), (p, c) -> {
+                    settings().format(MatchFormat.EPISODES);
                     settings().episodes(count);
                     settings().episodeMinutes(minutes);
                     changed(p);
@@ -262,6 +284,88 @@ public final class Menus {
             return lang().get("value-types.episode.last", Lang.p("value", settings().finalEpisode()));
         }
         return lang().get("value-types." + type + ".format", Lang.p("value", value));
+    }
+
+    // ── Escenarios ───────────────────────────────────────────
+
+    public void openScenarios(Player viewer) {
+        new Menu(4, lang().get("menu.scenarios.title")) {
+            @Override
+            protected void render() {
+                Scenario[] all = Scenario.values();
+                for (int i = 0; i < all.length && i < 27; i++) {
+                    Scenario scenario = all[i];
+                    boolean on = settings().scenario(scenario);
+                    List<Component> lore = new ArrayList<>(lang().itemList("scenarios." + scenario.key() + ".lore"));
+                    lore.add(Component.empty());
+                    lore.add(lang().item("menu.features.state", Lang.c("state", onOff(on))));
+                    lore.add(lang().item("menu.scenarios.help"));
+                    set(i, Items.of(scenario.icon()).name(lang().item("scenarios." + scenario.key() + ".name")).lore(lore)
+                            .glow(on).hideAll().build(), (p, c) -> {
+                        settings().scenario(scenario, !settings().scenario(scenario));
+                        changed(p);
+                        refresh();
+                    });
+                }
+                set(31, back(), (p, c) -> openMain(p));
+            }
+        }.open(viewer);
+    }
+
+    // ── Mapa: pregeneración, minerales y cuevas ──────────────
+
+    public void openMap(Player viewer) {
+        new Menu(3, lang().get("menu.map.title")) {
+            @Override
+            protected void render() {
+                boolean running = plugin.map().running();
+                set(10, Items.of(running ? Material.RED_CONCRETE : Material.LIME_CONCRETE)
+                        .name(lang().item(running ? "menu.map.stop.name" : "menu.map.start.name"))
+                        .lore(lore("menu.map.start.lore", Lang.p("radius", plugin.map().pregenRadius()),
+                                Lang.p("status", plugin.map().statusLine()))).glow(running).build(), (p, c) -> {
+                    if (plugin.map().running()) {
+                        plugin.map().stop(p);
+                    } else {
+                        plugin.map().start(p);
+                    }
+                    click(p);
+                    refresh();
+                });
+                for (Feature feature : new Feature[] {Feature.ORE_BOOST, Feature.BIG_CAVES}) {
+                    int slot = feature == Feature.ORE_BOOST ? 12 : 14;
+                    boolean on = settings().enabled(feature);
+                    List<Component> lore = new ArrayList<>(lang().itemList("features." + feature.key() + ".lore"));
+                    lore.add(Component.empty());
+                    lore.add(lang().item("menu.features.state", Lang.c("state", onOff(on))));
+                    if (feature.valueType() != Feature.ValueType.NONE) {
+                        lore.add(lang().item("menu.features.value", Lang.c("value", valueLabel(feature))));
+                    }
+                    lore.add(Component.empty());
+                    lore.add(lang().item("menu.features.help-toggle"));
+                    if (feature.valueType() != Feature.ValueType.NONE) {
+                        lore.add(lang().item("menu.features.help-value"));
+                    }
+                    set(slot, Items.of(feature.icon()).name(lang().item("features." + feature.key() + ".name")).lore(lore)
+                            .glow(on).hideAll().build(), (p, c) -> {
+                        if (c.isRightClick() && feature.valueType() != Feature.ValueType.NONE) {
+                            plugin.prompts().askNumber(p, "prompt.feature-value", value -> {
+                                settings().setValue(feature, value);
+                                settings().setEnabled(feature, true);
+                                plugin.saveSettings();
+                                openMap(p);
+                            }, Lang.c("hint", lang().get("value-types." + feature.valueType().name().toLowerCase(java.util.Locale.ROOT)
+                                    + ".hint")));
+                            return;
+                        }
+                        settings().setEnabled(feature, !settings().enabled(feature));
+                        changed(p);
+                        refresh();
+                    });
+                }
+                set(16, Items.of(Material.BOOK).name(lang().item("menu.map.info.name")).lore(lore("menu.map.info.lore")).build(), null);
+                set(18, back(), (p, c) -> openMain(p));
+            }
+        }.open(viewer);
     }
 
     // ── Equipos ──────────────────────────────────────────────

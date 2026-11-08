@@ -1,8 +1,82 @@
 # TukiUHC — textos en español (formato MiniMessage: https://docs.advntr.dev/minimessage/format)
 # <prefix> inserta el prefijo. Deja un texto en "" para no enviarlo.
 # No cambies este número: el plugin lo usa para actualizar el archivo.
-lang-version: 6
+lang-version: 7
 prefix: "<dark_gray>[<gradient:#FF5555:#FFAA00><bold>UHC</bold></gradient><dark_gray>]</dark_gray> <gold>»</gold> "
+
+formats:
+  episodes:
+    name: "<aqua>Por episodios"
+    description: "<gray>Partes con título y descanso opcional."
+  timed:
+    name: "<gold>Por tiempo"
+    description: "<gray>Duración fija y borde que se cierra sin parar."
+
+map:
+  status-idle: "detenida"
+  status-running: "en curso (<percent>%)"
+  already-running: "<prefix><yellow>La pregeneración ya va en un <white><percent>%</white>."
+  only-lobby: "<prefix><red>Solo se puede pregenerar en el lobby, antes de preparar la partida."
+  started: "<prefix><green>Pregenerando <white><world></white> hasta un radio de <white><radius></white> bloques (<white><chunks></white> chunks)…"
+  stopped: "<prefix><yellow>Pregeneración detenida en un <white><percent>%</white>. Al reanudar, lo ya hecho va rápido."
+  stopped-by-prepare: "<prefix><yellow>Se detuvo la pregeneración para preparar la partida."
+  not-running: "<prefix><gray>No hay una pregeneración en curso."
+  status: "<prefix><gray>Pregeneración: <white><status></white> · radio <white><radius></white> · chunks mejorados: <white><shaped>"
+  progress: "<prefix><gray>Pregenerando: <white><percent>%</white> (<done>/<total>) · faltan <white><eta></white> · TPS <white><tps>"
+  actionbar: "<gold>Pregenerando mapa <white><percent>%</white> <dark_gray>|</dark_gray> <gray><done>/<total> <dark_gray>|</dark_gray> <gray>faltan <white><eta></white> <dark_gray>|</dark_gray> <gray>TPS <white><tps>"
+  finished: "<prefix><green>¡Mapa pregenerado! <white><chunks></white> chunks en <white><time></white> (mejorados: <white><shaped></white>)."
+
+scenarios:
+  active: "<prefix><light_purple>Escenarios activos: <white><list>"
+  blocked: "<prefix><red>No se puede: escenario <scenario><red>."
+  no-clean-start: "<prefix><green>NoClean: eres invulnerable a otros jugadores por <white><seconds></white> s (se quita si atacas)."
+  no-clean-lost: "<prefix><yellow>Atacaste: perdiste la protección de NoClean."
+  no-clean-protected: "<prefix><red><white><player></white> está protegido por NoClean (<white><seconds></white> s)."
+  cut-clean:
+    name: "<gold>CutClean"
+    lore: ["<gray>Los minerales salen fundidos, la grava", "<gray>da pedernal y la comida sale cocinada."]
+  timber:
+    name: "<gold>Timber"
+    lore: ["<gray>Romper un tronco tala el árbol entero.", "<gray>Agáchate para romper uno solo."]
+  hastey-boys:
+    name: "<gold>HasteyBoys"
+    lore: ["<gray>Picos, hachas y palas salen con", "<gray>Eficiencia III e Irrompibilidad III."]
+  double-ores:
+    name: "<gold>Doble mineral"
+    lore: ["<gray>Los minerales dan el doble."]
+  triple-ores:
+    name: "<gold>Triple mineral"
+    lore: ["<gray>Los minerales dan el triple."]
+  lucky-leaves:
+    name: "<gold>LuckyLeaves"
+    lore: ["<gray>Las hojas pueden soltar una", "<gray>manzana dorada."]
+  fireless:
+    name: "<gold>Fireless"
+    lore: ["<gray>Sin daño por fuego ni lava."]
+  no-fall:
+    name: "<gold>NoFall"
+    lore: ["<gray>Sin daño por caída."]
+  no-clean:
+    name: "<gold>NoClean"
+    lore: ["<gray>Tras una kill eres invulnerable a", "<gray>jugadores 20 s (se quita si atacas)."]
+  blood-diamonds:
+    name: "<gold>BloodDiamonds"
+    lore: ["<gray>Picar diamante quita medio corazón."]
+  diamondless:
+    name: "<gold>Diamondless"
+    lore: ["<gray>El diamante no suelta nada."]
+  goldless:
+    name: "<gold>Goldless"
+    lore: ["<gray>El oro no suelta nada; cada jugador", "<gray>eliminado suelta 8 lingotes."]
+  bowless:
+    name: "<gold>Bowless"
+    lore: ["<gray>No se pueden fabricar ni usar arcos."]
+  rodless:
+    name: "<gold>Rodless"
+    lore: ["<gray>No se pueden fabricar ni usar cañas."]
+  horseless:
+    name: "<gold>Horseless"
+    lore: ["<gray>No se puede montar caballos."]
 
 phase:
   pve: "<green>PVE"
@@ -10,6 +84,12 @@ phase:
   pvd: "<light_purple>PVD"
 
 game:
+  timed-start: "<prefix><gold>¡Empieza la partida! Duración: <white><time></white>. El borde se cerrará poco a poco."
+  timed-ending: "<prefix><yellow>Quedan <white><time></white> de partida."
+  pvp-title: "<red><bold>PvP activado"
+  sudden-death: "<prefix><dark_red><bold>¡Se acabó el tiempo!</bold> <red>Muerte súbita: el borde se cierra al centro y todos brillan hasta que quede un ganador."
+  sudden-death-title: "<dark_red><bold>Muerte súbita"
+  sudden-death-subtitle: "<gray>Todos al centro · nadie se esconde"
   prepare-cancelled: "<prefix><red>Otro plugin canceló la preparación de la partida."
   episode-ending: "<prefix><yellow>La parte <white><episode></white> termina en <white><seconds></white> s."
   already-running: "<prefix><red>Ya hay una partida en curso. Usa <white>/sos</white> para reiniciarla."
@@ -61,6 +141,7 @@ stats:
   podium-entry: "<gray>  <place>. <white><team></white> <dark_gray>(<time>)"
 
 border:
+  timed-shrinking: "<prefix><red>El borde empieza a cerrarse: llegará a un radio de <white><radius></white> bloques en <white><time></white>."
   shrinking: "<prefix><red>El borde se está cerrando hasta un radio de <white><radius></white> bloques durante la parte <white><episode></white>."
   final-warning: "<prefix><yellow>¡Recuerda que al final de esta parte deberás estar en <white>0 0</white>!"
   final-battle: "<prefix><red><bold>¡Empieza la batalla final!"
@@ -235,6 +316,8 @@ rush:
   win: "<gray>Completó la lista"
 
 scoreboard:
+  timed: "<gold>⏱ Por tiempo <phase>"
+  sudden-death: "<dark_red><bold>☠ Muerte súbita</bold> <phase>"
   no-team: "<gray>Equipo: <white>sin equipo"
   team-pending: "<gray>Equipo: <yellow>por revelar"
   teams-header: "<gray>Equipos (<white><count></white>):"
@@ -317,6 +400,7 @@ help:
     - "<yellow>/uhcrevive <jugador></yellow> <gray>— revivir a un jugador"
     - "<yellow>/uhcgive <ítem></yellow> <gray>— ítems especiales de prueba"
     - "<yellow>/uhcreload</yellow> <gray>— recarga config.yml e idiomas"
+    - "<yellow>/uhcpregen [start|stop]</yellow> <gray>— pregenera el mapa dentro del borde"
 
 modes:
   pvp:
@@ -350,6 +434,9 @@ team-modes:
     lore: ["<gray>Los equipos se forman al juntarse", "<gray>durante la partida."]
 
 value-types:
+  boost:
+    format: "+<value>%"
+    hint: "porcentaje extra 0-400 (100 = el doble)"
   episode:
     format: "parte <value>"
     last: "última parte (<value>)"
@@ -365,6 +452,12 @@ value-types:
     hint: "bloques"
 
 features:
+  ore-boost:
+    name: "<aqua>Más minerales"
+    lore: ["<gray>Vetas extra de diamante, oro, hierro,", "<gray>lapislázuli y redstone en el mapa.", "<gray>Valor: porcentaje extra (100 = el doble).", "<dark_gray>Se aplica al generar o pregenerar."]
+  big-caves:
+    name: "<aqua>Cuevas más grandes"
+    lore: ["<gray>Salas amplias y túneles largos bajo", "<gray>tierra para minar más rápido.", "<dark_gray>Se aplica al generar o pregenerar."]
   teammate-compass:
     name: "<aqua>Brújula de compañero"
     lore: ["<gray>Desde la parte indicada, todos reciben", "<gray>una brújula que apunta a su compañero."]
@@ -427,6 +520,19 @@ features:
     lore: ["<gray>Poción arrojadiza + 6 pepitas de oro", "<gray>+ 2 polvos de blaze."]
 
 menu:
+  scenarios:
+    title: "<dark_gray>Escenarios"
+    help: "<yellow>Clic: activar / desactivar"
+  map:
+    title: "<dark_gray>Mapa"
+    start:
+      name: "<green><bold>Pregenerar mapa"
+      lore: ["<gray>Genera los chunks hasta un radio de", "<white><radius></white> <gray>bloques (el borde + margen).", "<gray>Estado: <white><status>", "", "<yellow>Clic para iniciar / detener"]
+    stop:
+      name: "<red><bold>Detener pregeneración"
+    info:
+      name: "<aqua>¿Cómo funciona?"
+      lore: ["<gray>Activa <white>Más minerales</white> y/o <white>Cuevas", "<white>más grandes</white> y luego pregenera.", "<gray>Cada chunk se mejora una sola vez.", "<gray>Recomendado en un mundo nuevo."]
   back: "<gray>← Volver"
   close: "<red>Cerrar"
   state-on: "<green>✔ Activado"
@@ -435,6 +541,12 @@ menu:
   click-select: "<yellow>Clic para seleccionar"
   number-help: ["<yellow>Clic izq: +<step>  <gray>|</gray>  Clic der: -<step>", "<yellow>Shift + clic: escribir el valor"]
   main:
+    map:
+      name: "<gold>Mapa"
+      lore: ["<gray>Pregenerar, más minerales y", "<gray>cuevas más grandes.", "<gray>Pregeneración: <white><status>", "", "<yellow>Clic para abrir"]
+    scenarios:
+      name: "<gold>Escenarios"
+      lore: ["<gray>CutClean, Timber, HasteyBoys y más.", "<gray>Activos: <white><count>", "", "<yellow>Clic para abrir"]
     title: "<dark_gray>TukiUHC · Configuración"
     mode:
       name: "<gold>Modo de juego"
@@ -467,6 +579,15 @@ menu:
       lore: ["<gray>Elige los objetos de cada nivel."]
   settings:
     title: "<dark_gray>Ajustes generales"
+    format:
+      name: "<gold>Formato de la partida"
+      lore: ["<gray>Actual: <value>", "<description>", "", "<yellow>Clic para cambiar"]
+    timed-minutes:
+      name: "<gold>Duración total"
+      lore: ["<gray>Actual: <white><value> minutos"]
+    border-start:
+      name: "<gold>Inicio del cierre del borde"
+      lore: ["<gray>Minuto: <white><value>", "<gray>Desde ahí se cierra sin parar", "<gray>hasta el final de la partida."]
     name:
       name: "<gold>Nombre de la partida"
       lore: ["<gray>Actual: <white><value>", "", "<yellow>Clic para cambiar"]

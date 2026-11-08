@@ -4,7 +4,7 @@ plugins {
 }
 
 group = "cl.itstuki.uhc"
-version = "1.1.1"
+version = "1.2.0"
 description = "UHC por episodios para Spigot/Paper 1.8.8 – 26.3 (edición Legacy)."
 
 repositories {

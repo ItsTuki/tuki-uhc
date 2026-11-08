@@ -1,5 +1,16 @@
 # Changelog
 
+## 1.2.0 — 2026-11-08
+
+Para las dos ediciones: completa (Paper 26.x) y Legacy (1.8.8 – 26.3).
+
+### Nuevo
+- **Partida por tiempo**: duración total configurable (ej. 2 horas) y un borde que se cierra **sin parar** desde el minuto elegido hasta el final. Si se acaba el tiempo, **muerte súbita**: PvP, borde a 10 bloques del centro y todos brillan.
+- **Pregeneración del mapa** (`/uhcpregen`, menú Mapa): genera los chunks dentro del borde con progreso, tiempo restante y control de TPS.
+- **Más minerales** y **cuevas más grandes** al generar o pregenerar (vetas y alturas configurables en `map`).
+- **Escenarios**: CutClean, Timber, HasteyBoys, Doble/Triple mineral, LuckyLeaves, Fireless, NoFall, NoClean, BloodDiamonds, Diamondless, Goldless, Bowless, Rodless y Horseless.
+- Placeholders `%tukiuhc_format%` y `%tukiuhc_sudden_death%`; `%tukiuhc_time_left%` muestra el tiempo total restante por tiempo.
+
 ## 1.1.1 Legacy — 2026-11-08
 
 ### Nuevo

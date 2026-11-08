@@ -19,6 +19,7 @@ La edición **Legacy** tiene los mismos modos, opciones, comandos, lobby, scoreb
 - Opciones que dependen de la versión se ocultan solas: tridentes (1.13+), cajas de shulker (1.11+), aliento de dragón y manzana encantada fabricable (1.9+).
 - En 1.8–1.17 el lobby se construye más abajo si `lobby.y` supera la altura máxima del mundo.
 - Selectores en comandos: nombre, `@a` o `@s`.
+- Pregeneración: en Paper 1.13+ va en paralelo; en Spigot y en 1.8–1.12 se hace por tramos en el hilo principal (más lenta).
 
 Probada con partidas completas en 1.8.8, 1.12.2, 1.16.5, 1.18.2, 1.20.4, 1.21.4 y 26.3.
 
@@ -33,8 +34,42 @@ Probada con partidas completas en 1.8.8, 1.12.2, 1.16.5, 1.18.2, 1.20.4, 1.21.4 
 1. **`/uhcconfig`** → elige modo, equipos y opciones.
 2. **`/uhcprepare`** → reparte a todos por el mapa (juntos por equipo si está activo), los congela y les da un bote.
 3. **`/uhcstart`** → cuenta atrás de 10 s (o **`/uhcforcestart`** si falta alguien).
-4. La partida avanza por **partes** (episodios). El scoreboard muestra parte, fase (PVE/PVP/PVD), compañeros con vida y distancia, tiempo y borde.
+4. La partida avanza por **partes** (episodios) o **por tiempo** (ver abajo). El scoreboard muestra parte o tiempo restante, fase (PVE/PVP/PVD), compañeros con vida y distancia, tiempo y borde.
 5. Al terminar se anuncian las estadísticas y se guarda una **imagen PNG** en `plugins/TukiUHC/stats/`.
+
+## Formato: por episodios o por tiempo
+
+En `/uhcconfig` → Ajustes generales → **Formato de la partida**:
+
+- **Por episodios**: partes de X minutos con título, aviso de fin y descanso opcional. El borde se cierra durante la parte elegida.
+- **Por tiempo**: eliges la **duración total** (por ejemplo 2 horas) y el **minuto en que empieza a cerrarse el borde**. Desde ahí el borde se cierra **sin parar** hasta el radio final justo al acabar el tiempo. Las opciones que dependen de una "parte" (PvP, brújula, shulker…) usan tramos internos de la duración de cada parte (20 min por defecto), sin títulos ni descansos.
+- Si se acaba el tiempo con más de un equipo vivo empieza la **muerte súbita**: PvP activo, el borde baja a un círculo pequeño en 0 0 (`timed.sudden-death-radius`, 10 bloques en 3 min) y todos brillan hasta que quede un ganador.
+
+## Mapa: pregeneración, más minerales y cuevas grandes
+
+En `/uhcconfig` → **Mapa**, o con **`/uhcpregen start|stop`**:
+
+- **Pregenerar** genera todos los chunks dentro del borde (más un margen) antes de jugar, de adentro hacia afuera, con barra de progreso y tiempo restante. Baja el ritmo sola si los TPS caen. Se detiene al preparar la partida y se puede reanudar.
+- **Más minerales**: vetas extra de diamante, oro, hierro, lapislázuli y redstone. El valor es el porcentaje extra (100 = el doble).
+- **Cuevas más grandes**: salas amplias y túneles largos bajo tierra, sin abrir agua ni lava.
+- Las mejoras se aplican a cada chunk **una sola vez**, al generarse o al pregenerar, y se recuerdan en `plugins/TukiUHC/map/`. Lo ideal es activarlas y pregenerar en un mundo nuevo. Minerales, alturas y fuerza de las cuevas se ajustan en `config.yml` → `map`.
+
+## Escenarios
+
+En `/uhcconfig` → **Escenarios** (se combinan entre sí y se anuncian al empezar):
+
+| Escenario | Qué hace |
+|---|---|
+| CutClean | Minerales fundidos, grava → pedernal, comida cocinada |
+| Timber | Romper un tronco tala el árbol entero (agachado rompe uno) |
+| HasteyBoys | Picos, hachas y palas con Eficiencia III e Irrompibilidad III |
+| Doble / Triple mineral | Los minerales dan ×2 o ×3 |
+| LuckyLeaves | Las hojas pueden soltar una manzana dorada |
+| Fireless · NoFall | Sin daño de fuego/lava · sin daño de caída |
+| NoClean | Tras una kill, 20 s invulnerable a jugadores (se quita si atacas) |
+| BloodDiamonds | Picar diamante quita medio corazón |
+| Diamondless · Goldless | El diamante / el oro no sueltan nada (en Goldless cada eliminado suelta 8 lingotes) |
+| Bowless · Rodless · Horseless | Sin arcos · sin cañas · sin montar caballos |
 
 ## Lobby y resultados
 
@@ -94,6 +129,8 @@ Clic izquierdo activa/desactiva, clic derecho cambia el valor (episodio, %, segu
 | Tumbas | Lista de dónde murió cada uno | No (4) |
 | Super e Hiper manzanas | Super (+4 ❤ al instante) e Hiper (+2 ❤ máx., hasta 5) | No |
 | Aliento de dragón | Crafteable con poción arrojadiza | No |
+| Más minerales | Vetas extra al generar el mapa (% extra) | No (100 %) |
+| Cuevas más grandes | Salas y túneles más grandes al generar el mapa | No |
 
 ## Comandos
 
@@ -106,6 +143,7 @@ Clic izquierdo activa/desactiva, clic derecho cambia el valor (episodio, %, segu
 | `/uhcstop` | `tukiuhc.command.stop` | Terminar sin ganador |
 | `/sos` (`/uhcreset`) | `tukiuhc.command.reset` | Reiniciar la partida y recargar |
 | `/uhcreload` | `tukiuhc.command.reload` | Recargar config.yml e idiomas |
+| `/uhcpregen start\|stop\|status` | `tukiuhc.command.pregen` | Pregenerar el mapa |
 | `/uhcteam create\|delete\|add\|remove\|random\|force\|clear\|list` (y `groupcreate`, `groupadd`…) | `tukiuhc.command.team` | Equipos y grupos |
 | `/heal` · `/uhcrevive` · `/uhcgive` | `tukiuhc.command.heal` · `.revive` · `.give` | Utilidades |
 | `/uhchub` (y `/hub`, `/lobby` con proxy) | `tukiuhc.hub` | Volver al lobby de la network |
@@ -130,7 +168,7 @@ Todo es opcional: TukiUHC funciona solo.
 - **[TukiCore](https://github.com/ItsTuki/tuki-core)** (recomendado): rangos, prefijos, chat y moderación. Si está instalado, TukiUHC usa sus prefijos en el chat de la partida (`<rank>`), y en el lobby el chat y el tab los maneja TukiCore. Los silencios y el anti-spam de TukiCore también valen en partida.
 - **LuckPerms**: sin TukiCore, TukiUHC muestra el prefijo de LuckPerms en el chat y en el tab del lobby (`luckperms.tab-prefix`).
 - **PlaceholderAPI**: registra `%tukiuhc_<x>%` y permite `<papi:nombre>` en cualquier texto de `lang/*.yml` (por ejemplo en `scoreboard.footer`).
-  - Globales: `state`, `mode`, `team_mode`, `team_size`, `match_name`, `episode`, `episodes`, `phase`, `pvp`, `time`, `time_left`, `alive`, `alive_teams`, `participants`, `border`.
+  - Globales: `state`, `mode`, `team_mode`, `team_size`, `match_name`, `format`, `episode`, `episodes`, `phase`, `pvp`, `time`, `time_left`, `sudden_death`, `alive`, `alive_teams`, `participants`, `border`.
   - Por jugador: `kills`, `is_alive`, `is_playing`, `team`, `team_color`, `team_alive`, `role`, `hearts`, `wins`, `total_kills`, `games`.
 - **BungeeCord / Velocity** (`proxy.enabled`): `/uhchub` y `/hub` mandan al servidor `proxy.lobby-server`. Al terminar, todos vuelven al lobby y el servidor se reinicia solo (`end-action: RESET`) o se apaga (`SHUTDOWN`). Con `block-late-joins` quien entra a una partida empezada vuelve al lobby. El MOTD muestra el estado de la partida (`motd.<estado>` en lang).
 - **Inicio automático** (`autostart`): con `min-players` conectados empieza una cuenta atrás, reparte e inicia sola.

@@ -173,8 +173,12 @@ public final class ScoreboardModule implements UhcModule {
         }
 
         UUID id = player.getUniqueId();
-        lines.add(s(lang.get("scoreboard.episode", Lang.p("episode", game.infiniteEpisodes() ? game.episode() + " ∞" : game.episode()),
-                Lang.c("phase", game.phaseLabel()))));
+        if (game.timed()) {
+            lines.add(s(lang.get(game.suddenDeath() ? "scoreboard.sudden-death" : "scoreboard.timed", Lang.c("phase", game.phaseLabel()))));
+        } else {
+            lines.add(s(lang.get("scoreboard.episode", Lang.p("episode", game.infiniteEpisodes() ? game.episode() + " ∞" : game.episode()),
+                    Lang.c("phase", game.phaseLabel()))));
+        }
         lines.add(blank(lines));
 
         Party team = plugin.teams().team(id);
@@ -197,7 +201,11 @@ public final class ScoreboardModule implements UhcModule {
         }
 
         lines.add(s(lang.get("scoreboard.time", Lang.p("time", Format.time(game.totalSeconds())))));
-        if (game.restLeft() > 0) {
+        if (game.timed()) {
+            if (!game.suddenDeath()) {
+                lines.add(s(lang.get("scoreboard.remaining", Lang.p("time", Format.time(game.timeLeft())))));
+            }
+        } else if (game.restLeft() > 0) {
             lines.add(s(lang.get("scoreboard.rest", Lang.p("seconds", game.restLeft()))));
         } else if (!game.infiniteEpisodes()) {
             lines.add(s(lang.get("scoreboard.remaining", Lang.p("time", Format.time(game.secondsLeftInEpisode())))));

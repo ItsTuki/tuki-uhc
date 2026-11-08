@@ -56,6 +56,7 @@ public final class TukiUHC extends JavaPlugin {
     private ProxyModule proxy;
     private SkinRotationModule skinRotation;
     private LobbyModule lobby;
+    private cl.itstuki.uhc.map.MapModule map;
 
     @Override
     public void onEnable() {
@@ -104,6 +105,9 @@ public final class TukiUHC extends JavaPlugin {
         game.register(proxy);
         proxy.registerChannel();
         game.register(new RewardsModule(this));
+        game.register(new cl.itstuki.uhc.module.ScenariosModule(this));
+        map = new cl.itstuki.uhc.map.MapModule(this);
+        game.register(map);
         AutoStartModule autoStart = new AutoStartModule(this);
         game.register(autoStart);
         autoStart.startTask();
@@ -127,6 +131,9 @@ public final class TukiUHC extends JavaPlugin {
         }
         if (items != null) {
             items.unregisterRecipes();
+        }
+        if (map != null) {
+            map.shutdown();
         }
         if (hooks != null) {
             hooks.disable();
@@ -175,4 +182,5 @@ public final class TukiUHC extends JavaPlugin {
     public ProxyModule proxy() { return proxy; }
     public SkinRotationModule skinRotation() { return skinRotation; }
     public LobbyModule lobby() { return lobby; }
+    public cl.itstuki.uhc.map.MapModule map() { return map; }
 }

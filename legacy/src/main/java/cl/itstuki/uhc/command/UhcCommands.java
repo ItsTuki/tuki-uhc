@@ -33,7 +33,7 @@ public final class UhcCommands implements CommandExecutor, TabCompleter {
     private static final String ADMIN = "tukiuhc.admin";
     private static final List<String> COMMANDS = Arrays.asList("uhchelp", "uhcconfig", "uhcprepare", "uhcstart",
             "uhcforcestart", "uhcstop", "sos", "afk", "renameteam", "heal", "uhcrevive", "uhcrole", "uhcgive", "uhcteam",
-            "uhcreload", "uhcdev", "uhchub");
+            "uhcreload", "uhcdev", "uhchub", "uhcpregen");
     private static final List<String> GIVE_ITEMS = Arrays.asList("golden_head", "golden_skull", "super_apple", "hyper_apple",
             "revive_crystal");
     private final TukiUHC plugin;
@@ -186,6 +186,18 @@ public final class UhcCommands implements CommandExecutor, TabCompleter {
             case "uhcdev":
                 if (allowed(sender, "tukiuhc.dev")) {
                     dev(sender, args);
+                }
+                break;
+            case "uhcpregen":
+                if (allowed(sender, "tukiuhc.command.pregen")) {
+                    String sub = args.length == 0 ? "status" : args[0].toLowerCase(Locale.ROOT);
+                    if (sub.equals("start")) {
+                        plugin.map().start(sender);
+                    } else if (sub.equals("stop")) {
+                        plugin.map().stop(sender);
+                    } else {
+                        plugin.map().status(sender);
+                    }
                 }
                 break;
             case "uhchub": {
@@ -573,6 +585,11 @@ public final class UhcCommands implements CommandExecutor, TabCompleter {
             case "uhcgive":
                 if (n == 1) {
                     options.addAll(GIVE_ITEMS);
+                }
+                break;
+            case "uhcpregen":
+                if (n == 1 && sender.hasPermission("tukiuhc.command.pregen")) {
+                    options.addAll(Arrays.asList("start", "stop", "status"));
                 }
                 break;
             case "uhcdev":
