@@ -1,0 +1,39 @@
+# Objetos de Resource Rush por nivel de dificultad (1 = fácil, 4 = difícil).
+# Se eligen 3 de cada nivel. También se editan en el juego: /uhcconfig > Modos > Resource Rush.
+# Edición Legacy: los objetos que no existen en la versión del servidor se saltan solos.
+pools:
+  '1':
+    - CAKE
+    - RABBIT_FOOT
+    - BOOKSHELF
+    - JUKEBOX
+    - PUMPKIN_PIE
+    - GILDED_BLACKSTONE
+    - WIND_CHARGE
+    - RECOVERY_COMPASS
+    - BREEZE_ROD
+  '2':
+    - ENCHANTING_TABLE
+    - DIAMOND_CHESTPLATE
+    - SADDLE
+    - NAME_TAG
+    - ANVIL
+    - GOLDEN_APPLE
+    - NETHERITE_INGOT
+    - SPLASH_POTION
+  '3':
+    - BLAZE_ROD
+    - GHAST_TEAR
+    - EMERALD
+    - ENDER_EYE
+    - SPONGE
+    - TURTLE_EGG
+    - BLUE_ICE
+    - TOTEM_OF_UNDYING
+  '4':
+    - WITHER_SKELETON_SKULL
+    - DIAMOND_HORSE_ARMOR
+    - ENCHANTED_GOLDEN_APPLE
+    - DRAGON_HEAD
+    - HEART_OF_THE_SEA
+    - ECHO_SHARD

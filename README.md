@@ -1,13 +1,31 @@
 # TukiUHC
 
-Plugin de **UHC por episodios** para servidores **Paper 26.3** (Java 25), totalmente configurable desde el juego. **No necesita** TAB ni SkinRestorer: incluye su propio scoreboard, tab con vida y rotación de skins.
+Plugin de **UHC por episodios** para servidores **Paper 26.3** (Java 25) y, con la edición **Legacy**, de **1.8.8 a 26.3**, totalmente configurable desde el juego. **No necesita** TAB ni SkinRestorer: incluye su propio scoreboard, tab con vida y rotación de skins.
 
 > Creado por **ItsTuki**. Inspirado en el formato de las series UHC por episodios (sin regeneración natural, partes de 20 minutos, cabezas en picas).
 
+## Ediciones
+
+| Jar | Servidores | Java |
+|---|---|---|
+| `TukiUHC-<versión>.jar` (**completa**) | Paper 26.1 – 26.3 | 25 |
+| `TukiUHC-Legacy-<versión>.jar` (**Legacy**) | Spigot / PaperSpigot / Paper **1.8.8 – 26.3** | 8 o superior (lo que pida tu servidor) |
+
+La edición **Legacy** tiene los mismos modos, opciones, comandos, lobby, scoreboard y textos. Diferencias:
+
+- Sin **Era del Cobre**, barra localizadora, diamantes de puesto avanzado, botín de campamento ni límite de la Ciudad Antigua (no existen en versiones antiguas).
+- **Rotación de skins**: solo oculta los nombres (`???`), no cambia las skins.
+- El maniquí y las estatuas del podio son **armor stands** con la cabeza del jugador; los textos flotantes también.
+- Opciones que dependen de la versión se ocultan solas: tridentes (1.13+), cajas de shulker (1.11+), aliento de dragón y manzana encantada fabricable (1.9+).
+- En 1.8–1.17 el lobby se construye más abajo si `lobby.y` supera la altura máxima del mundo.
+- Selectores en comandos: nombre, `@a` o `@s`.
+
+Probada con partidas completas en 1.8.8, 1.12.2, 1.16.5, 1.18.2, 1.20.4, 1.21.4 y 26.3.
+
 ## Instalación
 
-1. Descarga `TukiUHC-<versión>.jar` desde [Releases](../../releases).
-2. Cópialo a `plugins/` en un servidor Paper 26.3 con Java 25 y reinicia.
+1. Descarga desde [Releases](../../releases) el jar de tu edición (ver tabla).
+2. Cópialo a `plugins/` y reinicia.
 3. Entra como OP y usa **`/uhcconfig`**.
 
 ## Cómo se juega una partida
@@ -126,6 +144,6 @@ Español e inglés (`/uhcconfig` → Idioma). Todos los textos están en `plugin
 ## Compilar
 
 ```bash
-./gradlew build        # jar en build/libs/
+./gradlew build        # completa en build/libs/ y Legacy en legacy/build/libs/
 ./gradlew runServer    # servidor Paper 26.3 de prueba
 ```

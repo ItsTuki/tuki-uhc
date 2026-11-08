@@ -10,3 +10,6 @@ plugins {
 }
 
 rootProject.name = "tuki-uhc"
+
+// Edición Legacy: Spigot/Paper 1.8.8 – 26.3 (compilada para Java 8).
+include("legacy")

@@ -1,0 +1,73 @@
+name: TukiUHC
+main: cl.itstuki.uhc.TukiUHC
+version: ${version}
+description: "UHC por episodios totalmente configurable (edición Legacy 1.8.8 - 26.3)."
+api-version: "1.13"
+authors: [ItsTuki]
+website: https://github.com/ItsTuki/tuki-uhc
+softdepend: [TukiCore, LuckPerms, PlaceholderAPI]
+
+
+commands:
+  uhchelp: {description: Ayuda de TukiUHC, aliases: [uhc]}
+  uhcconfig: {description: Abre el menú de configuración}
+  uhcprepare: {description: Reparte a los jugadores}
+  uhcstart: {description: Inicia la partida}
+  uhcforcestart: {description: Inicia sin esperar a nadie}
+  uhcstop: {description: Termina la partida sin ganador}
+  sos: {description: Reinicia la partida y recarga la configuración, aliases: [uhcreset]}
+  afk: {description: Modo AFK}
+  renameteam: {description: Cambia el nombre de tu equipo, usage: /renameteam <nombre>}
+  heal: {description: Cura a un jugador, aliases: [uhcheal], usage: "/heal <jugador|@a>"}
+  uhcrevive: {description: Revive a un jugador eliminado, usage: /uhcrevive <jugador>}
+  uhcrole: {description: "Muestra o revela tu rol (Trolls y Ratas)", aliases: [rol]}
+  uhcgive: {description: Da un ítem especial de UHC}
+  uhcteam: {description: Gestiona equipos y grupos}
+  uhcreload: {description: Recarga config.yml y los idiomas}
+  uhcdev: {description: "Herramientas de desarrollo (modo dev)"}
+  uhchub: {description: Vuelve al lobby de la network}
+permissions:
+  tukiuhc.admin:
+    description: Todo TukiUHC (incluye cada tukiuhc.command.* y tukiuhc.staff).
+    default: op
+    children:
+      tukiuhc.staff: true
+      tukiuhc.command.config: true
+      tukiuhc.command.prepare: true
+      tukiuhc.command.start: true
+      tukiuhc.command.stop: true
+      tukiuhc.command.reset: true
+      tukiuhc.command.reload: true
+      tukiuhc.command.heal: true
+      tukiuhc.command.revive: true
+      tukiuhc.command.give: true
+      tukiuhc.command.team: true
+  tukiuhc.staff:
+    description: "Staff: espía los chats privados y puede entrar a mirar partidas en curso."
+    default: false
+    children:
+      tukiuhc.chat.spy: true
+      tukiuhc.join.spectate: true
+  tukiuhc.command.config: {description: /uhcconfig, default: false}
+  tukiuhc.command.prepare: {description: /uhcprepare, default: false}
+  tukiuhc.command.start: {description: /uhcstart y /uhcforcestart, default: false}
+  tukiuhc.command.stop: {description: /uhcstop, default: false}
+  tukiuhc.command.reset: {description: /sos (/uhcreset), default: false}
+  tukiuhc.command.reload: {description: /uhcreload, default: false}
+  tukiuhc.command.heal: {description: /heal, default: false}
+  tukiuhc.command.revive: {description: /uhcrevive, default: false}
+  tukiuhc.command.give: {description: /uhcgive, default: false}
+  tukiuhc.command.team: {description: /uhcteam, default: false}
+  tukiuhc.chat.spy: {description: Ver los chats de equipo/grupo siendo espectador, default: false}
+  tukiuhc.join.spectate: {description: Entrar como espectador con la partida en curso, default: true}
+  tukiuhc.hub: {description: /uhchub (y /hub /lobby con proxy), default: true}
+  tukiuhc.spectator:
+    description: No participar en las partidas (queda como espectador).
+    default: false
+  tukiuhc.afk:
+    description: Usar /afk.
+    default: true
+  tukiuhc.renameteam:
+    description: Cambiar el nombre de tu equipo.
+    default: true
+  tukiuhc.dev: {description: "/uhcdev: herramientas de desarrollo. No viene con OP: lo da el modo dev de TukiCore", default: false}

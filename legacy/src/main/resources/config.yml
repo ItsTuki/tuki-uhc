@@ -1,0 +1,140 @@
+# ─────────────────────────────────────────────────────────────
+#  TukiUHC — configuración
+#  Lo más cómodo es editarla en el juego con /uhcconfig: los cambios se guardan aquí solos.
+#  Textos: lang/es.yml y lang/en.yml · Objetos de Resource Rush: resource-rush.yml
+# ─────────────────────────────────────────────────────────────
+
+match:
+  name: "Partida UHC"
+  # es o en
+  language: es
+  # PVP, SOLITARIOS, DRAGON, TROLLS_RATAS, RESOURCE_RUSH
+  mode: PVP
+
+teams:
+  # SOLO, MANUAL, RANDOM (aleatorios), PROXIMITY (amor a primera vista)
+  mode: MANUAL
+  size: 2
+  random-reveal-episode: 2
+  proximity-radius: 100
+
+episodes:
+  # Duración de cada parte en minutos y cantidad de partes
+  minutes: 20
+  count: 5
+  # Parte en la que se activa el PvP
+  pvp-episode: 2
+
+border:
+  # Radio inicial del mapa (el mapa mide el doble de lado)
+  radius: 1500
+  final-radius: 50
+  # Parte en la que se cierra el borde (0 = penúltima)
+  shrink-episode: 0
+
+# Opciones activables. "value" es el episodio (0 = último), porcentaje, segundos o bloques según la opción.
+features:
+  teammate-compass: {enabled: true, value: 2}
+  teammate-teleport: {enabled: true}
+  resurrection: {enabled: false}
+  escort: {enabled: false, value: 100}
+  extra-episode: {enabled: false}
+  rest: {enabled: false, value: 5}
+  player-locator: {enabled: true, value: 0}
+  skin-rotation: {enabled: false}
+  head-steal-rod: {enabled: false}
+  tridents: {enabled: false, value: 50}
+  outpost-diamonds: {enabled: false, value: 50}
+  camp-loot: {enabled: false, value: 50}
+  ancient-city-cap: {enabled: true}
+  knights-pact: {enabled: false, value: 4}
+  shulker-box: {enabled: true, value: 4}
+  life-boost: {enabled: true, value: 0}
+  copper-age: {enabled: false}
+  graves: {enabled: false, value: 4}
+  super-apples: {enabled: false}
+  dragon-breath: {enabled: false}
+
+lobby:
+  # Mini lobby flotante: zona de espera con el maniquí del creador y zona de resultados con tops.
+  enabled: true
+  # Mundo (vacío = mundo principal) y posición del centro del lobby.
+  world: ""
+  x: 0
+  y: 300
+  z: 0
+  # Usuario cuya skin lleva el maniquí del lobby.
+  mannequin: ItsTuki
+  # Segundos tras el final antes de llevar a todos a la zona de resultados.
+  results-delay: 8
+
+death:
+  # Minutos que un jugador vivo puede estar desconectado antes de quedar eliminado (0 = nunca).
+  # Sus ítems caen donde se desconectó.
+  offline-elimination-minutes: 10
+  # Bloque que sostiene la pica con la cabeza del jugador muerto (material: peso).
+  pike-blocks:
+    CRAFTING_TABLE: 20
+    FURNACE: 15
+    ANVIL: 8
+    BOOKSHELF: 10
+    OBSIDIAN: 8
+    IRON_BLOCK: 8
+    GOLD_BLOCK: 6
+    ENCHANTING_TABLE: 4
+    TNT: 6
+    DIAMOND_BLOCK: 1
+
+# ───────────────────────── Network / core ─────────────────────────
+
+proxy:
+  # Actívalo si el servidor está detrás de BungeeCord o Velocity (canal "BungeeCord").
+  enabled: false
+  # Servidor del proxy al que se manda a los jugadores (/uhchub y al terminar).
+  lobby-server: lobby
+  # Registrar /hub y /lobby como alias de /uhchub (requiere reiniciar).
+  hub-aliases: true
+  # Al terminar la partida, enviar a todos al lobby de la network.
+  send-to-lobby-on-end: true
+  # Segundos extra (después de results-delay) antes de enviarlos.
+  end-delay: 30
+  # Qué hace el servidor después de vaciarse: RESET (nueva partida), SHUTDOWN (apagar, para servidores
+  # que se reinician solos) o NONE.
+  end-action: RESET
+  # Con la partida en curso, mandar al lobby a quien entra (salvo tukiuhc.join.spectate, que entra a mirar).
+  block-late-joins: false
+
+# MOTD de la lista de servidores según el estado (textos en lang/*.yml, sección motd).
+motd:
+  enabled: true
+
+# Inicio automático cuando hay suficientes jugadores (ideal para servidores de la network).
+autostart:
+  enabled: false
+  min-players: 4
+  # Segundos de cuenta atrás (se cancela si bajan los jugadores).
+  countdown: 60
+
+# Comandos de consola como recompensa (economía, puntos, etc.).
+# Variables: {player} {killer} {victim} {kills} {team} {match}
+rewards:
+  enabled: true
+  # Partidas más cortas que esto no dan premios (evita farmear).
+  min-match-seconds: 60
+  win: []
+  #  - "economy give {player} gold-coin 5"
+  kill: []
+  #  - "economy give {killer} gold-coin 1"
+  eliminated: []
+  participation: []
+  #  - "economy give {player} gold-coin 1"
+
+# Rangos: con TukiCore (recomendado) o LuckPerms instalados, sus prefijos salen en el chat y en lang/*.yml
+# como <rank>. Los rangos se crean y editan desde TukiCore (/rank) o LuckPerms.
+ranks:
+  # Prefijo del rango sobre la cabeza (y tab ordenado por rango) de quien no tiene equipo de UHC.
+  nametag-prefix: true
+
+luckperms:
+  # Sin TukiCore: mostrar el prefijo de LuckPerms en el tab fuera de la partida.
+  tab-prefix: true

@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.1.1 Legacy — 2026-11-08
+
+### Nuevo
+- **Edición Legacy** (`TukiUHC-Legacy-1.1.1.jar`): funciona en Spigot, PaperSpigot y Paper desde **1.8.8 hasta 26.3**, con los mismos modos, opciones, comandos, lobby y textos que la edición completa.
+- Materiales, sonidos y efectos se adaptan a cada versión (XSeries); los textos usan Adventure incluido en el jar.
+- Lo que no existe en versiones antiguas se oculta solo del menú (Era del Cobre, barra localizadora, tridentes antes de 1.13, etc.).
+- La rotación de skins en Legacy oculta los nombres sin cambiar las skins; el maniquí y el podio usan armor stands.
+
 ## 1.1.1 — 2026-11-08
 
 ### Nuevo

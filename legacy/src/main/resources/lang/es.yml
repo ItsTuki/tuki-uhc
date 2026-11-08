@@ -1,0 +1,611 @@
+# TukiUHC — textos en español (formato MiniMessage: https://docs.advntr.dev/minimessage/format)
+# <prefix> inserta el prefijo. Deja un texto en "" para no enviarlo.
+# No cambies este número: el plugin lo usa para actualizar el archivo.
+lang-version: 6
+prefix: "<dark_gray>[<gradient:#FF5555:#FFAA00><bold>UHC</bold></gradient><dark_gray>]</dark_gray> <gold>»</gold> "
+
+phase:
+  pve: "<green>PVE"
+  pvp: "<red>PVP"
+  pvd: "<light_purple>PVD"
+
+game:
+  prepare-cancelled: "<prefix><red>Otro plugin canceló la preparación de la partida."
+  episode-ending: "<prefix><yellow>La parte <white><episode></white> termina en <white><seconds></white> s."
+  already-running: "<prefix><red>Ya hay una partida en curso. Usa <white>/sos</white> para reiniciarla."
+  no-players: "<prefix><red>No hay jugadores para empezar."
+  preparing: "<prefix><yellow>Preparando la partida y repartiendo jugadores…"
+  prepared: "<prefix><green>¡Todos repartidos! El organizador puede usar <white>/uhcstart</white>."
+  still-scattering: "<prefix><yellow>Aún faltan <white><count></white> grupos por repartir. Espera un momento."
+  prepare-first: "<prefix><red>Primero usa <white>/uhcprepare</white>."
+  not-ready: "<prefix><red>Faltan jugadores conectados: <white><players></white>. Usa <white>/uhcforcestart</white> para empezar igual."
+  countdown-subtitle: "<gray>La partida está por comenzar"
+  started-title: "<gradient:#FF5555:#FFAA00><bold>¡A JUGAR!"
+  started-subtitle: "<gray>Buena suerte"
+  started: "<prefix><green><bold>¡La partida ha comenzado!</bold> <gray>No hay regeneración natural de vida."
+  episode-start: "<prefix><gold>¡Inicia la parte <white><episode></white>!"
+  overtime: "<prefix><red>¡Tiempo extra! Parte <white><episode></white>: la partida sigue hasta que quede un ganador."
+  episode-end: "<prefix><gray>Termina la parte <white><episode></white>."
+  episode-title: "<gold><bold>Parte <episode>"
+  episode-subtitle: "<phase>"
+  rest: "<prefix><aqua>Descanso: la parte <white><episode></white> empieza en <white><seconds></white> segundos."
+  rest-title: "<aqua><bold>Descanso"
+  rest-subtitle: "<gray>El tiempo está detenido (<seconds> s)"
+  rest-actionbar: "<aqua>Descanso · <white><seconds></white> s"
+  pvp-enabled: "<prefix><red><bold>¡El PvP está activado!"
+  pact-ended: "<prefix><yellow>Ha terminado el pacto de caballeros."
+  pvp-disabled-hit: "<red>El PvP todavía no está activado."
+  death-prefix: "<dark_red>☠ </dark_red>"
+  you-died: "<prefix><gray>Has sido eliminado. Ahora eres espectador."
+  offline-eliminated: "<prefix><red><player></red> <gray>fue eliminado por estar desconectado más de <minutes> min."
+  you-were-offline-eliminated: "<prefix><gray>Te eliminaron por estar desconectado demasiado tiempo. Ahora eres espectador."
+  late-join: "<prefix><gray>La partida ya empezó: entras como espectador."
+  team-eliminated: "<prefix><red>El equipo <white><team></white> ha sido eliminado."
+  end-title: "<gold><bold>¡FIN DE LA PARTIDA!"
+  end-subtitle: "<yellow>Ganador: <white><winner>"
+  win-reason-last: "<gray>Último equipo en pie"
+  no-winner: "<gray>No hubo ganador"
+  nobody: "Nadie"
+  stopped: "<gray>Partida detenida por el organizador"
+
+stats:
+  header: "<gold><bold>━━━━━━━━ ESTADÍSTICAS FINALES ━━━━━━━━"
+  winner: "<yellow>★ Ganador: <white><winner>"
+  duration: "<gray>⏱ Duración: <white><time>"
+  top-killer: "<gray>⚔ Jugador con más kills: <white><player></white> (<kills>)"
+  most-damaged: "<gray>❤ Jugador con mayor daño recibido: <white><player></white> (<hearts> corazones)"
+  top-team: "<gray>⚐ Equipo con más kills: <white><team></white> (<kills>)"
+  iron-man: "<gray>✔ Iron Man: <white><player></white> (<hearts> corazones de daño)"
+  straw-man: "<gray>☠ Straw Man: <white><player></white> (murió a los <time>)"
+  podium: "<gold>Podio de duración de equipos:"
+  podium-entry: "<gray>  <place>. <white><team></white> <dark_gray>(<time>)"
+
+border:
+  shrinking: "<prefix><red>El borde se está cerrando hasta un radio de <white><radius></white> bloques durante la parte <white><episode></white>."
+  final-warning: "<prefix><yellow>¡Recuerda que al final de esta parte deberás estar en <white>0 0</white>!"
+  final-battle: "<prefix><red><bold>¡Empieza la batalla final!"
+  final-battle-title: "<red><bold>¡Batalla final!"
+  final-battle-subtitle: "<gray>Todos al centro del mapa"
+
+teams:
+  forced: "<prefix><yellow><white><count></white> jugadores sin equipo fueron agrupados al azar."
+  auto-assigned: "<prefix><yellow><white><count></white> jugadores sin equipo fueron repartidos al azar en equipos nuevos."
+  default-name: "Equipo"
+  random-pending: "<prefix><gray>Los equipos aleatorios se revelarán en la parte <white><episode></white>."
+  random-countdown: "<prefix><yellow>¡En <white><seconds></white> s se revelará tu compañero!"
+  random-revealed: "<prefix><green>¡Se han revelado los equipos!"
+  your-team-title: "<gold>Tu equipo"
+  your-team: "<prefix><gray>Tu equipo es <white><team></white>: <mates>"
+  proximity-start: "<prefix><light_purple>❤ Amor a primera vista: acércate a otro jugador para formar equipo (tamaño <white><size></white>, radio <white><radius></white>)."
+  proximity-near: "<light_purple>❤ <white><player></white> está a <white><distance></white> bloques"
+  proximity-formed: "<prefix><light_purple>❤ ¡Se formó el equipo <white><team></white>! <gray>(<players>)"
+  shuffled: "<prefix><green>Se crearon <white><count></white> equipos aleatorios."
+  created: "<prefix><green>Creado: <white><team></white>."
+  deleted: "<prefix><yellow>Eliminado: <white><team></white>."
+  not-found: "<prefix><red>No existe <white><team></white>."
+  added: "<prefix><green>Jugadores agregados a <white><team></white>."
+  joined: "<prefix><green>Ahora estás en <white><team></white>."
+  removed: "<prefix><yellow>Jugadores quitados."
+  cleared: "<prefix><yellow>Se borraron todos los equipos y grupos."
+  none: "<prefix><gray>No hay equipos creados."
+  no-team: "<prefix><red>No tienes equipo."
+  renamed: "<prefix><green><white><player></white> renombró el equipo a <white><team></white>."
+
+chat:
+  global: "<dark_gray>[<red>GLOBAL</red>]</dark_gray> <rank><white><player></white> <gold>»</gold> <white><message>"
+  team: "<dark_gray>[<green>EQUIPO</green>]</dark_gray> <team> <rank><white><player></white> <gold>»</gold> <gray><message>"
+  group: "<dark_gray>[<aqua>GRUPO</aqua>]</dark_gray> <group> <rank><white><player></white> <gold>»</gold> <aqua><message>"
+  rats: "<dark_gray>[<dark_purple>RATAS</dark_purple>]</dark_gray> <white><player></white> <gold>»</gold> <light_purple><message>"
+  dead: "<dark_gray>[<gray>MUERTO</gray>]</dark_gray> <rank><gray><player> » <message>"
+
+items:
+  golden-head:
+    name: "<gold><bold>Cabeza Dorada"
+    lore: ["<gray>Regeneración II: 4 corazones", "<gray>+2 corazones de absorción (2 min)"]
+  golden-skull:
+    name: "<gold><bold>Calavera Dorada"
+    lore: ["<gray>Regeneración II: 4 corazones", "<gray>+2 corazones de absorción (2 min)"]
+  super-apple:
+    name: "<yellow><bold>Super Manzana Dorada"
+    lore: ["<gray>Recupera 4 corazones al instante"]
+  hyper-apple:
+    name: "<light_purple><bold>Hiper Manzana Dorada"
+    lore: ["<gray>+2 corazones de vida máxima", "<dark_gray>Máximo <max> por jugador"]
+    limit: "<prefix><red>Ya comiste el máximo de <white><max></white> Hiper Manzanas."
+    eaten: "<prefix><light_purple>+2 corazones máximos <gray>(<count>/<max>)"
+  revive-crystal:
+    name: "<aqua><bold>Cristal de Resurrección"
+    lore: ["<gray>Colócalo sobre <white>bedrock</white> para", "<gray>revivir a un compañero caído."]
+  team-compass:
+    name: "<aqua><bold>Brújula de Compañero"
+    lore: ["<gray>Apunta a tu compañero más cercano."]
+    received: "<prefix><aqua>Has recibido una brújula que te guía a tu compañero."
+
+revive:
+  need-bedrock: "<prefix><red>El cristal debe colocarse sobre bedrock."
+  disabled: "<prefix><red>La resurrección no está activa."
+  no-target: "<prefix><red>No hay compañeros que puedas revivir (solo una vez por jugador)."
+  done: "<prefix><aqua>✦ <white><player></white> ha resucitado gracias a <white><by></white>."
+  cannot: "<prefix><red>Ese jugador no se puede revivir."
+
+rewards:
+  shulker-warning: "<prefix><light_purple>¡En 30 segundos recibirás una Shulker Box, haz hueco en tu inventario!"
+  shulker-given: "<prefix><light_purple>Todos los jugadores recibieron una Shulker Box."
+  life-boost: "<prefix><red>❤ ¡Todos reciben 10 corazones extra y Resistencia II durante esta parte!"
+  life-boost-title: "<red><bold>+10 ❤"
+  life-boost-subtitle: "<gray>y Resistencia II para la batalla final"
+  locator-on: "<prefix><aqua>¡La barra localizadora de jugadores está activada!"
+  graves-header: "<prefix><gray>Lista de jugadores muertos:"
+  graves-entry: "<dark_gray> - </dark_gray><white><player></white> <gray>murió en <yellow><biome></yellow> | X=<x> Y=<y> Z=<z>"
+  graves-empty: "<prefix><gray>Todavía no ha muerto nadie."
+
+rules:
+  stew: "<gray>La sopa sospechosa solo da brillo (<seconds> s)."
+
+head-steal:
+  thief: "<prefix><gold>¡Le robaste la cabeza a <white><player></white>!"
+  victim: "<prefix><red><white><player></white> te robó la cabeza con su caña. Ya no la dejarás al morir."
+  already: "<prefix><gray>A <white><player></white> ya le robaron la cabeza."
+
+escort:
+  reduced: "<prefix><yellow>Modo escolta: la distancia máxima ahora es <white><max></white> bloques."
+  warning-title: "<yellow><bold>¡ATENCIÓN!"
+  warning-subtitle: "<gray>Te has alejado demasiado de tu equipo (máx. <max> bloques)"
+  danger-title: "<red><bold>¡PELIGRO!"
+  danger-subtitle: "<gray>Estáis demasiado lejos: el equipo recibe daño"
+
+copper:
+  item-name: "<#E77C56><bold>Estatua de Golem de Cobre"
+  item-lore: ["<gray>Colócala para crear un Área de Bendición:", "<gray>regeneración para tu equipo durante 5 min.", "<red>Si un enemigo la rompe, tu equipo pierde 3 ❤"]
+  blessed: "<prefix><#E77C56>¡Has sido bendecido con un Golem! <gray>(lo tiene <white><player></white>)"
+  activated: "<prefix><#E77C56>¡Bendición del golem activada!"
+  intruder: "<prefix><red>¡<white><player></white> entró en vuestra Área de Bendición!"
+  broken: "<prefix><red>¡<white><player></white> rompió vuestro golem! Pierdes 3 corazones."
+  you-broke: "<prefix><gold>¡Rompiste un golem enemigo!"
+  expired: "<prefix><gray>La bendición del golem se terminó."
+
+skins:
+  names-hidden: "<prefix><light_purple>¡Los nombres se han ocultado! Nadie sabe quién es quién…"
+  rotated: "<prefix><light_purple>¡Las skins han rotado! Nadie sabe quién es quién…"
+  not-enough: "<prefix><gray>No hay suficientes skins para rotar."
+  revealed: "<prefix><light_purple>¡Has revelado a <white><player></white>!"
+  you-were-revealed: "<prefix><light_purple>¡Te golpearon y tu skin ha sido revelada a todos!"
+  hidden-name: "<gray>???"
+
+afk:
+  label: "<red><bold>AFK"
+  enabled: "<prefix><gray>Estás AFK: eres invulnerable hasta que te muevas."
+  disabled: "<prefix><green>Ya no estás AFK."
+  broadcast: "<prefix><gray><player> está AFK."
+
+dragon:
+  objective: "<prefix><light_purple>Objetivo: matar a la dragona. En <white>0 0</white> hay un portal al End con 9 ojos: consigue los 3 que faltan. Tiempo: <white><time></white>."
+  killed: "<prefix><light_purple><bold>¡<white><player></white> remató a la dragona!"
+  time-up: "<prefix><red>Se acabó el tiempo y la dragona sigue viva."
+  time-up-reason: "<gray>La dragona sobrevivió"
+
+trolls:
+  need-three: "<prefix><red>Trolls y Ratas necesita al menos 3 jugadores."
+  rats-win: "<gray>Solo quedaron Ratas"
+  rat-team: "Ratas"
+  rats-revealed: "<prefix><dark_purple><bold>¡Las Ratas se revelan!</bold> <white><players></white> <gray>ahora forman un equipo."
+  torch:
+    name: "<gold><bold>Antorcha Troll"
+    lore: ["<gray>Clic derecho: la Rata de tu equipo", "<gray>puede delatarse con un ruido (50 %).", "<dark_gray>Se recarga cada 5 minutos."]
+    used: "<prefix><gold>Has activado el poder de la antorcha… escucha con atención."
+    no-rat: "<prefix><red>No hay ninguna Rata viva en tu equipo."
+    cooldown: "<prefix><red>Debes esperar <white><seconds></white> s para usar la antorcha."
+    actionbar: "<gold>Antorcha Troll: <white><seconds></white> s"
+    rat-noise: "<prefix><dark_purple>No pudiste evitar hacer un pequeño ruido…"
+  intro: "<prefix><dark_purple>Trolls y Ratas: los roles secretos se reparten al inicio de la parte <white><episode></white>."
+  assigned: "<prefix><dark_purple>Se repartieron los roles. Usa <white>/uhcrole</white> para verlo otra vez."
+  no-role: "<prefix><gray>No tienes rol en esta partida."
+  role-pending: "<gray>Oculto"
+  troll-cannot: "<red>Los Troll no pueden atacar a su propio equipo."
+  rat-cannot: "<red>Como Rata solo puedes eliminar a tu equipo de forma indirecta."
+  killed-troll: "<prefix><red>¡Mataste al Troll de tu equipo! Pierdes la mitad de tu vida máxima y la Rata puede atacarte."
+  rat-can-attack: "<prefix><dark_purple><white><player></white> mató al Troll: ahora puedes atacarlo directamente."
+  revealed: "<prefix><white><player></white> <gray>revela que es</gray> <role>"
+  you-revealed: "<prefix><gray>Revelaste tu rol a tu equipo."
+  role:
+    troll:
+      name: "<green>Troll"
+      title: "<green><bold>Eres TROLL"
+      subtitle: "<gray>Descubre quién es la Rata"
+      description: ["<green>[Troll]</green> <gray>Descubre quién es la Rata de tu equipo.", "<gray>No puedes dañar a tus compañeros: crea discordia y dudas."]
+    rata:
+      name: "<dark_purple>Rata"
+      title: "<dark_purple><bold>Eres RATA"
+      subtitle: "<gray>Elimina a tu equipo… sin que te pillen"
+      description: ["<dark_purple>[Rata]</dark_purple> <gray>Elimina a tus compañeros de forma <white>indirecta</white>.", "<gray>Sin armas ni lava. Habla con las otras Ratas escribiendo <white>#</white> antes del mensaje."]
+    normal:
+      name: "<aqua>Normal"
+      title: "<aqua><bold>Eres NORMAL"
+      subtitle: "<gray>Ejecuta a quien sospeches que es la Rata"
+      description: ["<aqua>[Normal]</aqua> <gray>Puedes atacar a tus compañeros si sospechas que son la Rata.", "<red>Si matas al Troll pierdes la mitad de tu vida y la Rata podrá atacarte."]
+
+rush:
+  pending-header: "<prefix><gold>Objetivos (<white><done></white>/<total>):"
+  pending-current: "<yellow> ▶ <number>. <white><item>"
+  pending-entry: "<gray>   <number>. <item>"
+  start: "<prefix><gold>Resource Rush: consigue <white><count></white> objetos en orden. ¡El primero gana!"
+  first: "<prefix><gold>Primer objetivo: <white><item>"
+  got: "<prefix><gold><white><who></white> consiguió <white><item></white> <gray>(<done>/<total>)"
+  next: "<prefix><yellow>Siguiente objetivo: <white><item>"
+  win: "<gray>Completó la lista"
+
+scoreboard:
+  no-team: "<gray>Equipo: <white>sin equipo"
+  team-pending: "<gray>Equipo: <yellow>por revelar"
+  teams-header: "<gray>Equipos (<white><count></white>):"
+  team-line: "<team> <white><alive></white><dark_gray>/<total></dark_gray> <gold><you>"
+  team-out: "<dark_gray><st>■</st> </dark_gray><team> <dark_gray>eliminado"
+  teams-more: "<dark_gray>…y <count> más"
+  title: "<gradient:#FF5555:#FFAA00><bold><name>"
+  mode: "<gray>Modo: <white><mode>"
+  teams: "<gray>Equipos: <white><teams></white> <dark_gray>(<size>)"
+  players: "<gray>Jugadores: <white><count>"
+  waiting: "<yellow>Esperando al organizador…"
+  preparing: "<yellow>Preparando la partida…"
+  ended: "<gold>Partida terminada"
+  episode: "<gold>⏵ Parte <white><episode></white> <phase>"
+  your-team: "<gray>Tu equipo: <team>"
+  mate: "<white><player> <red>❤<hearts> <gray><where>"
+  mate-dead: "<dark_gray><st><player></st> ☠"
+  mate-offline: "<dark_gray><player> (desconectado)"
+  time: "<gray>Tiempo: <white><time>"
+  remaining: "<gray>Restante: <yellow><time>"
+  rest: "<gray>Descanso: <aqua><seconds> s"
+  alive: "<gray>Vivos: <white><count></white> <dark_gray>(<sides> equipos)"
+  kills: "<gray>Kills: <white><kills>"
+  border: "<gray>Borde: <white>±<radius>"
+  rush-target: "<gray>Objetivo: <white><item></white> <dark_gray>(<done>/<total>)"
+  rush-done: "<green>¡Lista completa!"
+  role: "<gray>Rol: <role>"
+  # Líneas fijas al final del scoreboard. Admiten <rank> y <papi:nombre> (PlaceholderAPI). Ej.:
+  #   - ""
+  #   - "<yellow>play.tuserver.cl"
+  footer: []
+
+tab:
+  header: "<newline><gradient:#FF5555:#FFAA00><bold><name></bold></gradient><newline>"
+  footer: "<newline><gray>Vivos: <white><alive></white>  <dark_gray>|</dark_gray>  Parte: <white><episode></white>  <dark_gray>|</dark_gray>  <white><time></white><newline><dark_gray>TukiUHC by ItsTuki<newline>"
+
+prompt:
+  cancel-hint: "<gray>Escribe <white>cancelar</white> para anular."
+  cancelled: "<prefix><gray>Cancelado."
+  not-number: "<prefix><red>Eso no es un número."
+  number: "<prefix><yellow>Escribe en el chat el nuevo valor:"
+  match-name: "<prefix><yellow>Escribe en el chat el nombre de la partida:"
+  party-name: "<prefix><yellow>Escribe en el chat el nombre:"
+  feature-value: "<prefix><yellow>Escribe en el chat el valor <gray>(<hint>)</gray>:"
+  feature-saved: "<prefix><green><feature> <green>quedó activada con <white><value></white>."
+  saved: "<prefix><green>Guardado."
+
+commands:
+  no-permission: "<prefix><red>No tienes permiso para usar esto."
+  usage: "<prefix><gray>Uso: <yellow><usage>"
+  player-not-found: "<prefix><red>No se encontró al jugador <white><player></white>."
+  player-only: "<prefix><red>Solo un jugador puede usar esto."
+  stopped: "<prefix><yellow>Partida detenida."
+  sos: "<prefix><yellow>⚠ El organizador reinició la partida y recargó la configuración."
+  reset-done: "<prefix><yellow>Partida reiniciada."
+  healed: "<prefix><green>Un organizador te curó."
+  heal-done: "<prefix><green>Curado."
+  reloaded: "<prefix><green>Configuración e idioma recargados."
+  afk-running: "<prefix><red>No puedes usar /afk mientras juegas una partida."
+
+help:
+  player:
+    - "<gradient:#FF5555:#FFAA00><bold>TukiUHC</bold></gradient> <gray>v<version>"
+    - "<yellow>/uhchelp</yellow> <gray>— esta ayuda"
+    - "<yellow>/afk</yellow> <gray>— modo AFK (invulnerable hasta moverte)"
+    - "<yellow>/renameteam <nombre></yellow> <gray>— cambia el nombre de tu equipo"
+    - "<yellow>/uhcrole [revelar]</yellow> <gray>— tu rol en Trolls y Ratas"
+    - "<yellow>/uhchub</yellow> <gray>— vuelve al lobby de la network"
+    - "<gray>Chat: normal = equipo, <white>!</white> = todos, <white>@</white> = grupo, <white>#</white> = ratas"
+  admin:
+    - "<gold>Organizador:"
+    - "<yellow>/uhcconfig</yellow> <gray>— menú de configuración"
+    - "<yellow>/uhcprepare</yellow> <gray>— reparte a los jugadores por el mapa"
+    - "<yellow>/uhcstart</yellow> <gray>— cuenta atrás de 10 s si todos están listos"
+    - "<yellow>/uhcforcestart</yellow> <gray>— empieza sin esperar a nadie"
+    - "<yellow>/uhcstop</yellow> <gray>— termina la partida sin ganador"
+    - "<yellow>/sos</yellow> <gray>— reinicia la partida y recarga la configuración"
+    - "<yellow>/uhcteam</yellow> <gray>— crear, borrar y llenar equipos/grupos"
+    - "<yellow>/heal <jugador></yellow> <gray>— curar a un jugador"
+    - "<yellow>/uhcrevive <jugador></yellow> <gray>— revivir a un jugador"
+    - "<yellow>/uhcgive <ítem></yellow> <gray>— ítems especiales de prueba"
+    - "<yellow>/uhcreload</yellow> <gray>— recarga config.yml e idiomas"
+
+modes:
+  pvp:
+    name: "<red>PvP por equipos"
+    lore: ["<gray>Gana el último equipo con vida."]
+  solitarios:
+    name: "<gray>Solitarios"
+    lore: ["<gray>Todos contra todos, sin equipos.", "<gray>Gana el último jugador vivo."]
+  dragon:
+    name: "<light_purple>Dragón (PvD)"
+    lore: ["<gray>Portal al End en 0 0 con 9 ojos.", "<gray>Gana quien remate a la dragona", "<gray>antes de que acabe el tiempo.", "<gray>Sirve para un jugador o equipos."]
+  trolls-ratas:
+    name: "<dark_purple>Trolls y Ratas"
+    lore: ["<gray>Equipos de 3 con roles secretos:", "<green>Troll</green><gray>, <dark_purple>Rata</dark_purple> <gray>y <aqua>Normal</aqua>."]
+  resource-rush:
+    name: "<gold>Resource Rush"
+    lore: ["<gray>Consigue 12 objetos en orden de", "<gray>dificultad antes que los demás.", "<gray>Sin límite de tiempo."]
+
+team-modes:
+  solo:
+    name: "<gray>Sin equipos"
+    lore: ["<gray>Cada jugador juega solo."]
+  manual:
+    name: "<green>Manuales"
+    lore: ["<gray>Tú creas los equipos desde el menú", "<gray>o con <white>/uhcteam</white>."]
+  random:
+    name: "<yellow>Aleatorios"
+    lore: ["<gray>Todos empiezan separados y los", "<gray>equipos se revelan en un episodio."]
+  proximity:
+    name: "<light_purple>Amor a primera vista"
+    lore: ["<gray>Los equipos se forman al juntarse", "<gray>durante la partida."]
+
+value-types:
+  episode:
+    format: "parte <value>"
+    last: "última parte (<value>)"
+    hint: "número de episodio, 0 = último"
+  percent:
+    format: "<value>%"
+    hint: "porcentaje 0-100"
+  seconds:
+    format: "<value> s"
+    hint: "segundos"
+  blocks:
+    format: "<value> bloques"
+    hint: "bloques"
+
+features:
+  teammate-compass:
+    name: "<aqua>Brújula de compañero"
+    lore: ["<gray>Desde la parte indicada, todos reciben", "<gray>una brújula que apunta a su compañero."]
+  teammate-teleport:
+    name: "<aqua>Empezar junto al compañero"
+    lore: ["<gray>Al repartir, los equipos aparecen juntos."]
+  resurrection:
+    name: "<aqua>Resurrección de compañeros"
+    lore: ["<gray>Activa el Cristal de Resurrección:", "<gray>sobre bedrock revive a un compañero", "<gray>sin ítems (una vez por jugador)."]
+  escort:
+    name: "<yellow>Modo escolta"
+    lore: ["<gray>Los compañeros no pueden alejarse más", "<gray>de X bloques. Si siguen lejos, cada", "<gray>10 s el equipo pierde 1 corazón."]
+  extra-episode:
+    name: "<yellow>Episodio extra"
+    lore: ["<gray>Añade 1 episodio al final de la partida."]
+  rest:
+    name: "<yellow>Descanso entre episodios"
+    lore: ["<gray>Pausa el tiempo unos segundos", "<gray>entre cada parte."]
+  player-locator:
+    name: "<aqua>Localizador de jugadores"
+    lore: ["<gray>Activa la barra localizadora", "<gray>de jugadores en la parte indicada."]
+  skin-rotation:
+    name: "<light_purple>Rotación de skins"
+    lore: ["<gray>Al empezar y en cada parte impar", "<gray>se ocultan los nombres de todos.", "<gray>Golpear revela al enemigo.", "<dark_gray>(Legacy: sin cambio de skins)"]
+  head-steal-rod:
+    name: "<gold>Caña de pescar cabezas"
+    lore: ["<gray>Enganchar a un enemigo con la caña", "<gray>le roba la cabeza (no la dejará al morir)."]
+  tridents:
+    name: "<aqua>Tridentes"
+    lore: ["<gray>Los ahogados con tridente lo sueltan", "<gray>con esta probabilidad, sin perder durabilidad."]
+  outpost-diamonds:
+    name: "<aqua>Diamantes en puestos de saqueadores"
+    lore: ["<gray>Probabilidad de 1-2 diamantes en sus cofres."]
+  camp-loot:
+    name: "<gold>Campamentos con botín raro"
+    lore: ["<gray>Los cofres secretos de los campamentos", "<gray>pueden traer mazo, tridente o élitros."]
+  ancient-city-cap:
+    name: "<dark_aqua>Limitar ciudades antiguas"
+    lore: ["<gray>Quita pociones de regeneración y", "<gray>manzanas encantadas de sus cofres."]
+  knights-pact:
+    name: "<white>Pacto de caballeros"
+    lore: ["<gray>Nadie puede dañar a otros jugadores", "<gray>hasta la parte indicada."]
+  shulker-box:
+    name: "<light_purple>Shulker Box"
+    lore: ["<gray>Todos reciben una Shulker Box", "<gray>al inicio de la parte indicada."]
+  life-boost:
+    name: "<red>Aumento de vida"
+    lore: ["<gray>+10 corazones permanentes y", "<gray>Resistencia II en la parte indicada."]
+  copper-age:
+    name: "<#E77C56>Edad de Cobre"
+    lore: ["<gray>En la última parte cada equipo recibe", "<gray>una estatua de Golem de Cobre que crea", "<gray>un Área de Bendición."]
+  graves:
+    name: "<gray>Tumbas de jugadores"
+    lore: ["<gray>En la parte indicada se publica dónde", "<gray>murió cada jugador (bioma y coordenadas)."]
+  super-apples:
+    name: "<yellow>Super e Hiper manzanas"
+    lore: ["<gray>Activa los crafteos de Super Manzana", "<gray>(+4 ❤) e Hiper Manzana (+2 ❤ máx.)."]
+  dragon-breath:
+    name: "<light_purple>Aliento de dragón crafteable"
+    lore: ["<gray>Poción arrojadiza + 6 pepitas de oro", "<gray>+ 2 polvos de blaze."]
+
+menu:
+  back: "<gray>← Volver"
+  close: "<red>Cerrar"
+  state-on: "<green>✔ Activado"
+  state-off: "<red>✘ Desactivado"
+  selected: "<green>✔ Seleccionado"
+  click-select: "<yellow>Clic para seleccionar"
+  number-help: ["<yellow>Clic izq: +<step>  <gray>|</gray>  Clic der: -<step>", "<yellow>Shift + clic: escribir el valor"]
+  main:
+    title: "<dark_gray>TukiUHC · Configuración"
+    mode:
+      name: "<gold>Modo de juego"
+      lore: ["<gray>Actual: <value>", "", "<yellow>Clic para cambiar"]
+    teams:
+      name: "<gold>Equipos"
+      lore: ["<gray>Formación: <value>", "<gray>Tamaño: <white><size>", "", "<yellow>Clic para configurar"]
+    settings:
+      name: "<gold>Ajustes generales"
+      lore: ["<gray>Nombre, episodios, PvP y borde.", "", "<yellow>Clic para abrir"]
+    features:
+      name: "<gold>Opciones de la partida"
+      lore: ["<gray>Brújula, escolta, resurrección,", "<gray>shulker, Edad de Cobre y más.", "", "<yellow>Clic para abrir"]
+    language:
+      name: "<aqua>Idioma / Language"
+      lore: ["<gray>Actual: <white><value>", "", "<yellow>Clic para cambiar ES ⇄ EN"]
+    prepare:
+      name: "<green><bold>Preparar partida"
+      lore: ["<gray>Reparte a los jugadores por el mapa", "<gray>(igual que /uhcprepare)."]
+    start:
+      name: "<dark_green><bold>Iniciar partida"
+      lore: ["<gray>Cuenta atrás de 10 s (/uhcstart).", "<yellow>Shift + clic: forzar inicio"]
+    reset:
+      name: "<red><bold>Reiniciar"
+      lore: ["<gray>Detiene la partida y vuelve al lobby.", "<yellow>Shift + clic para confirmar"]
+  modes:
+    title: "<dark_gray>Modos de juego"
+    rush-edit:
+      name: "<gold>Editar Resource Rush"
+      lore: ["<gray>Elige los objetos de cada nivel."]
+  settings:
+    title: "<dark_gray>Ajustes generales"
+    name:
+      name: "<gold>Nombre de la partida"
+      lore: ["<gray>Actual: <white><value>", "", "<yellow>Clic para cambiar"]
+    minutes:
+      name: "<gold>Duración de cada parte"
+      lore: ["<gray>Actual: <white><value> minutos"]
+    episodes:
+      name: "<gold>Número de partes"
+      lore: ["<gray>Actual: <white><value>"]
+    pvp:
+      name: "<gold>Parte en que empieza el PvP"
+      lore: ["<gray>Actual: <white>parte <value>"]
+    border:
+      name: "<gold>Tamaño del mapa"
+      lore: ["<gray>Radio inicial: <white><value> bloques"]
+    border-final:
+      name: "<gold>Tamaño final del borde"
+      lore: ["<gray>Radio final: <white><value> bloques"]
+    border-episode:
+      name: "<gold>Parte en que se cierra el borde"
+      lore: ["<gray>Actual: <white><value></white> <dark_gray>(0 = penúltima)"]
+    preset-live:
+      name: "<red>Modo Directo"
+      lore: ["<gray>5 partes de 60 minutos.", "", "<yellow>Clic para aplicar"]
+    preset-episodes:
+      name: "<aqua>Modo Episodios"
+      lore: ["<gray>10 partes de 25 minutos.", "", "<yellow>Clic para aplicar"]
+  features:
+    title: "<dark_gray>Opciones de la partida"
+    state: "<gray>Estado: <state>"
+    value: "<gray>Valor: <white><value>"
+    help-toggle: "<yellow>Clic izq: activar / desactivar"
+    help-value: "<yellow>Clic der: cambiar el valor"
+  teams:
+    title: "<dark_gray>Equipos"
+    size:
+      name: "<gold>Tamaño de equipo"
+      lore: ["<gray>Actual: <white><value> jugadores"]
+    reveal:
+      name: "<gold>Revelación de aleatorios"
+      lore: ["<gray>Parte: <white><value>"]
+    manage-teams:
+      name: "<green>Gestionar equipos"
+      lore: ["<gray>Crear, borrar y asignar jugadores.", "<gray>Equipos: <white><count>"]
+    manage-groups:
+      name: "<aqua>Gestionar grupos"
+      lore: ["<gray>Grupos para el chat con <white>@</white>.", "<gray>Grupos: <white><count>"]
+    shuffle:
+      name: "<yellow>Equipos al azar ahora"
+      lore: ["<gray>Reparte a todos los conectados", "<gray>en equipos del tamaño elegido."]
+  parties:
+    team:
+      title: "<dark_gray>Gestión de equipos"
+      create: "<green>Crear equipo"
+      delete: "<red>Borrar equipo"
+    group:
+      title: "<dark_gray>Gestión de grupos"
+      create: "<green>Crear grupo"
+      delete: "<red>Borrar grupo"
+    delete-help: ["<gray>Clic y luego elige cuál borrar."]
+    delete-active: ["<red>Modo borrar activo: elige cuál borrar.", "<gray>Clic otra vez para salir."]
+    empty: "<dark_gray>Sin jugadores"
+    click-manage: "<yellow>Clic para gestionar"
+    click-delete: "<red>Clic para BORRAR"
+  party:
+    click-remove: "<red>Clic para quitar"
+    rename: "<gold>Cambiar nombre"
+    add: "<green>Añadir jugadores"
+    add-title: "<dark_gray>Añadir a <team>"
+    no-team: "<gray>Sin equipo"
+    current: "<gray>Ahora en: <white><team>"
+    click-add: "<green>Clic para añadir"
+  rush:
+    title: "<dark_gray>Resource Rush · Niveles"
+    tier: "<gold>Nivel <tier>"
+    tier-lore: ["<gray>Objetos: <white><count>", "<yellow>Clic para editar"]
+    click-remove: "<red>Clic para quitar"
+    help: "<gray>Haz clic en un ítem de tu inventario para añadirlo"
+
+lobby:
+  book:
+    name: "<gold><bold>Configurar partida"
+    lore: ["<gray>Clic derecho para abrir /uhcconfig."]
+  creator-title: "<gradient:#FF5555:#FFAA00><bold>TukiUHC</bold></gradient><newline><gray>Creado por <gradient:#55FFFF:#5555FF><bold><player></bold></gradient>"
+  creator-description: "<aqua>Creador de TukiUHC"
+  creator-click: "<prefix><gray>TukiUHC es de código abierto: <link>"
+  creator-link: "<aqua><u>ver en GitHub</u>"
+  welcome: "<gold><bold>¡Bienvenido!</bold><newline><gray>Espera a que el organizador<newline><gray>inicie la partida.<newline><dark_gray>/uhchelp para ver la ayuda"
+  results-teleport: "<prefix><gold>¡Mira los resultados y los tops en el podio!"
+  results-title: "<gold><bold><match></bold><newline><yellow>★ Ganador: <white><winner></white><newline><gray>Duración: <white><time>"
+  top-kills-title: "<red><bold>⚔ Top kills de la partida"
+  top-survival-title: "<aqua><bold>⏱ Top supervivencia"
+  top-wins-title: "<gold><bold>★ Top victorias (histórico)"
+  top-alltime-kills-title: "<red><bold>⚔ Top kills (histórico)"
+  top-line: "<gray><place>. <white><player></white> <dark_gray>—</dark_gray> <yellow><value>"
+  top-empty: "<dark_gray>Sin datos todavía"
+  survived: "sobrevivió"
+
+states:
+  lobby: "<green>En espera"
+  scattering: "<yellow>Repartiendo"
+  prepared: "<yellow>Preparada"
+  starting: "<gold>Empezando"
+  playing: "<red>En juego"
+  ended: "<gray>Terminada"
+
+motd:
+  lobby: "<gradient:#FF5555:#FFAA00><bold><name></bold></gradient> <dark_gray>| <gray><mode><newline><green>● Esperando jugadores <dark_gray>(<white><online></white>)"
+  scattering: "<gradient:#FF5555:#FFAA00><bold><name></bold></gradient> <dark_gray>| <gray><mode><newline><yellow>● Repartiendo jugadores…"
+  prepared: "<gradient:#FF5555:#FFAA00><bold><name></bold></gradient> <dark_gray>| <gray><mode><newline><yellow>● A punto de empezar"
+  starting: "<gradient:#FF5555:#FFAA00><bold><name></bold></gradient> <dark_gray>| <gray><mode><newline><gold>● Empezando"
+  playing: "<gradient:#FF5555:#FFAA00><bold><name></bold></gradient> <dark_gray>| <gray><mode><newline><red>● En juego <dark_gray>— <white><alive></white> vivos, parte <white><episode>"
+  ended: "<gradient:#FF5555:#FFAA00><bold><name></bold></gradient> <dark_gray>| <gray><mode><newline><gray>● Partida terminada"
+
+proxy:
+  disabled: "<prefix><red>El modo network (proxy.enabled) está desactivado en este servidor."
+  sending: "<prefix><gray>Enviándote a <white><server></white>…"
+  end-sending: "<prefix><yellow>Volviendo al lobby de la network (<white><server></white>)…"
+  match-running: "<prefix><gray>La partida ya empezó: entras como espectador."
+  match-running-kick: "<red>La partida ya empezó.<newline><gray>Vuelve a intentarlo cuando termine."
+
+autostart:
+  countdown: "<prefix><yellow>La partida empieza en <white><seconds></white> s."
+  cancelled: "<prefix><red>Inicio cancelado: faltan jugadores (<white><ready></white>/<min>)."
+  actionbar: "<yellow>Empieza en <white><seconds></white> s <dark_gray>| <gray>Jugadores: <white><ready>"
+
+dev:
+  help:
+    - "<gold>Herramientas de desarrollo:"
+    - "<yellow>/uhcdev info</yellow> <gray>— estado interno de la partida"
+    - "<yellow>/uhcdev skip</yellow> <gray>— termina la parte (o el descanso) ahora"
+    - "<yellow>/uhcdev time <segundo></yellow> <gray>— mueve el reloj de la parte"
+    - "<yellow>/uhcdev pvp</yellow> <gray>— fuerza el PvP aunque no sea su parte"
+  info:
+    - "<gold>Estado: <white><state></white> <dark_gray>|</dark_gray> modo <white><mode>"
+    - "<gray>Parte <white><episode></white>, segundo <white><second></white>/<length> <dark_gray>|</dark_gray> descanso <white><rest></white> s <dark_gray>|</dark_gray> total <white><total></white> s"
+    - "<gray>PvP: <white><pvp></white> <dark_gray>|</dark_gray> participantes <white><participants></white>, vivos <white><alive></white>, lados <white><sides>"
+  skipped: "<prefix><yellow>[Dev] La parte termina en el próximo segundo."
+  time-set: "<prefix><yellow>[Dev] Reloj de la parte en el segundo <white><second></white>."
+  not-playing: "<prefix><red>[Dev] No hay una partida en juego (o está en el descanso)."
+  pvp-forced: "<prefix><yellow>[Dev] PvP forzado activado."
+  pvp-normal: "<prefix><yellow>[Dev] PvP vuelve a depender de la parte."

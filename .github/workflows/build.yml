@@ -31,8 +31,13 @@ jobs:
           name: TukiUHC
           path: build/libs/*.jar
 
+      - uses: actions/upload-artifact@v4
+        with:
+          name: TukiUHC-Legacy
+          path: legacy/build/libs/*.jar
+
       - name: Adjuntar jar al release
         if: github.event_name == 'release'
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh release upload "${{ github.event.release.tag_name }}" build/libs/*.jar --clobber
+        run: gh release upload "${{ github.event.release.tag_name }}" build/libs/*.jar legacy/build/libs/*.jar --clobber
