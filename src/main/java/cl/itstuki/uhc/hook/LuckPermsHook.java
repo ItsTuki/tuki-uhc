@@ -42,4 +42,10 @@ final class LuckPermsHook implements RankProvider {
         String group = meta(player).getPrimaryGroup();
         return group == null ? "" : group;
     }
+
+    @Override
+    public int weight(Player player) {
+        var group = api.getGroupManager().getGroup(api.getPlayerAdapter(Player.class).getUser(player).getPrimaryGroup());
+        return group == null ? 0 : group.getWeight().orElse(0);
+    }
 }

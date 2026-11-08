@@ -15,6 +15,7 @@ final class TukiCoreHook implements RankProvider {
     private final MethodHandle prefix;
     private final MethodHandle suffix;
     private final MethodHandle rank;
+    private final MethodHandle weight;
 
     TukiCoreHook(Plugin core) throws ReflectiveOperationException {
         Class<?> api = Class.forName("cl.itstuki.core.api.TukiCoreAPI", true, core.getClass().getClassLoader());
@@ -23,6 +24,7 @@ final class TukiCoreHook implements RankProvider {
         prefix = lookup.findStatic(api, "prefix", type);
         suffix = lookup.findStatic(api, "suffix", type);
         rank = lookup.findStatic(api, "rank", type);
+        weight = lookup.findStatic(api, "weight", MethodType.methodType(int.class, Player.class));
     }
 
     static boolean present() {
@@ -49,6 +51,15 @@ final class TukiCoreHook implements RankProvider {
             return (String) suffix.invokeExact(player);
         } catch (Throwable ex) {
             return "";
+        }
+    }
+
+    @Override
+    public int weight(Player player) {
+        try {
+            return (int) weight.invokeExact(player);
+        } catch (Throwable ex) {
+            return 0;
         }
     }
 

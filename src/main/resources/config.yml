@@ -131,6 +131,10 @@ rewards:
 
 # Rangos: con TukiCore (recomendado) o LuckPerms instalados, sus prefijos salen en el chat y en lang/*.yml
 # como <rank>. Los rangos se crean y editan desde TukiCore (/rank) o LuckPerms.
+ranks:
+  # Prefijo del rango sobre la cabeza (y tab ordenado por rango) de quien no tiene equipo de UHC.
+  nametag-prefix: true
+
 luckperms:
   # Sin TukiCore: mostrar el prefijo de LuckPerms en el tab fuera de la partida.
   tab-prefix: true

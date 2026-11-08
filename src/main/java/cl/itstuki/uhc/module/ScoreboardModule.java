@@ -282,7 +282,7 @@ public final class ScoreboardModule implements UhcModule {
             } else if (hide) {
                 spec = known ? new Spec("uhct_known", NamedTextColor.WHITE, Component.empty(), Team.OptionStatus.ALWAYS)
                         : new Spec("uhct_hidden", NamedTextColor.GRAY, Component.empty(), Team.OptionStatus.NEVER);
-            } else {
+            } else if ((spec = rankSpec(target)) == null) {
                 continue;
             }
             specs.putIfAbsent(spec.id(), spec);
@@ -294,7 +294,7 @@ public final class ScoreboardModule implements UhcModule {
                 team = board.registerNewTeam(spec.id());
             }
             // uhct_known/uhct_hidden agrupan a jugadores sin equipo solo para el nombre: entre ellos sí hay PvP.
-            boolean ff = friendlyFire || spec.id().startsWith("uhct_");
+            boolean ff = friendlyFire || spec.id().startsWith("uhct_") || spec.id().startsWith("uhcr_");
             // Cada setter manda un paquete: solo se cambia lo que cambió.
             if (!team.hasColor() || team.color() != spec.color()) {
                 team.color(spec.color());
@@ -313,7 +313,7 @@ public final class ScoreboardModule implements UhcModule {
             }
         }
         for (Team team : Set.copyOf(board.getTeams())) {
-            if (!team.getName().startsWith("uhct_") && !team.getName().startsWith("uhc_")) {
+            if (!team.getName().startsWith("uhct_") && !team.getName().startsWith("uhc_") && !team.getName().startsWith("uhcr_")) {
                 continue;
             }
             if (!specs.containsKey(team.getName())) {
@@ -332,6 +332,23 @@ public final class ScoreboardModule implements UhcModule {
                 team.addEntry(entry.getKey());
             }
         }
+    }
+
+    /**
+     * Sin equipo de UHC: el prefijo del rango (TukiCore o LuckPerms) sobre la cabeza y en el tab.
+     * El nombre del equipo lleva el peso, así el tab queda ordenado de mayor a menor rango.
+     */
+    private @org.jspecify.annotations.Nullable Spec rankSpec(Player target) {
+        if (!plugin.hooks().hasRanks() || !plugin.getConfig().getBoolean("ranks.nametag-prefix", true)) {
+            return null;
+        }
+        String prefix = plugin.hooks().ranks().prefix(target);
+        if (prefix.isEmpty()) {
+            return null;
+        }
+        int weight = Math.max(0, Math.min(9999, plugin.hooks().ranks().weight(target)));
+        String id = "uhcr_" + String.format("%04d", 9999 - weight) + "_" + Integer.toHexString(prefix.hashCode());
+        return new Spec(id, NamedTextColor.WHITE, cl.itstuki.uhc.hook.Hooks.legacy(prefix), Team.OptionStatus.ALWAYS);
     }
 
     private static String nameOf(UUID id) {

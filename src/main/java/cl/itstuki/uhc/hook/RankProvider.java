@@ -17,6 +17,11 @@ public interface RankProvider {
     }
 
     /** Grupo principal del jugador, o vacío. */
+    /** Peso del rango (para ordenar el tab: los de más peso arriba). */
+    default int weight(Player player) {
+        return 0;
+    }
+
     default String group(Player player) {
         return "";
     }
