@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.1.1 — 2026-11-08
+
+### Nuevo
+- **Prefijo del rango sobre la cabeza** (TukiCore o LuckPerms) para quien no tiene equipo de UHC, con el tab ordenado por peso del rango (`ranks.nametag-prefix`).
+- **`/uhcdev`**: `info`, `skip` (termina la parte), `time <segundo>` y `pvp` (fuerza el PvP). Requiere `tukiuhc.dev`, que no viene con OP: lo da el modo dev de TukiCore.
+
+### Correcciones
+- Si al archivo `lang/` del servidor le falta un texto nuevo, se usa el del jar en vez de mostrar la clave.
+
 ## 1.1.0 — 2026-11-07
 
 TukiUHC queda solo para el UHC; la parte administrativa (rangos, chat, moderación) pasa a **TukiCore**, que es compatible.
