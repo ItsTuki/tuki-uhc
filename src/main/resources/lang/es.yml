@@ -588,3 +588,20 @@ autostart:
   countdown: "<prefix><yellow>La partida empieza en <white><seconds></white> s."
   cancelled: "<prefix><red>Inicio cancelado: faltan jugadores (<white><ready></white>/<min>)."
   actionbar: "<yellow>Empieza en <white><seconds></white> s <dark_gray>| <gray>Jugadores: <white><ready>"
+
+dev:
+  help:
+    - "<gold>Herramientas de desarrollo:"
+    - "<yellow>/uhcdev info</yellow> <gray>— estado interno de la partida"
+    - "<yellow>/uhcdev skip</yellow> <gray>— termina la parte (o el descanso) ahora"
+    - "<yellow>/uhcdev time <segundo></yellow> <gray>— mueve el reloj de la parte"
+    - "<yellow>/uhcdev pvp</yellow> <gray>— fuerza el PvP aunque no sea su parte"
+  info:
+    - "<gold>Estado: <white><state></white> <dark_gray>|</dark_gray> modo <white><mode>"
+    - "<gray>Parte <white><episode></white>, segundo <white><second></white>/<length> <dark_gray>|</dark_gray> descanso <white><rest></white> s <dark_gray>|</dark_gray> total <white><total></white> s"
+    - "<gray>PvP: <white><pvp></white> <dark_gray>|</dark_gray> participantes <white><participants></white>, vivos <white><alive></white>, lados <white><sides>"
+  skipped: "<prefix><yellow>[Dev] La parte termina en el próximo segundo."
+  time-set: "<prefix><yellow>[Dev] Reloj de la parte en el segundo <white><second></white>."
+  not-playing: "<prefix><red>[Dev] No hay una partida en juego (o está en el descanso)."
+  pvp-forced: "<prefix><yellow>[Dev] PvP forzado activado."
+  pvp-normal: "<prefix><yellow>[Dev] PvP vuelve a depender de la parte."

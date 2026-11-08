@@ -71,6 +71,8 @@ public final class GameManager {
     private int episodeSecond;
     private long totalSeconds;
     private int restLeft;
+    /** Modo dev: PvP forzado aunque no haya llegado su parte. */
+    private boolean devPvp;
     private int countdown;
     private int pendingScatter;
     private boolean pvpAnnounced;
@@ -599,7 +601,40 @@ public final class GameManager {
     }
 
     public boolean pvpAllowed() {
-        return state == GameState.PLAYING && episode >= pvpEpisode();
+        return state == GameState.PLAYING && (devPvp || episode >= pvpEpisode());
+    }
+
+    // ── Herramientas de desarrollo (/uhcdev, permiso tukiuhc.dev) ──
+
+    /** Termina la parte actual (o el descanso) en el próximo segundo. */
+    public boolean devSkip() {
+        if (state != GameState.PLAYING) {
+            return false;
+        }
+        if (restLeft > 0) {
+            restLeft = 1;
+        } else {
+            episodeSecond = Math.max(episodeSecond, settings().episodeSeconds() - 1);
+        }
+        return true;
+    }
+
+    /** Mueve el reloj de la parte actual al segundo indicado. */
+    public boolean devSetSecond(int second) {
+        if (state != GameState.PLAYING || restLeft > 0) {
+            return false;
+        }
+        episodeSecond = Math.max(0, Math.min(second, settings().episodeSeconds() - 1));
+        return true;
+    }
+
+    public boolean devTogglePvp() {
+        devPvp = !devPvp;
+        return devPvp;
+    }
+
+    public int episodeSecond() {
+        return episodeSecond;
     }
 
     public Component phaseLabel() {
@@ -742,6 +777,7 @@ public final class GameManager {
         totalSeconds = 0;
         each(UhcModule::onReset);
         matchId++;
+        devPvp = false;
         for (World world : Bukkit.getWorlds()) {
             world.setGameRule(GameRules.NATURAL_HEALTH_REGENERATION, true);
             world.setGameRule(GameRules.LOCATOR_BAR, true);

@@ -189,6 +189,8 @@ public final class UhcCommands {
             plugin.lang().send(sender(ctx), "commands.reloaded");
         })).build(), "Recarga config.yml y los idiomas", List.of());
 
+        registrar.register(devCommand().build(), "Herramientas de desarrollo (modo dev)", List.of());
+
         boolean proxyAliases = plugin.getConfig().getBoolean("proxy.enabled", false)
                 && plugin.getConfig().getBoolean("proxy.hub-aliases", true);
         registrar.register(Commands.literal("uhchub").requires(perm("tukiuhc.hub")).executes(ok(ctx -> {
@@ -303,5 +305,31 @@ public final class UhcCommands {
                         return n == null ? "?" : n;
                     }).toList()))));
         }
+    }
+
+    /** /uhcdev: solo con tukiuhc.dev, que no viene con OP (lo da el modo dev de TukiCore). */
+    private LiteralArgumentBuilder<CommandSourceStack> devCommand() {
+        return Commands.literal("uhcdev").requires(perm("tukiuhc.dev"))
+                .executes(ok(ctx -> plugin.lang().sendList(sender(ctx), "dev.help")))
+                .then(Commands.literal("info").executes(ok(ctx -> {
+                    var game = plugin.game();
+                    plugin.lang().sendList(sender(ctx), "dev.info",
+                            Lang.p("state", game.state().name()), Lang.p("mode", plugin.settings().mode().name()),
+                            Lang.p("episode", game.episode()), Lang.p("second", game.episodeSecond()),
+                            Lang.p("length", plugin.settings().episodeSeconds()), Lang.p("rest", game.restLeft()),
+                            Lang.p("pvp", game.pvpAllowed()), Lang.p("participants", game.participants().size()),
+                            Lang.p("alive", game.alive().size()), Lang.p("sides", game.aliveSides()),
+                            Lang.p("total", game.totalSeconds()));
+                })))
+                .then(Commands.literal("skip").executes(ok(ctx -> plugin.lang().send(sender(ctx),
+                        plugin.game().devSkip() ? "dev.skipped" : "dev.not-playing"))))
+                .then(Commands.literal("time").then(Commands.argument("segundo", IntegerArgumentType.integer(0))
+                        .executes(ok(ctx -> {
+                            int second = IntegerArgumentType.getInteger(ctx, "segundo");
+                            plugin.lang().send(sender(ctx), plugin.game().devSetSecond(second) ? "dev.time-set" : "dev.not-playing",
+                                    Lang.p("second", plugin.game().episodeSecond()));
+                        }))))
+                .then(Commands.literal("pvp").executes(ok(ctx -> plugin.lang().send(sender(ctx),
+                        plugin.game().devTogglePvp() ? "dev.pvp-forced" : "dev.pvp-normal"))));
     }
 }

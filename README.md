@@ -91,6 +91,7 @@ Clic izquierdo activa/desactiva, clic derecho cambia el valor (episodio, %, segu
 | `/uhcteam create\|delete\|add\|remove\|random\|force\|clear\|list` (y `groupcreate`, `groupadd`…) | `tukiuhc.command.team` | Equipos y grupos |
 | `/heal` · `/uhcrevive` · `/uhcgive` | `tukiuhc.command.heal` · `.revive` · `.give` | Utilidades |
 | `/uhchub` (y `/hub`, `/lobby` con proxy) | `tukiuhc.hub` | Volver al lobby de la network |
+| `/uhcdev info\|skip\|time\|pvp` | `tukiuhc.dev` (no viene con OP; lo da el modo dev de TukiCore) | Herramientas de desarrollo |
 | `/afk` | `tukiuhc.afk` | Invulnerable hasta moverte (en partida, solo en el descanso) |
 | `/renameteam <nombre>` | `tukiuhc.renameteam` | Renombrar tu equipo |
 | `/uhcrole [revelar]` | — | Tu rol en Trolls y Ratas |

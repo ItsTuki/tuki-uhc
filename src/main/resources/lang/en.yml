@@ -588,3 +588,20 @@ autostart:
   countdown: "<prefix><yellow>The match starts in <white><seconds></white> s."
   cancelled: "<prefix><red>Start cancelled: not enough players (<white><ready></white>/<min>)."
   actionbar: "<yellow>Starting in <white><seconds></white> s <dark_gray>| <gray>Players: <white><ready>"
+
+dev:
+  help:
+    - "<gold>Developer tools:"
+    - "<yellow>/uhcdev info</yellow> <gray>— internal match state"
+    - "<yellow>/uhcdev skip</yellow> <gray>— ends the part (or the rest) now"
+    - "<yellow>/uhcdev time <second></yellow> <gray>— moves the part clock"
+    - "<yellow>/uhcdev pvp</yellow> <gray>— forces PvP even if it's not its part"
+  info:
+    - "<gold>State: <white><state></white> <dark_gray>|</dark_gray> mode <white><mode>"
+    - "<gray>Part <white><episode></white>, second <white><second></white>/<length> <dark_gray>|</dark_gray> rest <white><rest></white> s <dark_gray>|</dark_gray> total <white><total></white> s"
+    - "<gray>PvP: <white><pvp></white> <dark_gray>|</dark_gray> participants <white><participants></white>, alive <white><alive></white>, sides <white><sides>"
+  skipped: "<prefix><yellow>[Dev] The part ends next second."
+  time-set: "<prefix><yellow>[Dev] Part clock set to second <white><second></white>."
+  not-playing: "<prefix><red>[Dev] No match in progress (or it's the rest)."
+  pvp-forced: "<prefix><yellow>[Dev] Forced PvP on."
+  pvp-normal: "<prefix><yellow>[Dev] PvP depends on the part again."

@@ -52,3 +52,4 @@ permissions:
   tukiuhc.renameteam:
     description: Cambiar el nombre de tu equipo.
     default: true
+  tukiuhc.dev: {description: "/uhcdev: herramientas de desarrollo. No viene con OP: lo da el modo dev de TukiCore", default: false}

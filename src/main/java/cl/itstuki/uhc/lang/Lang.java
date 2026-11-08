@@ -85,7 +85,9 @@ public final class Lang {
     }
 
     public String raw(String key) {
-        return messages.getString(key, key);
+        // Sin valor por defecto explícito: así, si falta en el archivo del servidor, se usa el texto del jar.
+        String value = messages.getString(key);
+        return value != null ? value : key;
     }
 
     public void playerTags(java.util.function.Function<org.bukkit.entity.@org.jspecify.annotations.Nullable Player, TagResolver> tags) {
