@@ -1,8 +1,27 @@
 # TukiUHC — textos en español (formato MiniMessage: https://docs.advntr.dev/minimessage/format)
 # <prefix> inserta el prefijo. Deja un texto en "" para no enviarlo.
 # No cambies este número: el plugin lo usa para actualizar el archivo.
-lang-version: 7
+lang-version: 8
 prefix: "<dark_gray>[<gradient:#FF5555:#FFAA00><bold>UHC</bold></gradient><dark_gray>]</dark_gray> <gold>»</gold> "
+
+spectator:
+  info: "<prefix><gray>Ahora eres espectador: vuelas, nadie te ve y no puedes tocar nada. Usa la <white>brújula</white> para ir con los jugadores vivos."
+  teleported: "<prefix><gray>Te llevé con <white><player></white>."
+  compass:
+    name: "<gold>Jugadores vivos <gray>(clic derecho)"
+    lore: ["<gray>Clic izquierdo en una cabeza: ir con él.", "<gray>Clic derecho: ver su inventario."]
+  menu:
+    title: "<dark_gray>Jugadores vivos"
+    player-lore: ["<gray>Equipo: <white><team>", "<gray>Vida: <red><hearts> ❤", "<gray>Kills: <white><kills>", "<gray>Distancia: <white><distance></white> bloques", "", "<yellow>Clic izquierdo: ir con él", "<yellow>Clic derecho: ver inventario"]
+    empty: "<gray>No queda nadie vivo"
+    refresh: "<yellow>Actualizar"
+  inventory:
+    title: "<dark_gray>Inventario de <player>"
+    health: "<red>Vida: <hearts> / <max> ❤"
+    food: "<gold>Comida: <food> / 20"
+    level: "<green>Nivel: <level>"
+    effects: "<light_purple>Efectos activos: <count>"
+    back: "<gray>« Volver a la lista"
 
 formats:
   episodes:

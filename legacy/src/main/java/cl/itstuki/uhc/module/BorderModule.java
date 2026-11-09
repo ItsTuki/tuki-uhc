@@ -123,6 +123,14 @@ public final class BorderModule implements UhcModule {
         }
     }
 
+    /** Al terminar se quita el borde: la zona de resultados (junto al lobby) queda fuera de un borde pequeño. */
+    @Override
+    public void onEnd() {
+        for (World world : Bukkit.getWorlds()) {
+            world.getWorldBorder().reset();
+        }
+    }
+
     @Override
     public void onReset() {
         timedShrinkStarted = false;

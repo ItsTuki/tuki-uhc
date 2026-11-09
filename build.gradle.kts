@@ -4,7 +4,7 @@ plugins {
 }
 
 group = "cl.itstuki.uhc"
-version = "1.2.0"
+version = "1.2.1"
 description = "UHC por episodios totalmente configurable para Paper 26.3."
 
 val minecraftVersion: String by project

@@ -61,6 +61,11 @@ scenarios:
   rodless: false
   horseless: false
 
+spectators:
+  # true: los eliminados vuelan invisibles con una brújula para ir con los vivos y ver su inventario.
+  # false: modo espectador normal del juego.
+  ghost: true
+
 scenarios-settings:
   timber-max-logs: 256
   # Probabilidad (%) de que una hoja suelte una manzana dorada
@@ -129,6 +134,8 @@ death:
   # Minutos que un jugador vivo puede estar desconectado antes de quedar eliminado (0 = nunca).
   # Sus ítems caen donde se desconectó.
   offline-elimination-minutes: 10
+  # Las cosas del jugador quedan en un cofre bajo la pica con su cabeza (el bloque útil va dentro del cofre).
+  chest: true
   # Bloque que sostiene la pica con la cabeza del jugador muerto (material: peso).
   pike-blocks:
     CRAFTING_TABLE: 20

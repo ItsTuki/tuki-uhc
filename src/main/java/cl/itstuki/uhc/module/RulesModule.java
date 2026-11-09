@@ -5,7 +5,9 @@ import cl.itstuki.uhc.config.UhcMode;
 import cl.itstuki.uhc.game.GameState;
 import cl.itstuki.uhc.game.UhcModule;
 import cl.itstuki.uhc.lang.Lang;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
@@ -14,6 +16,7 @@ import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
 import org.bukkit.block.Skull;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.EntityType;
@@ -154,7 +157,14 @@ public final class RulesModule implements UhcModule {
         }
         boolean headStolen = Boolean.TRUE.equals(player.getPersistentDataContainer()
                 .get(plugin.key("head_stolen"), PersistentDataType.BOOLEAN));
-        placePike(where, headStolen ? null : player);
+        Block base = placePike(where, headStolen ? null : player);
+        if (plugin.getConfig().getBoolean("death.chest", true) && !event.getDrops().isEmpty()) {
+            // Las cosas quedan en un cofre bajo la estaca (el bloque útil va dentro).
+            List<ItemStack> items = new ArrayList<>(event.getDrops());
+            items.add(new ItemStack(base.getType()));
+            event.getDrops().clear();
+            fillChests(base, items);
+        }
         plugin.game().eliminate(player, killer, where);
     }
 
@@ -168,7 +178,7 @@ public final class RulesModule implements UhcModule {
                 event.setRespawnLocation(death.clone().add(0, 2, 0));
             }
             Bukkit.getScheduler().runTask(plugin, () -> {
-                player.setGameMode(GameMode.SPECTATOR);
+                plugin.spectators().spectate(player);
                 plugin.lang().send(player, "game.you-died");
             });
         }
@@ -182,7 +192,7 @@ public final class RulesModule implements UhcModule {
             return;
         }
         if (!plugin.game().isParticipant(id)) {
-            player.setGameMode(GameMode.SPECTATOR);
+            plugin.spectators().spectate(player);
             plugin.lang().send(player, "game.late-join");
             watchPoint(player).ifPresent(player::teleportAsync);
         } else if (!plugin.game().isAlive(id)) {
@@ -190,7 +200,7 @@ public final class RulesModule implements UhcModule {
                 player.getInventory().clear(); // Sus cosas ya se soltaron donde se desconectó.
                 plugin.lang().send(player, "game.you-were-offline-eliminated");
             }
-            player.setGameMode(GameMode.SPECTATOR);
+            plugin.spectators().spectate(player);
             Location death = plugin.game().deathLocations().get(id);
             if (death != null) {
                 player.teleportAsync(death.clone().add(0, 2, 0));
@@ -217,7 +227,43 @@ public final class RulesModule implements UhcModule {
         return java.util.Optional.of(new Location(world, 0.5, plugin.game().groundY(world, 0, 0) + 10, 0.5));
     }
 
-    private void placePike(Location where, @Nullable Player headOwner) {
+    /** Cofre en la base de la estaca y, si no alcanza, otro al lado. Lo que no cabe se suelta encima. */
+    private void fillChests(Block base, List<ItemStack> items) {
+        List<Block> chests = new ArrayList<>();
+        base.setType(Material.CHEST);
+        chests.add(base);
+        if (items.size() > 27) {
+            for (BlockFace face : new BlockFace[] {BlockFace.EAST, BlockFace.WEST, BlockFace.NORTH, BlockFace.SOUTH}) {
+                Block side = base.getRelative(face);
+                if (side.getType().isAir() || side.isReplaceable()) {
+                    side.setType(Material.CHEST);
+                    chests.add(side);
+                    break;
+                }
+            }
+        }
+        int index = 0;
+        for (Block block : chests) {
+            if (!(block.getState() instanceof org.bukkit.block.Chest chest)) {
+                continue;
+            }
+            org.bukkit.inventory.Inventory inventory = chest.getBlockInventory();
+            while (index < items.size() && inventory.firstEmpty() >= 0) {
+                ItemStack item = items.get(index++);
+                if (item != null && !item.getType().isAir()) {
+                    inventory.addItem(item);
+                }
+            }
+        }
+        for (; index < items.size(); index++) {
+            ItemStack item = items.get(index);
+            if (item != null && !item.getType().isAir()) {
+                base.getWorld().dropItemNaturally(base.getLocation().add(0.5, 1.2, 0.5), item);
+            }
+        }
+    }
+
+    private Block placePike(Location where, @Nullable Player headOwner) {
         Block block = where.getBlock();
         int guard = 0;
         while (!block.getType().isAir() && !block.isLiquid() && guard++ < 10) {
@@ -235,6 +281,7 @@ public final class RulesModule implements UhcModule {
                 skull.update();
             }
         }
+        return base;
     }
 
     private Material randomPikeBlock() {

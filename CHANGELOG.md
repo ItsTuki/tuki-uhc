@@ -1,5 +1,17 @@
 # Changelog
 
+## 1.2.1 — 2026-11-08
+
+Para las dos ediciones.
+
+### Nuevo
+- **Espectadores fantasma**: al morir (o al entrar a mirar) vuelas, eres invisible para los vivos y no puedes tocar nada. La **brújula** abre la lista de jugadores vivos: clic izquierdo para ir con uno, clic derecho para ver su inventario, vida, comida y efectos sin poder cambiarlos. Con `spectators.ghost: false` se usa el modo espectador normal.
+- **Cofre de muerte**: las cosas del jugador quedan en un cofre bajo la pica con su cabeza (dos cofres si no caben; el bloque útil va dentro). Se desactiva con `death.chest: false`.
+
+### Arreglos
+- Al terminar la partida se quita el borde, que ya no tapa la zona de resultados.
+- `/uhcrevive` hace aparecer al jugador en un punto al azar dentro del borde, como en el reparto.
+
 ## 1.2.0 — 2026-11-08
 
 Para las dos ediciones: completa (Paper 26.x) y Legacy (1.8.8 – 26.3).

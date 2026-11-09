@@ -157,7 +157,14 @@ public final class RulesModule implements UhcModule {
             event.setDeathMessage(Text.legacy(plugin.lang().get("game.death-prefix")) + event.getDeathMessage());
         }
         boolean headStolen = plugin.items().headStolen(player.getUniqueId());
-        placePike(where, headStolen ? null : player.getName());
+        Block base = placePike(where, headStolen ? null : player.getName());
+        if (plugin.getConfig().getBoolean("death.chest", true) && !event.getDrops().isEmpty()) {
+            // Las cosas quedan en un cofre bajo la estaca (el bloque útil va dentro).
+            java.util.List<ItemStack> items = new java.util.ArrayList<>(event.getDrops());
+            items.add(new ItemStack(base.getType()));
+            event.getDrops().clear();
+            fillChests(base, items);
+        }
         plugin.game().eliminate(player, killer, where);
     }
 
@@ -171,7 +178,7 @@ public final class RulesModule implements UhcModule {
                 event.setRespawnLocation(death.clone().add(0, 2, 0));
             }
             Bukkit.getScheduler().runTask(plugin, () -> {
-                player.setGameMode(GameMode.SPECTATOR);
+                plugin.spectators().spectate(player);
                 plugin.lang().send(player, "game.you-died");
             });
         }
@@ -203,7 +210,7 @@ public final class RulesModule implements UhcModule {
             return;
         }
         if (!plugin.game().isParticipant(id)) {
-            player.setGameMode(GameMode.SPECTATOR);
+            plugin.spectators().spectate(player);
             plugin.lang().send(player, "game.late-join");
             player.teleport(watchPoint(player));
         } else if (!plugin.game().isAlive(id)) {
@@ -211,7 +218,7 @@ public final class RulesModule implements UhcModule {
                 player.getInventory().clear(); // Sus cosas ya se soltaron donde se desconectó.
                 plugin.lang().send(player, "game.you-were-offline-eliminated");
             }
-            player.setGameMode(GameMode.SPECTATOR);
+            plugin.spectators().spectate(player);
             Location death = plugin.game().deathLocations().get(id);
             if (death != null) {
                 player.teleport(death.clone().add(0, 2, 0));
@@ -239,7 +246,45 @@ public final class RulesModule implements UhcModule {
     }
 
     @SuppressWarnings("deprecation")
-    private void placePike(Location where, String headOwner) {
+    /** Cofre en la base de la estaca y, si no alcanza, otro al lado. Lo que no cabe se suelta encima. */
+    private void fillChests(Block base, java.util.List<ItemStack> items) {
+        java.util.List<Block> chests = new java.util.ArrayList<>();
+        base.setType(Material.CHEST);
+        chests.add(base);
+        if (items.size() > 27) {
+            for (org.bukkit.block.BlockFace face : new org.bukkit.block.BlockFace[] {org.bukkit.block.BlockFace.EAST,
+                    org.bukkit.block.BlockFace.WEST, org.bukkit.block.BlockFace.NORTH, org.bukkit.block.BlockFace.SOUTH}) {
+                Block side = base.getRelative(face);
+                if (Compat.isAir(side.getType())) {
+                    side.setType(Material.CHEST);
+                    chests.add(side);
+                    break;
+                }
+            }
+        }
+        int index = 0;
+        for (Block block : chests) {
+            BlockState state = block.getState();
+            if (!(state instanceof org.bukkit.block.Chest)) {
+                continue;
+            }
+            org.bukkit.inventory.Inventory inventory = ((org.bukkit.block.Chest) state).getBlockInventory();
+            while (index < items.size() && inventory.firstEmpty() >= 0) {
+                ItemStack item = items.get(index++);
+                if (item != null && !Compat.isAir(item.getType())) {
+                    inventory.addItem(item);
+                }
+            }
+        }
+        for (; index < items.size(); index++) {
+            ItemStack item = items.get(index);
+            if (item != null && !Compat.isAir(item.getType())) {
+                base.getWorld().dropItemNaturally(base.getLocation().add(0.5, 1.2, 0.5), item);
+            }
+        }
+    }
+
+    private Block placePike(Location where, String headOwner) {
         Block block = where.getBlock();
         int guard = 0;
         while (!Compat.isAir(block.getType()) && !block.isLiquid() && guard++ < 10) {
@@ -267,6 +312,7 @@ public final class RulesModule implements UhcModule {
                 skull.update(true);
             }
         }
+        return base;
     }
 
     private Material randomPikeBlock() {

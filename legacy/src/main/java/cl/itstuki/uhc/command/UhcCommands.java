@@ -303,7 +303,8 @@ public final class UhcCommands implements CommandExecutor, TabCompleter {
             return;
         }
         Player target = targets.get(0);
-        Location where = sender instanceof Player ? ((Player) sender).getLocation() : plugin.game().mainWorld().getSpawnLocation();
+        // Aparece en un punto al azar del mapa, como en el reparto.
+        Location where = plugin.game().reviveSpot();
         if (plugin.resurrection().adminRevive(target, where)) {
             plugin.lang().broadcast("revive.done", Lang.p("player", target.getName()), Lang.p("by", sender.getName()));
         } else {

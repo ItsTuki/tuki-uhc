@@ -85,6 +85,8 @@ En `/uhcconfig` → **Escenarios** (se combinan entre sí y se anuncian al empez
 - Crafteos UHC: melón reluciente (bloque de oro + rodaja), zanahoria dorada (8 lingotes), manzana encantada (8 bloques de oro), ghast seco.
 - Los ghasts sueltan oro en vez de lágrimas; la sopa sospechosa solo da brillo.
 - Borde que se cierra hacia **0 0** y **batalla final** en la última parte.
+- Las cosas del muerto quedan en un **cofre bajo la pica** con su cabeza (`death.chest`).
+- **Espectadores fantasma**: los eliminados vuelan invisibles para los vivos con una **brújula**: clic izquierdo en una cabeza para ir con ese jugador, clic derecho para ver su inventario (solo mirar). `spectators.ghost: false` vuelve al modo espectador normal.
 
 ## Modos de juego
 

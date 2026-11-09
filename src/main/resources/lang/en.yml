@@ -1,8 +1,27 @@
 # TukiUHC — English texts (MiniMessage format: https://docs.advntr.dev/minimessage/format)
 # <prefix> inserts the prefix. Leave a text as "" to not send it.
 # No cambies este número: el plugin lo usa para actualizar el archivo.
-lang-version: 7
+lang-version: 8
 prefix: "<dark_gray>[<gradient:#FF5555:#FFAA00><bold>UHC</bold></gradient><dark_gray>]</dark_gray> <gold>»</gold> "
+
+spectator:
+  info: "<prefix><gray>You are now a spectator: you fly, nobody sees you and you can't touch anything. Use the <white>compass</white> to go to living players."
+  teleported: "<prefix><gray>Teleported to <white><player></white>."
+  compass:
+    name: "<gold>Living players <gray>(right click)"
+    lore: ["<gray>Left click a head: go to them.", "<gray>Right click: see their inventory."]
+  menu:
+    title: "<dark_gray>Living players"
+    player-lore: ["<gray>Team: <white><team>", "<gray>Health: <red><hearts> ❤", "<gray>Kills: <white><kills>", "<gray>Distance: <white><distance></white> blocks", "", "<yellow>Left click: go to them", "<yellow>Right click: see inventory"]
+    empty: "<gray>Nobody is alive"
+    refresh: "<yellow>Refresh"
+  inventory:
+    title: "<dark_gray><player>'s inventory"
+    health: "<red>Health: <hearts> / <max> ❤"
+    food: "<gold>Food: <food> / 20"
+    level: "<green>Level: <level>"
+    effects: "<light_purple>Active effects: <count>"
+    back: "<gray>« Back to the list"
 
 formats:
   episodes:

@@ -345,6 +345,29 @@ public final class GameManager {
         return best;
     }
 
+    /**
+     * Punto al azar en tierra firme dentro del borde actual (para /uhcrevive), como en el reparto.
+     * Carga los chunks en el momento: es un solo jugador.
+     */
+    public Location reviveSpot() {
+        World world = mainWorld();
+        double border = world.getWorldBorder().getSize() / 2 - 8;
+        int radius = (int) Math.max(8, Math.min(settings().borderRadius() * 0.9, border));
+        ThreadLocalRandom random = ThreadLocalRandom.current();
+        Location spot = null;
+        for (int attempt = 0; attempt < 16; attempt++) {
+            spot = new Location(world, random.nextInt(-radius, radius + 1) + 0.5, 0, random.nextInt(-radius, radius + 1) + 0.5);
+            world.getChunkAt(spot.getBlockX() >> 4, spot.getBlockZ() >> 4);
+            Block top = world.getBlockAt(spot.getBlockX(), groundY(world, spot.getBlockX(), spot.getBlockZ()), spot.getBlockZ());
+            boolean wet = WET.contains(top.getType()) || top.isLiquid()
+                    || (top.getBlockData() instanceof org.bukkit.block.data.Waterlogged w && w.isWaterlogged());
+            if (!wet) {
+                break;
+            }
+        }
+        return safeLocation(spot);
+    }
+
     private static final java.util.Set<Material> WET = java.util.EnumSet.of(Material.WATER, Material.LAVA, Material.KELP,
             Material.KELP_PLANT, Material.SEAGRASS, Material.TALL_SEAGRASS, Material.BUBBLE_COLUMN, Material.MAGMA_BLOCK,
             Material.LILY_PAD);
@@ -388,6 +411,7 @@ public final class GameManager {
     }
 
     public void resetPlayer(Player player) {
+        plugin.spectators().clear(player);
         player.setGameMode(GameMode.SURVIVAL);
         AttributeInstance maxHealth = player.getAttribute(Attribute.MAX_HEALTH);
         if (maxHealth != null) {
@@ -477,7 +501,7 @@ public final class GameManager {
                 .orElseGet(() -> new Location(mainWorld(), 0.5, groundY(mainWorld(), 0, 0) + 1, 0.5));
         for (Player player : Bukkit.getOnlinePlayers()) {
             if (!participants.contains(player.getUniqueId()) && player.getGameMode() != GameMode.CREATIVE) {
-                player.setGameMode(GameMode.SPECTATOR);
+                plugin.spectators().spectate(player);
                 player.teleportAsync(watch.clone().add(0, 10, 0));
             }
         }
@@ -779,6 +803,7 @@ public final class GameManager {
         }
         alive.add(id);
         eliminatedTeams.remove(sideKey(id));
+        plugin.spectators().clear(player);
         player.setGameMode(GameMode.SURVIVAL);
         player.teleport(where);
         AttributeInstance max = player.getAttribute(Attribute.MAX_HEALTH);

@@ -327,4 +327,66 @@ public final class Compat {
     public static ItemStack mainHand(Player player) {
         return player.getItemInHand();
     }
+
+    // ── Jugadores: ocultar, colisiones y estados (por reflexión, cambian entre versiones) ──
+
+    private static java.lang.reflect.Method method(Class<?> type, String name, Class<?>... args) {
+        try {
+            return type.getMethod(name, args);
+        } catch (NoSuchMethodException ex) {
+            return null;
+        }
+    }
+
+    private static final java.lang.reflect.Method HIDE = method(Player.class, "hidePlayer", org.bukkit.plugin.Plugin.class, Player.class);
+    private static final java.lang.reflect.Method SHOW = method(Player.class, "showPlayer", org.bukkit.plugin.Plugin.class, Player.class);
+    private static final java.lang.reflect.Method HIDE_OLD = method(Player.class, "hidePlayer", Player.class);
+    private static final java.lang.reflect.Method SHOW_OLD = method(Player.class, "showPlayer", Player.class);
+
+    private static void call(java.lang.reflect.Method method, Object target, Object... args) {
+        if (method == null) {
+            return;
+        }
+        try {
+            method.invoke(target, args);
+        } catch (ReflectiveOperationException | RuntimeException ignored) {
+            // No disponible en esta versión.
+        }
+    }
+
+    public static void hide(Player viewer, org.bukkit.plugin.Plugin plugin, Player target) {
+        if (HIDE != null) {
+            call(HIDE, viewer, plugin, target);
+        } else {
+            call(HIDE_OLD, viewer, target);
+        }
+    }
+
+    public static void show(Player viewer, org.bukkit.plugin.Plugin plugin, Player target) {
+        if (SHOW != null) {
+            call(SHOW, viewer, plugin, target);
+        } else {
+            call(SHOW_OLD, viewer, target);
+        }
+    }
+
+    /** 1.9+: setCollidable, setInvulnerable, setSilent. En 1.8 no hacen nada (el daño se cancela por evento). */
+    public static void ghostFlags(Player player, boolean ghost) {
+        call(method(Player.class, "setCollidable", boolean.class), player, !ghost);
+        call(method(Player.class, "setInvulnerable", boolean.class), player, ghost);
+        call(method(Player.class, "setSilent", boolean.class), player, ghost);
+    }
+
+    /** Ítem de la segunda mano (1.9+), o null. */
+    public static ItemStack offHand(Player player) {
+        java.lang.reflect.Method m = method(org.bukkit.inventory.PlayerInventory.class, "getItemInOffHand");
+        if (m == null) {
+            return null;
+        }
+        try {
+            return (ItemStack) m.invoke(player.getInventory());
+        } catch (ReflectiveOperationException | RuntimeException ex) {
+            return null;
+        }
+    }
 }

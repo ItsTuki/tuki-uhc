@@ -345,6 +345,24 @@ public final class GameManager {
     }
 
     /** Agua, lava, algas, nenúfares… (por nombre: así sirve en todas las versiones). */
+    /** Punto al azar en tierra firme dentro del borde actual (para /uhcrevive), como en el reparto. */
+    public Location reviveSpot() {
+        World world = mainWorld();
+        double border = world.getWorldBorder().getSize() / 2 - 8;
+        int radius = (int) Math.max(8, Math.min(settings().borderRadius() * 0.9, border));
+        java.util.concurrent.ThreadLocalRandom random = java.util.concurrent.ThreadLocalRandom.current();
+        Location spot = null;
+        for (int attempt = 0; attempt < 16; attempt++) {
+            spot = new Location(world, random.nextInt(-radius, radius + 1) + 0.5, 0, random.nextInt(-radius, radius + 1) + 0.5);
+            world.getChunkAt(spot.getBlockX() >> 4, spot.getBlockZ() >> 4);
+            Block top = world.getBlockAt(spot.getBlockX(), groundY(world, spot.getBlockX(), spot.getBlockZ()), spot.getBlockZ());
+            if (!wet(top)) {
+                break;
+            }
+        }
+        return safeLocation(spot);
+    }
+
     private static boolean wet(Block block) {
         String name = block.getType().name();
         return block.isLiquid() || name.contains("WATER") || name.contains("LAVA") || name.contains("KELP")
@@ -390,6 +408,7 @@ public final class GameManager {
     }
 
     public void resetPlayer(Player player) {
+        plugin.spectators().clear(player);
         player.setGameMode(GameMode.SURVIVAL);
         Compat.resetMaxHealth(player);
         player.setHealth(player.getMaxHealth());
@@ -473,7 +492,7 @@ public final class GameManager {
                 .orElseGet(() -> new Location(mainWorld(), 0.5, groundY(mainWorld(), 0, 0) + 1, 0.5));
         for (Player player : Bukkit.getOnlinePlayers()) {
             if (!participants.contains(player.getUniqueId()) && player.getGameMode() != GameMode.CREATIVE) {
-                player.setGameMode(GameMode.SPECTATOR);
+                plugin.spectators().spectate(player);
                 player.teleport(watch.clone().add(0, 10, 0));
             }
         }
@@ -770,6 +789,7 @@ public final class GameManager {
         }
         alive.add(id);
         eliminatedTeams.remove(sideKey(id));
+        plugin.spectators().clear(player);
         player.setGameMode(GameMode.SURVIVAL);
         player.teleport(where);
         player.setHealth(player.getMaxHealth());

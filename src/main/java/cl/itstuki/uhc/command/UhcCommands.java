@@ -131,7 +131,8 @@ public final class UhcCommands {
         registrar.register(Commands.literal("uhcrevive").requires(perm("tukiuhc.command.revive"))
                 .then(Commands.argument("jugador", ArgumentTypes.player()).executes(ok(ctx -> {
                     Player target = players(ctx, "jugador").getFirst();
-                    Location where = sender(ctx) instanceof Player p ? p.getLocation() : plugin.game().mainWorld().getSpawnLocation();
+                    // Aparece en un punto al azar del mapa, como en el reparto.
+                    Location where = plugin.game().reviveSpot();
                     if (plugin.resurrection().adminRevive(target, where)) {
                         plugin.lang().broadcast("revive.done", Lang.p("player", target.getName()), Lang.p("by", sender(ctx).getName()));
                     } else {
