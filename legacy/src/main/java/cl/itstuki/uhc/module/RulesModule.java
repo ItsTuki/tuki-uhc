@@ -158,12 +158,15 @@ public final class RulesModule implements UhcModule {
         }
         boolean headStolen = plugin.items().headStolen(player.getUniqueId());
         Block base = placePike(where, headStolen ? null : player.getName());
-        if (plugin.getConfig().getBoolean("death.chest", true) && !event.getDrops().isEmpty()) {
+        boolean chest = plugin.getConfig().getBoolean("death.chest", true)
+                || plugin.settings().scenario(cl.itstuki.uhc.config.Scenario.TIME_BOMB)
+                || plugin.settings().scenario(cl.itstuki.uhc.config.Scenario.SAFE_LOOT);
+        if (chest && !event.getDrops().isEmpty()) {
             // Las cosas quedan en un cofre bajo la estaca (el bloque útil va dentro).
             java.util.List<ItemStack> items = new java.util.ArrayList<>(event.getDrops());
             items.add(new ItemStack(base.getType()));
             event.getDrops().clear();
-            fillChests(base, items);
+            plugin.scenarioActions().onDeathChest(fillChests(base, items), player.getName(), killer);
         }
         plugin.game().eliminate(player, killer, where);
     }
@@ -247,7 +250,7 @@ public final class RulesModule implements UhcModule {
 
     @SuppressWarnings("deprecation")
     /** Cofre en la base de la estaca y, si no alcanza, otro al lado. Lo que no cabe se suelta encima. */
-    private void fillChests(Block base, java.util.List<ItemStack> items) {
+    private java.util.List<Block> fillChests(Block base, java.util.List<ItemStack> items) {
         java.util.List<Block> chests = new java.util.ArrayList<>();
         base.setType(Material.CHEST);
         chests.add(base);
@@ -282,6 +285,7 @@ public final class RulesModule implements UhcModule {
                 base.getWorld().dropItemNaturally(base.getLocation().add(0.5, 1.2, 0.5), item);
             }
         }
+        return chests;
     }
 
     private Block placePike(Location where, String headOwner) {

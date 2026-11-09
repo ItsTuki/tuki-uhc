@@ -56,20 +56,39 @@ En `/uhcconfig` → **Mapa**, o con **`/uhcpregen start|stop`**:
 
 ## Escenarios
 
-En `/uhcconfig` → **Escenarios** (se combinan entre sí y se anuncian al empezar):
+En `/uhcconfig` → **Escenarios**, ordenados por categoría (se combinan entre sí y se anuncian al empezar). Los ajustes finos están en `config.yml` → `scenarios-settings`.
 
-| Escenario | Qué hace |
-|---|---|
-| CutClean | Minerales fundidos, grava → pedernal, comida cocinada |
-| Timber | Romper un tronco tala el árbol entero (agachado rompe uno) |
-| HasteyBoys | Picos, hachas y palas con Eficiencia III e Irrompibilidad III |
-| Doble / Triple mineral | Los minerales dan ×2 o ×3 |
-| LuckyLeaves | Las hojas pueden soltar una manzana dorada |
-| Fireless · NoFall | Sin daño de fuego/lava · sin daño de caída |
-| NoClean | Tras una kill, 20 s invulnerable a jugadores (se quita si atacas) |
-| BloodDiamonds | Picar diamante quita medio corazón |
-| Diamondless · Goldless | El diamante / el oro no sueltan nada (en Goldless cada eliminado suelta 8 lingotes) |
-| Bowless · Rodless · Horseless | Sin arcos · sin cañas · sin montar caballos |
+| Categoría | Escenario | Qué hace |
+|---|---|---|
+| ⛏ Minería | CutClean | Minerales fundidos, grava → pedernal, comida cocinada |
+| | Timber | Romper un tronco tala el árbol entero (agachado rompe uno) |
+| | VeinMiner | Agachado, picar un mineral rompe toda la veta |
+| | Doble / Triple mineral | Los minerales dan ×2 o ×3 |
+| | Doble / Triple XP | Toda la experiencia ×2 o ×3 |
+| | HasteyBoys | Picos, hachas y palas con Eficiencia III e Irrompibilidad III |
+| ✖ Restricciones | Barebones | Diamante, oro, esmeralda, lapis y redstone solo dan hierro; sin Nether, mesa de encantamiento, yunque ni manzanas doradas; cada muerto suelta 1 diamante, 1 manzana, 32 flechas y 2 hilos |
+| | Diamondless · Goldless | El diamante / el oro no sueltan nada (en Goldless cada eliminado suelta 8 lingotes) |
+| | Bowless · Swordless · Rodless | Sin arcos · sin espadas · sin cañas |
+| | NoEnchants | Sin mesa de encantamientos ni yunque |
+| | Horseless | No se puede montar caballos |
+| ☘ Suerte | LuckyLeaves | Las hojas pueden soltar una manzana dorada |
+| | LuckyBook | Picar minerales puede dar un libro encantado al azar (3 %) |
+| | BloodDiamonds | Picar diamante quita medio corazón |
+| | BloodEnchant | Encantar cuesta medio corazón por nivel del botón |
+| ✸ Acción | TimeBomb | El cofre del muerto explota a los 30 s |
+| | AirDrops | Cada 10 min cae un cofre con suministros y se anuncian sus coordenadas |
+| | Radar | Brújula que apunta al enemigo más cercano (con la distancia en la barra) |
+| | Rush | Velocidad I y Prisa II toda la partida |
+| | RedVsBlue | Dos equipos al azar: Rojo y Azul |
+| | FinalUHC | Curación final: al activarse el PvP todos recuperan toda la vida |
+| | Pyro | Resistencia al fuego; espadas con Aspecto ígneo y arcos con Fuego |
+| | Superheroes | Un poder al azar para cada uno: velocidad, fuerza, resistencia, supersalto, +10 ❤ o prisa |
+| ✦ Más | Anonymous | Nombres ocultos en el tab, sobre la cabeza y en el chat de todos |
+| | WebCage | Al hacer una kill te rodea una jaula de telarañas |
+| | SafeLoot | Solo quien hizo la kill (y su equipo) abre el cofre del muerto por 60 s |
+| | Siphon | Cada kill da regeneración, absorción y 3 niveles |
+| | NoFall · Fireless | Sin daño de caída · sin daño de fuego/lava |
+| | NoClean | Tras una kill, 20 s invulnerable a jugadores (se quita si atacas) |
 
 ## Lobby y resultados
 

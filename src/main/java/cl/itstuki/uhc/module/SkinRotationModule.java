@@ -37,7 +37,7 @@ public final class SkinRotationModule implements UhcModule {
 
     /** Si los nombres deben ocultarse (lo usa el scoreboard). */
     public static boolean hidingNames() {
-        return active;
+        return active || ScenarioActionsModule.anonymous();
     }
 
     /**
@@ -45,7 +45,7 @@ public final class SkinRotationModule implements UhcModule {
      * a los enemigos que golpeó, y todo si es espectador o no participa.
      */
     public boolean knows(UUID viewer, UUID target) {
-        if (!active || viewer.equals(target) || plugin.teams().sameTeam(viewer, target)) {
+        if (!hidingNames() || viewer.equals(target) || plugin.teams().sameTeam(viewer, target)) {
             return true;
         }
         if (!plugin.game().isAlive(viewer) || !plugin.game().isAlive(target)) {
@@ -56,7 +56,7 @@ public final class SkinRotationModule implements UhcModule {
 
     /** Si el jugador ya fue revelado a todos (o no hay rotación activa). */
     public boolean isRevealed(UUID target) {
-        return !active || revealed.contains(target) || !plugin.game().isAlive(target);
+        return !hidingNames() || revealed.contains(target) || !plugin.game().isAlive(target);
     }
 
     @Override

@@ -55,8 +55,10 @@ public final class ChatModule implements UhcModule {
         Component teamTag = team != null ? Component.text(team.name(), team.color()) : Component.empty();
         Component groupTag = group != null ? Component.text(group.name(), group.color()) : Component.empty();
         TagResolver senderTags = plugin.hooks().tags(sender);
+        // Anonymous: en el chat de todos no se ve quién habla.
+        boolean hideName = channel == Channel.GLOBAL && ScenarioActionsModule.anonymous() && plugin.game().isAlive(sender.getUniqueId());
         Component format = plugin.lang().get("chat." + channel.name().toLowerCase(Locale.ROOT),
-                Lang.p("player", NAME_MARK), Lang.p("message", MESSAGE_MARK), Lang.c("team", teamTag),
+                hideName ? Lang.c("player", plugin.lang().get("skins.hidden-name")) : Lang.p("player", NAME_MARK), Lang.p("message", MESSAGE_MARK), Lang.c("team", teamTag),
                 Lang.c("group", groupTag), senderTags);
         // Bukkit arma el mensaje con %1$s (nombre) y %2$s (texto): el resto se escapa.
         String legacy = Text.legacy(format).replace("%", "%%")

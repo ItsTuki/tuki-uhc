@@ -1,7 +1,7 @@
 # TukiUHC — English texts (MiniMessage format: https://docs.advntr.dev/minimessage/format)
 # <prefix> inserts the prefix. Leave a text as "" to not send it.
 # No cambies este número: el plugin lo usa para actualizar el archivo.
-lang-version: 8
+lang-version: 9
 prefix: "<dark_gray>[<gradient:#FF5555:#FFAA00><bold>UHC</bold></gradient><dark_gray>]</dark_gray> <gold>»</gold> "
 
 spectator:
@@ -46,6 +46,91 @@ map:
   finished: "<prefix><green>Map pregenerated! <white><chunks></white> chunks in <white><time></white> (improved: <white><shaped></white>)."
 
 scenarios:
+  categories:
+    mining: "<aqua><bold>⛏ Mining"
+    restrictions: "<red><bold>✖ Restrictions"
+    luck: "<green><bold>☘ Luck"
+    action: "<gold><bold>✸ Action"
+    more: "<light_purple><bold>✦ More"
+  superhero: "<prefix><gold>Superheroes: your power is <power><gold>."
+  powers:
+    speed: "<aqua>Speed II"
+    strength: "<red>Strength I"
+    resistance: "<gray>Resistance I"
+    jump: "<green>Super jump (no fall damage)"
+    health: "<light_purple>+10 hearts"
+    haste: "<yellow>Haste III"
+  radar-item: "<gold>Radar <gray>(points to the nearest enemy)"
+  radar-bar: "<gold>Radar: <white>enemy <distance> blocks away"
+  final-heal: "<prefix><green>FinalUHC: everyone is fully healed as PvP starts!"
+  air-drop: "<prefix><gold>✦ Supplies! A chest dropped at <white>X <x> Y <y> Z <z></white>."
+  time-bomb-start: "<prefix><red>✸ <white><player></white>'s chest explodes in <white><seconds></white> s."
+  time-bomb-label: "<red>✸ <player> <white><seconds>s"
+  safe-loot-locked: "<prefix><red>This chest belongs to the killer for <white><seconds></white> more s."
+  siphon-kill: "<prefix><green>Siphon: regeneration, absorption and 3 levels for the kill."
+  red-team: "Red"
+  blue-team: "Blue"
+  red-vs-blue-teams: "<prefix><red>Red</red> <gray>vs</gray> <blue>Blue</blue><gray>: <white><red_count></white> against <white><blue_count></white>."
+  vein-miner:
+    name: "<gold>VeinMiner"
+    lore: ["<gray>While sneaking, mining an ore", "<gray>breaks the whole vein."]
+  double-xp:
+    name: "<gold>Double XP"
+    lore: ["<gray>All experience is doubled."]
+  triple-xp:
+    name: "<gold>Triple XP"
+    lore: ["<gray>All experience is tripled."]
+  barebones:
+    name: "<gold>Barebones"
+    lore: ["<gray>Diamond, gold, emerald, lapis and redstone", "<gray>only drop iron. No Nether, enchanting", "<gray>table, anvil or golden apples.", "<gray>Every death drops 1 diamond, 1 apple,", "<gray>32 arrows and 2 string."]
+  swordless:
+    name: "<gold>Swordless"
+    lore: ["<gray>Swords can't be crafted or used."]
+  no-enchants:
+    name: "<gold>NoEnchants"
+    lore: ["<gray>No enchanting table", "<gray>and no anvil."]
+  lucky-book:
+    name: "<gold>LuckyBook"
+    lore: ["<gray>Mining ores can drop a", "<gray>random enchanted book."]
+  blood-enchant:
+    name: "<gold>BloodEnchant"
+    lore: ["<gray>Enchanting costs health: half a", "<gray>heart per button level."]
+  time-bomb:
+    name: "<gold>TimeBomb"
+    lore: ["<gray>The dead player's chest", "<gray>explodes after 30 seconds."]
+  air-drops:
+    name: "<gold>AirDrops"
+    lore: ["<gray>Every 10 min a supply chest drops", "<gray>and its coordinates are announced."]
+  radar:
+    name: "<gold>Radar"
+    lore: ["<gray>Everyone gets a compass pointing", "<gray>to the nearest enemy."]
+  rush:
+    name: "<gold>Rush"
+    lore: ["<gray>Speed I and Haste II", "<gray>the whole match."]
+  red-vs-blue:
+    name: "<gold>RedVsBlue"
+    lore: ["<gray>Two random teams: Red and Blue."]
+  final-uhc:
+    name: "<gold>FinalUHC"
+    lore: ["<gray>Final heal: when PvP starts", "<gray>everyone is fully healed."]
+  pyro:
+    name: "<gold>Pyro"
+    lore: ["<gray>Permanent fire resistance;", "<gray>swords with Fire Aspect, bows with Flame."]
+  superheroes:
+    name: "<gold>Superheroes"
+    lore: ["<gray>Every player gets a random power:", "<gray>speed, strength, resistance,", "<gray>super jump, +10 hearts or haste."]
+  anonymous:
+    name: "<gold>Anonymous"
+    lore: ["<gray>Names hidden in tab, above heads", "<gray>and in public chat."]
+  web-cage:
+    name: "<gold>WebCage"
+    lore: ["<gray>Getting a kill surrounds you", "<gray>with a cobweb cage."]
+  safe-loot:
+    name: "<gold>SafeLoot"
+    lore: ["<gray>Only the killer (and their team) can", "<gray>open the dead player's chest for 60 s."]
+  siphon:
+    name: "<gold>Siphon"
+    lore: ["<gray>Every kill gives regeneration,", "<gray>absorption and 3 levels."]
   active: "<prefix><light_purple>Active scenarios: <white><list>"
   blocked: "<prefix><red>Not allowed: scenario <scenario><red>."
   no-clean-start: "<prefix><green>NoClean: you are invulnerable to other players for <white><seconds></white> s (lost if you attack)."

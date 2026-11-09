@@ -165,6 +165,10 @@ public final class UhcSettings {
                 scenarios.remove(Scenario.TRIPLE_ORES);
             } else if (scenario == Scenario.TRIPLE_ORES) {
                 scenarios.remove(Scenario.DOUBLE_ORES);
+            } else if (scenario == Scenario.DOUBLE_XP) {
+                scenarios.remove(Scenario.TRIPLE_XP);
+            } else if (scenario == Scenario.TRIPLE_XP) {
+                scenarios.remove(Scenario.DOUBLE_XP);
             }
         } else {
             scenarios.remove(scenario);

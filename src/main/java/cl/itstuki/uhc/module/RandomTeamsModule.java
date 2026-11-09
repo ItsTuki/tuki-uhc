@@ -25,7 +25,8 @@ public final class RandomTeamsModule implements UhcModule {
     }
 
     private boolean active() {
-        return plugin.settings().teamMode() == TeamMode.RANDOM;
+        return plugin.settings().teamMode() == TeamMode.RANDOM
+                && !plugin.settings().scenario(cl.itstuki.uhc.config.Scenario.RED_VS_BLUE);
     }
 
     @Override

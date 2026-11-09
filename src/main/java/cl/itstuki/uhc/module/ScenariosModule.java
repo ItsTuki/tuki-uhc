@@ -9,6 +9,7 @@ import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
 import java.util.EnumMap;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -72,6 +73,13 @@ public final class ScenariosModule implements UhcModule {
         }
     }
 
+    private static final Set<Material> BAREBONES_ORES = EnumSet.of(Material.DIAMOND_ORE, Material.DEEPSLATE_DIAMOND_ORE,
+            Material.GOLD_ORE, Material.DEEPSLATE_GOLD_ORE, Material.NETHER_GOLD_ORE, Material.EMERALD_ORE,
+            Material.DEEPSLATE_EMERALD_ORE, Material.LAPIS_ORE, Material.DEEPSLATE_LAPIS_ORE, Material.REDSTONE_ORE,
+            Material.DEEPSLATE_REDSTONE_ORE);
+    /** VeinMiner: evita que los bloques rotos por la veta vuelvan a disparar la veta. */
+    private boolean veining;
+
     private final TukiUHC plugin;
     /** NoClean: quién es invulnerable y hasta cuándo (ms). */
     private final Map<UUID, Long> noClean = new HashMap<>();
@@ -121,6 +129,13 @@ public final class ScenariosModule implements UhcModule {
             event.getItems().clear();
             return;
         }
+        if (on(Scenario.BAREBONES) && BAREBONES_ORES.contains(type)) {
+            // Barebones: los minerales valiosos solo dan hierro.
+            for (Item item : event.getItems()) {
+                item.setItemStack(new ItemStack(Material.IRON_INGOT));
+            }
+            return;
+        }
         int multiplier = on(Scenario.TRIPLE_ORES) ? 3 : on(Scenario.DOUBLE_ORES) ? 2 : 1;
         boolean smelted = false;
         for (Item item : event.getItems()) {
@@ -163,6 +178,116 @@ public final class ScenariosModule implements UhcModule {
         }
         if (on(Scenario.TIMBER) && Tag.LOGS.isTagged(type) && !player.isSneaking()) {
             Bukkit.getScheduler().runTask(plugin, () -> timber(block, player));
+        }
+        if (ORES.contains(type)) {
+            if (on(Scenario.LUCKY_BOOK)) {
+                luckyBook(block);
+            }
+            if (on(Scenario.VEIN_MINER) && player.isSneaking() && !veining) {
+                Bukkit.getScheduler().runTask(plugin, () -> vein(block, type, player));
+            }
+        }
+    }
+
+    // ── VeinMiner ────────────────────────────────────────────
+
+    private static String family(Material type) {
+        return type.name().replace("DEEPSLATE_", "");
+    }
+
+    /** Agachado, picar un mineral rompe toda la veta (con los mismos drops, escenarios y desgaste del pico). */
+    private void vein(Block start, Material type, Player player) {
+        int limit = Math.max(1, plugin.getConfig().getInt("scenarios-settings.vein-miner-max", 64));
+        String family = family(type);
+        Deque<Block> queue = new ArrayDeque<>();
+        Set<Block> seen = new HashSet<>();
+        for (BlockFace face : BlockFace.values()) {
+            if (face.isCartesian()) {
+                queue.add(start.getRelative(face));
+            }
+        }
+        int broken = 0;
+        veining = true;
+        try {
+            while (!queue.isEmpty() && broken < limit && player.isOnline()) {
+                Block block = queue.poll();
+                if (!seen.add(block) || !ORES.contains(block.getType()) || !family(block.getType()).equals(family)) {
+                    continue;
+                }
+                if (!player.breakBlock(block)) {
+                    continue;
+                }
+                broken++;
+                for (BlockFace face : BlockFace.values()) {
+                    if (face.isCartesian()) {
+                        queue.add(block.getRelative(face));
+                    }
+                }
+            }
+        } finally {
+            veining = false;
+        }
+    }
+
+    // ── LuckyBook ────────────────────────────────────────────
+
+    private void luckyBook(Block block) {
+        double chance = plugin.getConfig().getDouble("scenarios-settings.lucky-book-percent", 3) / 100.0;
+        if (ThreadLocalRandom.current().nextDouble() >= chance) {
+            return;
+        }
+        List<Enchantment> all = new ArrayList<>();
+        io.papermc.paper.registry.RegistryAccess.registryAccess().getRegistry(io.papermc.paper.registry.RegistryKey.ENCHANTMENT)
+                .forEach(all::add);
+        if (all.isEmpty()) {
+            return;
+        }
+        Enchantment enchantment = all.get(ThreadLocalRandom.current().nextInt(all.size()));
+        ItemStack book = new ItemStack(Material.ENCHANTED_BOOK);
+        org.bukkit.inventory.meta.EnchantmentStorageMeta meta = (org.bukkit.inventory.meta.EnchantmentStorageMeta) book.getItemMeta();
+        meta.addStoredEnchant(enchantment, 1 + ThreadLocalRandom.current().nextInt(enchantment.getMaxLevel()), true);
+        book.setItemMeta(meta);
+        block.getWorld().dropItemNaturally(block.getLocation().add(0.5, 0.5, 0.5), book);
+    }
+
+    // ── Experiencia doble / triple ───────────────────────────
+
+    @EventHandler(ignoreCancelled = true)
+    public void onExp(org.bukkit.event.player.PlayerExpChangeEvent event) {
+        int multiplier = on(Scenario.TRIPLE_XP) ? 3 : on(Scenario.DOUBLE_XP) ? 2 : 1;
+        if (multiplier > 1 && event.getAmount() > 0) {
+            event.setAmount(event.getAmount() * multiplier);
+        }
+    }
+
+    // ── NoEnchants y BloodEnchant ────────────────────────────
+
+    @EventHandler(ignoreCancelled = true)
+    public void onOpen(org.bukkit.event.inventory.InventoryOpenEvent event) {
+        org.bukkit.event.inventory.InventoryType type = event.getInventory().getType();
+        if (on(Scenario.NO_ENCHANTS) && (type == org.bukkit.event.inventory.InventoryType.ENCHANTING
+                || type == org.bukkit.event.inventory.InventoryType.ANVIL)) {
+            event.setCancelled(true);
+            plugin.lang().send(event.getPlayer(), "scenarios.blocked", Lang.c("scenario", plugin.lang().get("scenarios.no-enchants.name")));
+        }
+    }
+
+    @EventHandler(ignoreCancelled = true)
+    public void onEnchant(org.bukkit.event.enchantment.EnchantItemEvent event) {
+        if (on(Scenario.BLOOD_ENCHANT)) {
+            Player player = event.getEnchanter();
+            double cost = event.whichButton() + 1;
+            Bukkit.getScheduler().runTask(plugin, () -> player.damage(cost));
+        }
+    }
+
+    // ── Barebones: sin Nether ────────────────────────────────
+
+    @EventHandler(ignoreCancelled = true)
+    public void onPortal(org.bukkit.event.player.PlayerPortalEvent event) {
+        if (on(Scenario.BAREBONES) && event.getCause() == org.bukkit.event.player.PlayerTeleportEvent.TeleportCause.NETHER_PORTAL) {
+            event.setCancelled(true);
+            plugin.lang().send(event.getPlayer(), "scenarios.blocked", Lang.c("scenario", plugin.lang().get("scenarios.barebones.name")));
         }
     }
 
@@ -230,6 +355,25 @@ public final class ScenariosModule implements UhcModule {
         }
     }
 
+    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+    public void onSwordHit(EntityDamageByEntityEvent event) {
+        if (on(Scenario.SWORDLESS) && event.getDamager() instanceof Player player
+                && Tag.ITEMS_SWORDS.isTagged(player.getInventory().getItemInMainHand().getType())) {
+            event.setCancelled(true);
+            plugin.lang().send(player, "scenarios.blocked", Lang.c("scenario", plugin.lang().get("scenarios.swordless.name")));
+        }
+    }
+
+    @EventHandler(priority = EventPriority.NORMAL)
+    public void onBarebonesDeath(PlayerDeathEvent event) {
+        if (on(Scenario.BAREBONES) && playing(event.getEntity())) {
+            event.getDrops().add(new ItemStack(Material.DIAMOND));
+            event.getDrops().add(new ItemStack(Material.GOLDEN_APPLE));
+            event.getDrops().add(new ItemStack(Material.ARROW, 32));
+            event.getDrops().add(new ItemStack(Material.STRING, 2));
+        }
+    }
+
     @EventHandler
     public void onPlayerDeath(PlayerDeathEvent event) {
         if (on(Scenario.GOLDLESS) && playing(event.getEntity())) {
@@ -249,8 +393,18 @@ public final class ScenariosModule implements UhcModule {
             return;
         }
         Material type = result.getType();
-        if ((on(Scenario.BOWLESS) && type == Material.BOW) || (on(Scenario.RODLESS) && type == Material.FISHING_ROD)) {
+        boolean plainItem = !result.hasItemMeta() || !result.getItemMeta().hasDisplayName();
+        if ((on(Scenario.BOWLESS) && type == Material.BOW) || (on(Scenario.RODLESS) && type == Material.FISHING_ROD)
+                || (on(Scenario.SWORDLESS) && Tag.ITEMS_SWORDS.isTagged(type))
+                || (on(Scenario.BAREBONES) && plainItem && (type == Material.GOLDEN_APPLE || type == Material.ENCHANTING_TABLE
+                        || type == Material.ANVIL))) {
             event.getInventory().setResult(null);
+            return;
+        }
+        if (on(Scenario.PYRO) && (Tag.ITEMS_SWORDS.isTagged(type) || type == Material.BOW)) {
+            ItemStack fiery = result.clone();
+            fiery.addUnsafeEnchantment(type == Material.BOW ? Enchantment.FLAME : Enchantment.FIRE_ASPECT, 1);
+            event.getInventory().setResult(fiery);
             return;
         }
         if (on(Scenario.HASTEY_BOYS) && (Tag.ITEMS_PICKAXES.isTagged(type) || Tag.ITEMS_AXES.isTagged(type)

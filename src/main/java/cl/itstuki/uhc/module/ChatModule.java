@@ -61,8 +61,11 @@ public final class ChatModule implements UhcModule {
         Component finalMessage = message;
         event.message(finalMessage);
         net.kyori.adventure.text.minimessage.tag.resolver.TagResolver senderTags = plugin.hooks().tags(sender);
+        // Anonymous: en el chat de todos no se ve quién habla.
+        boolean hideName = channel == Channel.GLOBAL && ScenarioActionsModule.anonymous() && plugin.game().isAlive(sender.getUniqueId());
+        Component hiddenName = plugin.lang().get("skins.hidden-name");
         event.renderer(ChatRenderer.viewerUnaware((source, displayName, msg) -> plugin.lang().get(formatKey,
-                Lang.c("player", displayName), Lang.c("message", msg), Lang.c("team", teamTag), Lang.c("group", groupTag),
+                Lang.c("player", hideName ? hiddenName : displayName), Lang.c("message", msg), Lang.c("team", teamTag), Lang.c("group", groupTag),
                 senderTags)));
     }
 

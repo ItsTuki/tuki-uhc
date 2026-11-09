@@ -60,6 +60,26 @@ scenarios:
   bowless: false
   rodless: false
   horseless: false
+  vein-miner: false
+  double-xp: false
+  triple-xp: false
+  barebones: false
+  swordless: false
+  no-enchants: false
+  lucky-book: false
+  blood-enchant: false
+  time-bomb: false
+  air-drops: false
+  radar: false
+  rush: false
+  red-vs-blue: false
+  final-uhc: false
+  pyro: false
+  superheroes: false
+  anonymous: false
+  web-cage: false
+  safe-loot: false
+  siphon: false
 
 spectators:
   # true: los eliminados vuelan invisibles con una brújula para ir con los vivos y ver su inventario.
@@ -72,6 +92,17 @@ scenarios-settings:
   lucky-leaves-percent: 0.5
   goldless-gold-on-death: 8
   no-clean-seconds: 20
+  # VeinMiner: bloques máximos por veta
+  vein-miner-max: 64
+  # LuckyBook: probabilidad (%) de libro encantado al picar un mineral
+  lucky-book-percent: 3
+  # TimeBomb: segundos hasta la explosión y su fuerza (4 = TNT)
+  time-bomb-seconds: 30
+  time-bomb-power: 4
+  # SafeLoot: segundos que el cofre es solo del que hizo la kill
+  safe-loot-seconds: 60
+  # AirDrops: cada cuántos minutos cae un cofre
+  air-drop-minutes: 10
 
 map:
   # /uhcpregen: genera los chunks hasta el radio del borde + este margen

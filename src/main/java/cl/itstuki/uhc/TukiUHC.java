@@ -56,6 +56,7 @@ public final class TukiUHC extends JavaPlugin {
     private ProxyModule proxy;
     private SkinRotationModule skinRotation;
     private LobbyModule lobby;
+    private cl.itstuki.uhc.module.ScenarioActionsModule scenarioActions;
     private cl.itstuki.uhc.module.SpectatorModule spectators;
     private cl.itstuki.uhc.map.MapModule map;
 
@@ -107,6 +108,8 @@ public final class TukiUHC extends JavaPlugin {
         proxy.registerChannel();
         game.register(new RewardsModule(this));
         game.register(new cl.itstuki.uhc.module.ScenariosModule(this));
+        scenarioActions = new cl.itstuki.uhc.module.ScenarioActionsModule(this);
+        game.register(scenarioActions);
         spectators = new cl.itstuki.uhc.module.SpectatorModule(this);
         game.register(spectators);
         map = new cl.itstuki.uhc.map.MapModule(this);
@@ -185,6 +188,7 @@ public final class TukiUHC extends JavaPlugin {
     public ProxyModule proxy() { return proxy; }
     public SkinRotationModule skinRotation() { return skinRotation; }
     public LobbyModule lobby() { return lobby; }
+    public cl.itstuki.uhc.module.ScenarioActionsModule scenarioActions() { return scenarioActions; }
     public cl.itstuki.uhc.module.SpectatorModule spectators() { return spectators; }
     public cl.itstuki.uhc.map.MapModule map() { return map; }
 }

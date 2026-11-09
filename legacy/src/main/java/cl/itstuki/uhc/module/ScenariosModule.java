@@ -162,6 +162,137 @@ public final class ScenariosModule implements UhcModule {
         if (on(Scenario.TIMBER) && isLog(type) && !player.isSneaking()) {
             Bukkit.getScheduler().runTask(plugin, () -> timber(block, player));
         }
+        if (isOre(type.name())) {
+            if (on(Scenario.LUCKY_BOOK)) {
+                luckyBook(block);
+            }
+            if (on(Scenario.VEIN_MINER) && player.isSneaking()) {
+                final String family = family(type);
+                Bukkit.getScheduler().runTask(plugin, () -> vein(block, family, player));
+            }
+        }
+    }
+
+    // ── VeinMiner ────────────────────────────────────────────
+
+    private static String family(Material type) {
+        return type.name().replace("DEEPSLATE_", "").replace("GLOWING_", "");
+    }
+
+    /** Agachado, picar un mineral rompe toda la veta (con los mismos drops y escenarios). */
+    @SuppressWarnings("deprecation")
+    private void vein(Block start, String family, Player player) {
+        int limit = Math.max(1, plugin.getConfig().getInt("scenarios-settings.vein-miner-max", 64));
+        Deque<Block> queue = new ArrayDeque<>();
+        Set<Block> seen = new HashSet<>();
+        BlockFace[] faces = {BlockFace.UP, BlockFace.DOWN, BlockFace.NORTH, BlockFace.SOUTH, BlockFace.EAST, BlockFace.WEST};
+        for (BlockFace face : faces) {
+            queue.add(start.getRelative(face));
+        }
+        ItemStack tool = Compat.mainHand(player);
+        int count = 0;
+        while (!queue.isEmpty() && count < limit && player.isOnline()) {
+            Block block = queue.poll();
+            if (!seen.add(block) || !isOre(block.getType().name()) || !family(block.getType()).equals(family)) {
+                continue;
+            }
+            broken.add(new Broken(block.getLocation(), block.getType().name(), tick));
+            block.breakNaturally(tool);
+            count++;
+            if (tool != null && tool.getType().getMaxDurability() > 0) {
+                tool.setDurability((short) (tool.getDurability() + 1));
+                if (tool.getDurability() >= tool.getType().getMaxDurability()) {
+                    Compat.sound(player, com.cryptomorin.xseries.XSound.ENTITY_ITEM_BREAK, 1f, 1f);
+                    player.setItemInHand(null);
+                    break;
+                }
+            }
+            for (BlockFace face : faces) {
+                queue.add(block.getRelative(face));
+            }
+        }
+    }
+
+    // ── LuckyBook ────────────────────────────────────────────
+
+    private void luckyBook(Block block) {
+        double chance = plugin.getConfig().getDouble("scenarios-settings.lucky-book-percent", 3) / 100.0;
+        if (ThreadLocalRandom.current().nextDouble() < chance) {
+            block.getWorld().dropItemNaturally(block.getLocation().add(0.5, 0.5, 0.5), randomBook());
+        }
+    }
+
+    /** Libro encantado al azar (lo usan LuckyBook y AirDrops). */
+    public static ItemStack randomBook() {
+        Enchantment[] all = Enchantment.values();
+        ItemStack book = Compat.item(XMaterial.ENCHANTED_BOOK);
+        if (all.length > 0 && book.getItemMeta() instanceof org.bukkit.inventory.meta.EnchantmentStorageMeta) {
+            Enchantment enchantment = all[ThreadLocalRandom.current().nextInt(all.length)];
+            org.bukkit.inventory.meta.EnchantmentStorageMeta meta = (org.bukkit.inventory.meta.EnchantmentStorageMeta) book.getItemMeta();
+            meta.addStoredEnchant(enchantment, 1 + ThreadLocalRandom.current().nextInt(Math.max(1, enchantment.getMaxLevel())), true);
+            book.setItemMeta(meta);
+        }
+        return book;
+    }
+
+    // ── Experiencia doble / triple ───────────────────────────
+
+    @EventHandler(ignoreCancelled = true)
+    public void onExp(org.bukkit.event.player.PlayerExpChangeEvent event) {
+        int multiplier = on(Scenario.TRIPLE_XP) ? 3 : on(Scenario.DOUBLE_XP) ? 2 : 1;
+        if (multiplier > 1 && event.getAmount() > 0) {
+            event.setAmount(event.getAmount() * multiplier);
+        }
+    }
+
+    // ── NoEnchants y BloodEnchant ────────────────────────────
+
+    @EventHandler(ignoreCancelled = true)
+    public void onOpen(org.bukkit.event.inventory.InventoryOpenEvent event) {
+        String type = event.getInventory().getType().name();
+        if (on(Scenario.NO_ENCHANTS) && (type.equals("ENCHANTING") || type.equals("ANVIL"))) {
+            event.setCancelled(true);
+            plugin.lang().send(event.getPlayer(), "scenarios.blocked", Lang.c("scenario", plugin.lang().get("scenarios.no-enchants.name")));
+        }
+    }
+
+    @EventHandler(ignoreCancelled = true)
+    public void onEnchant(org.bukkit.event.enchantment.EnchantItemEvent event) {
+        if (on(Scenario.BLOOD_ENCHANT)) {
+            final Player player = event.getEnchanter();
+            final double cost = event.whichButton() + 1;
+            Bukkit.getScheduler().runTask(plugin, () -> player.damage(cost));
+        }
+    }
+
+    // ── Barebones: sin Nether ────────────────────────────────
+
+    @EventHandler(ignoreCancelled = true)
+    public void onPortal(org.bukkit.event.player.PlayerPortalEvent event) {
+        if (on(Scenario.BAREBONES) && event.getCause() == org.bukkit.event.player.PlayerTeleportEvent.TeleportCause.NETHER_PORTAL) {
+            event.setCancelled(true);
+            plugin.lang().send(event.getPlayer(), "scenarios.blocked", Lang.c("scenario", plugin.lang().get("scenarios.barebones.name")));
+        }
+    }
+
+    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+    public void onSwordHit(EntityDamageByEntityEvent event) {
+        if (on(Scenario.SWORDLESS) && event.getDamager() instanceof Player
+                && Compat.mainHand((Player) event.getDamager()) != null
+                && Compat.mainHand((Player) event.getDamager()).getType().name().endsWith("_SWORD")) {
+            event.setCancelled(true);
+            plugin.lang().send((Player) event.getDamager(), "scenarios.blocked", Lang.c("scenario", plugin.lang().get("scenarios.swordless.name")));
+        }
+    }
+
+    @EventHandler(priority = EventPriority.NORMAL)
+    public void onBarebonesDeath(PlayerDeathEvent event) {
+        if (on(Scenario.BAREBONES) && playing(event.getEntity())) {
+            event.getDrops().add(new ItemStack(Material.DIAMOND));
+            event.getDrops().add(new ItemStack(Material.GOLDEN_APPLE));
+            event.getDrops().add(new ItemStack(Material.ARROW, 32));
+            event.getDrops().add(new ItemStack(Material.STRING, 2));
+        }
     }
 
     private Broken brokenAt(Location location) {
@@ -189,6 +320,11 @@ public final class ScenariosModule implements UhcModule {
         String type = source.type;
         if ((on(Scenario.DIAMONDLESS) && type.contains("DIAMOND_ORE")) || (on(Scenario.GOLDLESS) && type.contains("GOLD_ORE"))) {
             event.setCancelled(true);
+            return;
+        }
+        if (on(Scenario.BAREBONES) && (type.contains("DIAMOND_ORE") || type.contains("GOLD_ORE") || type.contains("EMERALD_ORE")
+                || type.contains("LAPIS_ORE") || type.contains("REDSTONE_ORE"))) {
+            item.setItemStack(new ItemStack(Material.IRON_INGOT));
             return;
         }
         ItemStack stack = item.getItemStack();
@@ -306,8 +442,22 @@ public final class ScenariosModule implements UhcModule {
             return;
         }
         Material type = result.getType();
-        if ((on(Scenario.BOWLESS) && type == Material.BOW) || (on(Scenario.RODLESS) && type == Material.FISHING_ROD)) {
+        boolean plainItem = !result.hasItemMeta() || !result.getItemMeta().hasDisplayName();
+        String name = type.name();
+        if ((on(Scenario.BOWLESS) && type == Material.BOW) || (on(Scenario.RODLESS) && type == Material.FISHING_ROD)
+                || (on(Scenario.SWORDLESS) && name.endsWith("_SWORD"))
+                || (on(Scenario.BAREBONES) && plainItem && (type == Material.GOLDEN_APPLE || name.equals("ENCHANTING_TABLE")
+                        || name.equals("ENCHANTMENT_TABLE") || type == Material.ANVIL))) {
             event.getInventory().setResult(null);
+            return;
+        }
+        if (on(Scenario.PYRO) && (name.endsWith("_SWORD") || type == Material.BOW)) {
+            ItemStack fiery = result.clone();
+            Enchantment enchantment = type == Material.BOW ? XEnchantment.FLAME.get() : XEnchantment.FIRE_ASPECT.get();
+            if (enchantment != null) {
+                fiery.addUnsafeEnchantment(enchantment, 1);
+                event.getInventory().setResult(fiery);
+            }
             return;
         }
         if (on(Scenario.HASTEY_BOYS) && isTool(type)) {

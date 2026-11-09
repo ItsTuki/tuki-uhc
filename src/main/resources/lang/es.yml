@@ -1,7 +1,7 @@
 # TukiUHC — textos en español (formato MiniMessage: https://docs.advntr.dev/minimessage/format)
 # <prefix> inserta el prefijo. Deja un texto en "" para no enviarlo.
 # No cambies este número: el plugin lo usa para actualizar el archivo.
-lang-version: 8
+lang-version: 9
 prefix: "<dark_gray>[<gradient:#FF5555:#FFAA00><bold>UHC</bold></gradient><dark_gray>]</dark_gray> <gold>»</gold> "
 
 spectator:
@@ -46,6 +46,91 @@ map:
   finished: "<prefix><green>¡Mapa pregenerado! <white><chunks></white> chunks en <white><time></white> (mejorados: <white><shaped></white>)."
 
 scenarios:
+  categories:
+    mining: "<aqua><bold>⛏ Minería"
+    restrictions: "<red><bold>✖ Restricciones"
+    luck: "<green><bold>☘ Suerte"
+    action: "<gold><bold>✸ Acción"
+    more: "<light_purple><bold>✦ Más"
+  superhero: "<prefix><gold>Superheroes: tu poder es <power><gold>."
+  powers:
+    speed: "<aqua>Velocidad II"
+    strength: "<red>Fuerza I"
+    resistance: "<gray>Resistencia I"
+    jump: "<green>Supersalto (sin daño de caída)"
+    health: "<light_purple>+10 corazones"
+    haste: "<yellow>Prisa III"
+  radar-item: "<gold>Radar <gray>(apunta al enemigo más cercano)"
+  radar-bar: "<gold>Radar: <white>enemigo a <distance> bloques"
+  final-heal: "<prefix><green>FinalUHC: ¡todos recuperan toda la vida al empezar el PvP!"
+  air-drop: "<prefix><gold>✦ ¡Suministros! Cayó un cofre en <white>X <x> Y <y> Z <z></white>."
+  time-bomb-start: "<prefix><red>✸ El cofre de <white><player></white> explota en <white><seconds></white> s."
+  time-bomb-label: "<red>✸ <player> <white><seconds>s"
+  safe-loot-locked: "<prefix><red>Este cofre es del que hizo la kill por <white><seconds></white> s más."
+  siphon-kill: "<prefix><green>Siphon: regeneración, absorción y 3 niveles por la kill."
+  red-team: "Rojo"
+  blue-team: "Azul"
+  red-vs-blue-teams: "<prefix><red>Rojo</red> <gray>vs</gray> <blue>Azul</blue><gray>: <white><red_count></white> contra <white><blue_count></white>."
+  vein-miner:
+    name: "<gold>VeinMiner"
+    lore: ["<gray>Agachado, picar un mineral", "<gray>rompe toda la veta."]
+  double-xp:
+    name: "<gold>Doble XP"
+    lore: ["<gray>Toda la experiencia vale el doble."]
+  triple-xp:
+    name: "<gold>Triple XP"
+    lore: ["<gray>Toda la experiencia vale el triple."]
+  barebones:
+    name: "<gold>Barebones"
+    lore: ["<gray>Diamante, oro, esmeralda, lapis y redstone", "<gray>solo dan hierro. Sin Nether, mesa de", "<gray>encantamiento, yunque ni manzanas doradas.", "<gray>Cada muerto suelta 1 diamante, 1 manzana,", "<gray>32 flechas y 2 hilos."]
+  swordless:
+    name: "<gold>Swordless"
+    lore: ["<gray>No se pueden fabricar ni", "<gray>usar espadas."]
+  no-enchants:
+    name: "<gold>NoEnchants"
+    lore: ["<gray>Sin mesa de encantamientos", "<gray>ni yunque."]
+  lucky-book:
+    name: "<gold>LuckyBook"
+    lore: ["<gray>Al picar minerales puede salir", "<gray>un libro encantado al azar."]
+  blood-enchant:
+    name: "<gold>BloodEnchant"
+    lore: ["<gray>Encantar cuesta vida: medio corazón", "<gray>por cada nivel del botón."]
+  time-bomb:
+    name: "<gold>TimeBomb"
+    lore: ["<gray>El cofre del muerto explota", "<gray>a los 30 segundos."]
+  air-drops:
+    name: "<gold>AirDrops"
+    lore: ["<gray>Cada 10 min cae un cofre con", "<gray>suministros y se anuncian sus coordenadas."]
+  radar:
+    name: "<gold>Radar"
+    lore: ["<gray>Todos reciben una brújula que apunta", "<gray>al enemigo más cercano."]
+  rush:
+    name: "<gold>Rush"
+    lore: ["<gray>Velocidad I y Prisa II", "<gray>toda la partida."]
+  red-vs-blue:
+    name: "<gold>RedVsBlue"
+    lore: ["<gray>Dos equipos al azar: Rojo y Azul."]
+  final-uhc:
+    name: "<gold>FinalUHC"
+    lore: ["<gray>Curación final: al activarse el PvP", "<gray>todos recuperan toda la vida."]
+  pyro:
+    name: "<gold>Pyro"
+    lore: ["<gray>Resistencia al fuego permanente;", "<gray>espadas con Aspecto ígneo y arcos con Fuego."]
+  superheroes:
+    name: "<gold>Superheroes"
+    lore: ["<gray>Cada jugador recibe un poder al azar:", "<gray>velocidad, fuerza, resistencia,", "<gray>supersalto, +10 corazones o prisa."]
+  anonymous:
+    name: "<gold>Anonymous"
+    lore: ["<gray>Nombres ocultos en el tab, sobre la", "<gray>cabeza y en el chat de todos."]
+  web-cage:
+    name: "<gold>WebCage"
+    lore: ["<gray>Al hacer una kill te rodea", "<gray>una jaula de telarañas."]
+  safe-loot:
+    name: "<gold>SafeLoot"
+    lore: ["<gray>Solo quien hizo la kill (y su equipo)", "<gray>puede abrir el cofre del muerto por 60 s."]
+  siphon:
+    name: "<gold>Siphon"
+    lore: ["<gray>Cada kill da regeneración,", "<gray>absorción y 3 niveles."]
   active: "<prefix><light_purple>Escenarios activos: <white><list>"
   blocked: "<prefix><red>No se puede: escenario <scenario><red>."
   no-clean-start: "<prefix><green>NoClean: eres invulnerable a otros jugadores por <white><seconds></white> s (se quita si atacas)."

@@ -1,5 +1,18 @@
 # Changelog
 
+## 1.3.0 — 2026-11-09
+
+Para las dos ediciones.
+
+### Nuevo
+- **20 escenarios nuevos** (35 en total), con el menú ordenado por categoría:
+  - Minería: **VeinMiner**, **Doble XP** y **Triple XP**.
+  - Restricciones: **Barebones**, **Swordless** y **NoEnchants**.
+  - Suerte: **LuckyBook** y **BloodEnchant**.
+  - Acción: **TimeBomb**, **AirDrops**, **Radar**, **Rush**, **RedVsBlue**, **FinalUHC** (curación final al empezar el PvP), **Pyro** y **Superheroes**.
+  - Más: **Anonymous**, **WebCage**, **SafeLoot** y **Siphon**.
+- Ajustes en `scenarios-settings`: tamaño máximo de VeinMiner, probabilidad de LuckyBook, tiempo y fuerza de TimeBomb, duración de SafeLoot y cada cuánto caen los AirDrops.
+
 ## 1.2.1 — 2026-11-08
 
 Para las dos ediciones.

@@ -27,12 +27,12 @@ public final class SkinRotationModule implements UhcModule {
     }
 
     public static boolean hidingNames() {
-        return active;
+        return active || ScenarioActionsModule.anonymous();
     }
 
     /** Si {@code viewer} sabe quién es {@code target}. */
     public boolean knows(UUID viewer, UUID target) {
-        if (!active || viewer.equals(target) || plugin.teams().sameTeam(viewer, target)) {
+        if (!hidingNames() || viewer.equals(target) || plugin.teams().sameTeam(viewer, target)) {
             return true;
         }
         if (!plugin.game().isAlive(viewer) || !plugin.game().isAlive(target)) {
@@ -42,7 +42,7 @@ public final class SkinRotationModule implements UhcModule {
     }
 
     public boolean isRevealed(UUID target) {
-        return !active || revealed.contains(target) || !plugin.game().isAlive(target);
+        return !hidingNames() || revealed.contains(target) || !plugin.game().isAlive(target);
     }
 
     @Override

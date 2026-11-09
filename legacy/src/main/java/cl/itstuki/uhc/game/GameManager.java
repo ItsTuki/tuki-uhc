@@ -181,6 +181,10 @@ public final class GameManager {
             }
         }
 
+        if (settings().scenario(cl.itstuki.uhc.config.Scenario.RED_VS_BLUE)) {
+            cl.itstuki.uhc.module.ScenarioActionsModule.redVsBlue(plugin, participants);
+        }
+
         World world = mainWorld();
         Compat.gameRule(world, "doImmediateRespawn", true);
         Compat.gameRule(world, "locatorBar", false);

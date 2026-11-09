@@ -309,25 +309,36 @@ public final class Menus {
     // ── Escenarios ───────────────────────────────────────────
 
     public void openScenarios(Player viewer) {
-        new Menu(4, lang().get("menu.scenarios.title")) {
+        new Menu(6, lang().get("menu.scenarios.title")) {
             @Override
             protected void render() {
-                Scenario[] all = Scenario.values();
-                for (int i = 0; i < all.length && i < 27; i++) {
-                    final Scenario scenario = all[i];
+                // Una fila por categoría: el icono de la categoría y luego sus escenarios.
+                java.util.Map<Scenario.Category, Integer> next = new java.util.EnumMap<>(Scenario.Category.class);
+                for (Scenario.Category category : Scenario.Category.values()) {
+                    int row = category.ordinal();
+                    set(row * 9, Items.of(category.icon()).name(lang().item("scenarios.categories." + category.key()))
+                            .hideAll().build(), null);
+                    next.put(category, row * 9 + 1);
+                }
+                for (final Scenario scenario : Scenario.values()) {
+                    int slot = next.get(scenario.category());
+                    if (slot % 9 == 0) {
+                        continue;
+                    }
+                    next.put(scenario.category(), slot + 1);
                     boolean on = settings().scenario(scenario);
                     List<String> lore = new ArrayList<>(lang().itemList("scenarios." + scenario.key() + ".lore"));
                     lore.add("");
                     lore.add(lang().item("menu.features.state", Lang.c("state", onOff(on))));
                     lore.add(lang().item("menu.scenarios.help"));
-                    set(i, Items.of(scenario.icon()).name(lang().item("scenarios." + scenario.key() + ".name")).lore(lore)
+                    set(slot, Items.of(scenario.icon()).name(lang().item("scenarios." + scenario.key() + ".name")).lore(lore)
                             .glow(on).hideAll().build(), (p, c) -> {
                         settings().scenario(scenario, !settings().scenario(scenario));
                         changed(p);
                         refresh();
                     });
                 }
-                set(31, back(), (p, c) -> openMain(p));
+                set(49, back(), (p, c) -> openMain(p));
             }
         }.open(viewer);
     }
